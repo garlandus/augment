@@ -13,7 +13,7 @@ import math.Numeric.Implicits.infixNumericOps
 import scala.collection.mutable.Set as MSet
 import scala.reflect.ClassTag
 
-val plotFldr = "out/plots"
+val plotFldr = "out"
 
 trait PlotShape:
   def `type`: String
