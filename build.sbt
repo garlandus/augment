@@ -1,4 +1,4 @@
-val scala3Version = "3.3.0"
+val scala3Version = "3.3.1"
 
 lazy val FunTest = config("fun") extend(Test)
 def itFilter(name: String): Boolean = name endsWith "ITest"
@@ -15,15 +15,15 @@ lazy val root = project
 
     // zero-dependency library: these are loaded only for testing
     libraryDependencies ++= Seq (
-      "org.scalameta" %% "munit" % "0.7.29" % "it,test",
-      "junit" % "junit" % "4.13.2" % "it,test",
-      "com.novocode" % "junit-interface" % "0.11" % "it,test",
+      "org.scalameta" %% "munit" % "1.0.0-M10" % "it,test",
+      "org.junit.jupiter" % "junit-jupiter-api" % "5.10.1" % "it,test",
+      "com.github.sbt" % "junit-interface" % "0.13.3" % "it,test",
       "org.apache.commons" % "commons-math3" % "3.6.1" % "it,test",
-      "com.google.guava" % "guava" % "28.1-jre" % "it,test",
+      "com.google.guava" % "guava" % "32.1.3-jre" % "it,test",
       "info.debatty" % "java-string-similarity" % "2.0.0" % "it,test",
-      "org.typelevel" %% "cats-effect" % "3.5.0" % "it,test",
-      "dev.zio" %% "zio" % "2.0.13" % "it,test",
-      "dev.zio" %% "zio-prelude" % "1.0.0-RC19" % "it,test",
+      "org.typelevel" %% "cats-effect" % "3.5.2" % "it,test",
+      "dev.zio" %% "zio" % "2.0.19" % "it,test",
+      "dev.zio" %% "zio-prelude" % "1.0.0-RC21" % "it,test",
       "dev.zio" %% "zio-direct" % "1.0.0-RC7" % "it,test",
     ),
 

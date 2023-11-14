@@ -8,7 +8,6 @@
 This is a zero-dependency alternative to [comprehensions](https://en.wikipedia.org/wiki/List_comprehension) that requires no special syntax, and as such can be used from Java and other JVM languages.\
 Overall it provides a concise, direct-style notation that handles plain and "boxed" types indifferently, which can simplify effect handling.\
 It also inherently distinguishes the "rectangular" from everything else - or if you prefer, array comprehensions from list comprehensions, the parallelizable from the sequential, and applicatives from monads.\
-Preliminary version
 
 There are more detailed explanations in the [documentation](http://computist.co/augment.html)
 
