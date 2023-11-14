@@ -383,4 +383,4 @@ class BasicSuite extends munit.FunSuite:
     val res = sudoku(a)(x)
     val bds = completedBoards(a, x, res)
     assertEquals(bds.length, 1)
-    assertEquals(bds(0).orig(0), List(4, 8, 3, 9, 2, 1, 6, 5, 7))
+    assertEquals(bds.head.nested().head, List(4, 8, 3, 9, 2, 1, 6, 5, 7))

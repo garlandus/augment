@@ -13,6 +13,8 @@ import math.Numeric.Implicits.infixNumericOps
 import scala.collection.mutable.Set as MSet
 import scala.reflect.ClassTag
 
+val plotFldr = "out/plots"
+
 trait PlotShape:
   def `type`: String
   def x0: Float
@@ -41,7 +43,7 @@ object PlotExtensionsA:
 
     def toJS(): String =
       val xs = s"x = ${toJSON(a.as)}"
-      val ys = s"y = ${toJSON(a.orig)}"
+      val ys = s"y = ${toJSON(a.flat())}"
       val ys2 = s"var data_y = {x: x, y: y, type: 'line', name: 'X'}"
       val s = "Plotly.newPlot('chart1', [ data_y ])"
       s"\n$xs\n$ys\n$ys2\n$s\n"
@@ -52,8 +54,8 @@ object PlotExtensionsA:
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "") =
       val fileName = getFileName(title, addTimeStamp, name, "plotA")
-      saveToFile("out", fileName, a.toHTML(title).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, a.toHTML(title).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
 object PlotExtensionsB:
 
@@ -63,13 +65,13 @@ object PlotExtensionsB:
       val xs = s"x = ${toJSON(arr.bs.toList)}"
       val yNames = arr.as.head match
         case x: Named[_] => arr.as.map(a => a.asInstanceOf[Named[_]].name).toList
-        case _           => arr.as.toList
+                case _           => arr.as.toList
       val ys = s"y = ${toJSON(yNames)}"
       (xs, ys)
 
     def toJS(): String =
       val (xs, ys) = axesToJS()
-      val zs = s"z = ${toJSON(arr.orig)}"
+      val zs = s"z = ${toJSON(arr.nested())}"
       s"\n$xs\n$ys\n$zs\n"
 
     def toHTML(title: String): Seq[String] =
@@ -133,7 +135,7 @@ object PlotExtensionsB:
     def toJsFlat(): String =
       val xs = s"x = ${toJSON(arr.bs)}"
       val inds = 0 to arr.as.length - 1
-      val ys = inds.map(i => s"y$i = ${toJSON(arr.orig(i).toArray)}")
+      val ys = inds.map(i => s"y$i = ${toJSON(arr.nested()(i).toArray)}")
       s"\n$xs\n${ys.mkString("\n")}\n"
 
     def toHtmlFlat(title: String): Seq[String] =
@@ -155,13 +157,13 @@ object PlotExtensionsB:
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
       val fileName = getFileName(title, addTimeStamp, name, "plotB")
-      saveToFile("out", fileName, arr.toHTML(title).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, arr.toHTML(title).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
     def plotflat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
       val fileName = getFileName(title, addTimeStamp, name, "flat")
-      saveToFile("out", fileName, arr.toHtmlFlat(title).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, arr.toHtmlFlat(title).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
 def rectsAsJson(rects: Array[FilledRectangle]): String =
   val entries: Array[Any] = rects.map(r => Array(r.x0, r.y0, r.x1, r.y1, r.line.color, r.fillcolor))
@@ -231,7 +233,7 @@ object PlotExtensionsC:
       val useImages = imageSources != None
       val xs = s"x = ${toJSON(arr.cs)}"
       val ys = s"y = ${toJSON(arr.bs)}"
-      val arrays = arr.orig.map(_.map(_.toArray).toArray).toArray
+      val arrays = arr.nested().map(_.map(_.toArray).toArray).toArray
       val divNm = "chart1"
       val (width, height) = (500, 520)
       val z1s = "z = " + toJSON(arrays)
@@ -365,8 +367,8 @@ object PlotExtensionsC:
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "plotC")
-      saveToFile("out", fileName, arr.toHTML(title, false, false, None, 750, visibleAxes).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, arr.toHTML(title, false, false, None, 750, visibleAxes).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
     def animate(
         title: String = "",
@@ -380,12 +382,12 @@ object PlotExtensionsC:
     ): Unit =
       val fileName = getFileName(title, addTimeStamp, name, "animateC")
       saveToFile(
-        "out",
+        plotFldr,
         fileName,
         arr.toHTML(title, true, flat, imageSources, duration, visibleAxes, getGridColors).mkString("\n"),
         "html"
       )
-      openInBrowser(s"out/$fileName")
+      openInBrowser(s"$plotFldr/$fileName")
 
 val indentSt = "\t"
 
@@ -567,8 +569,8 @@ object PlotExtensionsSeq:
         name: String = ""
     ) =
       val fileName = getFileName(title, addTimeStamp, name, "plotSeqB")
-      saveToFile("out", fileName, a.toHTMLB(title, sphereSize, duration, visibleAxes, color).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, a.toHTMLB(title, sphereSize, duration, visibleAxes, color).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
     def animateB(
         title: String = "",
@@ -581,12 +583,12 @@ object PlotExtensionsSeq:
     ) =
       val fileName = getFileName(title, addTimeStamp, name, "animateSeqB")
       saveToFile(
-        "out",
+        plotFldr,
         fileName,
         a.toHTMLB(title, sphereSize, duration, visibleAxes, color, true).mkString("\n"),
         "html"
       )
-      openInBrowser(s"out/$fileName")
+      openInBrowser(s"$plotFldr/$fileName")
 
   extension [A](a: Seq[(A, A, A)])(using Numeric[A], ClassTag[A])
 
@@ -693,8 +695,8 @@ object PlotExtensionsSeq:
         name: String = ""
     ) =
       val fileName = getFileName(title, addTimeStamp, name, "plotSeq")
-      saveToFile("out", fileName, a.toHTML(title, sphereSize, duration, visibleAxes, color).mkString("\n"), "html")
-      openInBrowser(s"out/$fileName")
+      saveToFile(plotFldr, fileName, a.toHTML(title, sphereSize, duration, visibleAxes, color).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
 
     def animate(
         title: String = "",
@@ -707,12 +709,12 @@ object PlotExtensionsSeq:
     ) =
       val fileName = getFileName(title, addTimeStamp, name, "animateSeq")
       saveToFile(
-        "out",
+        plotFldr,
         fileName,
         a.toHTML(title, sphereSize, duration, visibleAxes, color, true).mkString("\n"),
         "html"
       )
-      openInBrowser(s"out/$fileName")
+      openInBrowser(s"$plotFldr/$fileName")
 
   extension [A](a: JList[(JInteger, JInteger, JInteger)])
     def plot(

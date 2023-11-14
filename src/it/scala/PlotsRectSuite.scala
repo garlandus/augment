@@ -86,7 +86,7 @@ class PlotsRectSuite extends munit.FunSuite:
   test("cellular"):
     val boardSt = pulsar
     val board = stringAsIntArr(boardSt)
-    val arr = multiArray apply (0 to 0, 0 until board.length, 0 until board.head.length, List(board.map(_.toList)))
+    val arr = multiArray apply (0 to 0, 0 until board.length, 0 until board.head.length, List(board.map(_.toList).toList))
     val res = nextStep(arr)(50)
     res.animate("Pulsar", true, 750, addTimeStamp = false, visibleAxes = false)
 
@@ -111,5 +111,5 @@ class PlotsRectSuite extends munit.FunSuite:
         val arrD = f1(a)(0)(0 until a.la, 0 until a.lb, -1 to 1, -1 to 1)
         val arrB = arrD.map(nextStepStatus(1, 0))
         val i = arr.as.length + 1
-        val arrC = multiArray(0 until i, 0 until a.la, 0 until a.lb, arr.orig ++ List(arrB.orig))
+        val arrC = multiArray(0 until i, 0 until a.la, 0 until a.lb, arr.nested() ++ List(arrB.nested()))
         nextStep(arrC)(n - 1)

@@ -83,6 +83,22 @@ object image:
   def apply[Z, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], f: (A, B, C) => Z)(using ClassTag[Z]) =
     augment(f)(as, bs, cs)
 
+  def apply[Z, A, B, C, D]
+      (f: (A, B, C, D) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D])(using ClassTag[Z]) =
+    augment(f)(as, bs, cs, ds)
+
+  def apply[Z, A, B, C, D]
+      (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], f: (A, B, C, D) => Z)(using ClassTag[Z]) =
+    augment(f)(as, bs, cs, ds)
+
+  def apply[Z, A, B, C, D, E]
+      (f: (A, B, C, D, E) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E])(using ClassTag[Z]) =
+    augment(f)(as, bs, cs, ds, es)
+
+  def apply[Z, A, B, C, D, E]
+      (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], f: (A, B, C, D, E) => Z)(using ClassTag[Z]) =
+    augment(f)(as, bs, cs, ds, es)
+
   def apply[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](
       f: (A, B, C) => Z,
       as: Seq[A],
@@ -926,6 +942,10 @@ trait AugmentedFnE[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]](u
   ) =
     val v = baseShape apply (as, bs, cs, ds, es, f)
     v.irregComprehensionDerived[Z](id)
+
+  def apply[F, G](fs: Seq[F], gs: Seq[G], g: (F, G) => (A, B, C, D, E))(using tagZ: ClassTag[Z]) =
+    val v = AugmentB[MultiArrayB, SeqB]()(fs, gs, g)
+    v.rectComprehension(f(_, _, _, _, _))
 
   def apply(as: JList[A], bs: JList[B], cs: JList[C], ds: JList[D], es: JList[E])(using ClassTag[Z]) =
     val (as1, bs1, cs1, ds1, es1) =

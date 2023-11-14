@@ -114,7 +114,7 @@ public class PlotsRectJSuite {
       var arrD = f.apply(range(0, a.la()), range(0, a.lb()), rangeTo(-1, 1), rangeTo(-1, 1));
       var arrB = arrD.map(s -> nextStepStatus(s, 1, 0));
       int i = arr.lengths(0) + 1;
-      var arrC = multiarray(range(0, i), range(0, a.la()), range(0, a.lb()), append(arr.orig(), List.of(arrB.orig())));
+      var arrC = multiarray(range(0, i), range(0, a.la()), range(0, a.lb()), append(arr.nested(), List.of(arrB.nested())));
       return nextStep(arrC, n - 1);
     }
   }
