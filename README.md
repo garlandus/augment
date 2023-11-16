@@ -7,9 +7,49 @@
 
 This is a zero-dependency alternative to [comprehensions](https://en.wikipedia.org/wiki/List_comprehension) that requires no special syntax, and as such can be used from Java and other JVM languages.\
 Overall it provides a concise, direct-style notation that handles plain and "boxed" types indifferently, which can simplify effect handling.\
-It also inherently distinguishes the "rectangular" from everything else - or if you prefer, array comprehensions from list comprehensions, the parallelizable from the sequential, and applicatives from monads.\
+It also inherently distinguishes the "rectangular" from everything else - or if you prefer, array comprehensions from list comprehensions, the parallelizable from the sequential, and applicatives from monads.
+
+## Basics
+
+Say you have an existing function f0 of two variables, something along the lines of *def f0(a: Int, b: Int) = a\*a + b\*b*. Then if you write
+```scala
+val f = augment(f0)
+```
+	
+you effectively have a new function f that can replace f0, in that *f(a,b)* is the same as *f0(a,b)* for any integers a and b.  But it now has additional behavior: for instance if A and B are ranges of integers, then
+```scala
+f(A, B).plot()
+```
+
+will display a 3D graph using HTML.  The new function by itself does the work of a comprehension, since
+```scala
+f(A, B)
+```
+contains the same values as
+```scala
+for
+  a <- A
+  b <- B
+yield
+  f0(a, b)
+```
+
+More general comprehensions can be replicated by changing the argument types: instead of sequences of integers, they could be functions that return sequences, as shown below.
 
 There are more detailed explanations in the [documentation](http://computist.co/augment.html)
+
+## Quick start
+
+In Scala, you can add the following to build.sbt:
+```scala
+libraryDependencies += "co.computist" %% "augment" % "0.0.1"
+```
+
+Imports to get you started:
+```scala
+import augmented._
+import augmented.given
+```
 
 ## Examples
 
