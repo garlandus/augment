@@ -9,7 +9,7 @@ This is a zero-dependency alternative to [comprehensions](https://en.wikipedia.o
 Overall it provides a concise, direct-style notation that handles plain and "boxed" types indifferently, which can simplify effect handling.\
 It also inherently distinguishes the "rectangular" from everything else - or if you prefer, array comprehensions from list comprehensions, the parallelizable from the sequential, and applicatives from monads.
 
-## Basics
+## Overview
 
 Say you have an existing function f0 of two variables, something along the lines of *def f0(a: Int, b: Int) = a\*a + b\*b*. Then if you write
 ```scala
