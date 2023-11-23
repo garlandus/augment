@@ -8,7 +8,7 @@ import scala.reflect.ClassTag
 trait ComprehensionA[F[_, _]]:
 
   def rectangular[X, Z, A](using ClassTag[Z]): RectComprehensionA[F, X, Z, A] =
-    (as, f, g) => irregular(as, f, g)
+    (as, f, g) => irregular(as, _ => true, f, g)
   def irregular[X, Z, A]: IrregComprehensionA[F, X, Z, A]
 
 trait ComprehensionB[F[_, _, _]]:
@@ -147,7 +147,7 @@ trait ComprehensionE[F[_, _, _, _, _, _]]:
     f
 
 type RectComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => X, X => Z) => F[Z, A]
-type IrregComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => X, X => Z) => F[Z, A]
+type IrregComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => Boolean, A => X, X => Z) => F[Z, A]
 
 type RectComprehensionB[F[_, _, _], X, Z, A, B] = (Seq[A], Seq[B], (A, B) => X, X => Z) => F[Z, A, B]
 type IrregComprehensionB[F[_, _, _], X, Z, A, B] = (Seq[A], DepSeqB[A, B], (A, B) => X, X => Z) => F[Z, A, B]

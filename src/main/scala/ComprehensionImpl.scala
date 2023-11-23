@@ -7,9 +7,10 @@ import scala.reflect.ClassTag
 
 given ComprehensionA[SeqA] with
   def irregular[X, Z, A]: IrregComprehensionA[SeqA, X, Z, A] =
-    (as: Seq[A], f: A => X, g: X => Z) =>
-      as.map:
-        f andThen g
+    (as: Seq[A], phi: A => Boolean, f: A => X, g: X => Z) =>
+      as.withFilter(phi)
+        .map:
+          f andThen g
 
 given ComprehensionA[ArrayNA] with
   def irregular[X, Z, A]: IrregComprehensionA[ArrayNA, X, Z, A] = ???
@@ -21,17 +22,19 @@ given ComprehensionA[ArrayNA] with
 
 given ComprehensionA[MapA] with
   def irregular[X, Z, A]: IrregComprehensionA[MapA, X, Z, A] =
-    (as: Seq[A], f: A => X, g: X => Z) =>
-      as.map: a =>
-        (a, g(f(a)))
-      .toMap
+    (as: Seq[A], phi: A => Boolean, f: A => X, g: X => Z) =>
+      as.withFilter(phi)
+        .map: a =>
+          (a, g(f(a)))
+        .toMap
 
 given ComprehensionA[SetA] with
   def irregular[X, Z, A]: IrregComprehensionA[SetA, X, Z, A] =
-    (as: Seq[A], f: A => X, g: X => Z) =>
-      as.map:
-        f andThen g
-      .toSet
+    (as: Seq[A], phi: A => Boolean, f: A => X, g: X => Z) =>
+      as.withFilter(phi)
+        .map:
+          f andThen g
+        .toSet
 
 given ComprehensionA[MultiArrayA] with
   def irregular[X, Z, A]: IrregComprehensionA[MultiArrayA, X, Z, A] = ???

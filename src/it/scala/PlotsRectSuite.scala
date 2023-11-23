@@ -43,7 +43,7 @@ class PlotsRectSuite extends munit.FunSuite:
 
     val applyNamedFn = augment((f: Named[Double => Double], x: Double) => f.mainValue(x))
     val res = applyNamedFn apply (namedFns, xVals)
-    res plotflat ("Fitted Curves")
+    res plotFlat ("Fitted Curves")
 
   test("string distances"):
     val sts = List("ABCDEF", "ABDCEF", "BACDFE", "ABCDE", "BCDEF", "ABCGDEF", "WXYZ")

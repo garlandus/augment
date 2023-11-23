@@ -53,7 +53,7 @@ object PlotExtensionsA:
       getHtmlLines(title, data)
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "") =
-      val fileName = getFileName(title, addTimeStamp, name, "plotA")
+      val fileName = getFileName(title, addTimeStamp, name, "plotA.html")
       saveToFile(plotFldr, fileName, a.toHTML(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
@@ -74,10 +74,10 @@ object PlotExtensionsB:
       val zs = s"z = ${toJSON(arr.nested())}"
       s"\n$xs\n$ys\n$zs\n"
 
-    def toHTML(title: String): Seq[String] =
+    def toHTML(title: String, plotTypeName: String = "surface"): Seq[String] =
       val js = toJS()
       val data = js.split("\n")
-      val s2 = "var data_z = {x: x, y: y, z: z, type: 'surface'}"
+      val s2 = s"var data_z = {x: x, y: y, z: z, type: '$plotTypeName'}"
       val s3 = """Plotly.newPlot('chart1', [data_z])"""
       getHtmlLines(title, data ++ List(s2, s3))
 
@@ -156,13 +156,23 @@ object PlotExtensionsB:
       getHtmlLines(title, data ++ List(s1) ++ List(s2))
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
-      val fileName = getFileName(title, addTimeStamp, name, "plotB")
+      val fileName = getFileName(title, addTimeStamp, name, "plotB.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotflat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
-      val fileName = getFileName(title, addTimeStamp, name, "flat")
+    def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+      val fileName = getFileName(title, addTimeStamp, name, "flat.html")
       saveToFile(plotFldr, fileName, arr.toHtmlFlat(title).mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
+
+    def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+      val fileName = getFileName(title, addTimeStamp, name, "contour.html")
+      saveToFile(plotFldr, fileName, arr.toHTML(title, "contour").mkString("\n"), "html")
+      openInBrowser(s"$plotFldr/$fileName")
+
+    def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+      val fileName = getFileName(title, addTimeStamp, name, "heatmap.html")
+      saveToFile(plotFldr, fileName, arr.toHTML(title, "heatmap").mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
 def rectsAsJson(rects: Array[FilledRectangle]): String =
@@ -366,7 +376,7 @@ object PlotExtensionsC:
       getHtmlLines(title, data)
 
     def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-      val fileName = getFileName(title, addTimeStamp, name, "plotC")
+      val fileName = getFileName(title, addTimeStamp, name, "plotC.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, false, false, None, 750, visibleAxes).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 

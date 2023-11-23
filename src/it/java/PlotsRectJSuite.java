@@ -45,7 +45,7 @@ public class PlotsRectJSuite {
 
     var applyNamedFn = augment((Named<Function<Double, Double>> named, Double x) -> named.mainValue().apply(x));
     var res = applyNamedFn.apply(namedFns, xs);
-    res.plotflat("Fitted Curves [J]", false, "", true);
+    res.plotFlat("Fitted Curves [J]", false, "", true);
   }
 
   @Test

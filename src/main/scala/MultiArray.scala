@@ -326,8 +326,14 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
   def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
     multiarrayplot.PlotExtensionsB.plot(this)(title, addTimeStamp, name, visibleAxes)
 
-  def plotflat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsB.plotflat(this)(title, addTimeStamp, name, visibleAxes)
+  def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    multiarrayplot.PlotExtensionsB.plotFlat(this)(title, addTimeStamp, name, visibleAxes)
+
+  def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    multiarrayplot.PlotExtensionsB.plotContour(this)(title, addTimeStamp, name, visibleAxes)
+
+  def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    multiarrayplot.PlotExtensionsB.plotHeatMap(this)(title, addTimeStamp, name, visibleAxes)
 
   def saveToFile(
       folder: String,

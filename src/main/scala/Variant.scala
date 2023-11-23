@@ -20,9 +20,9 @@ case class VariantRectA[X, A, R[_, _], S[_, _]](as: Seq[A], f: A => X) extends V
   def rectComprehension[Z](using c: ComprehensionA[R], t: ClassTag[Z]) = c.rectangular(as, f, _)
   def irregComprehension[Z](using c: ComprehensionA[S]) = ???
 
-case class VariantIrregA[X, A, R[_, _], S[_, _]](as: Seq[A], f: A => X) extends VariantAT[X, A, R, S]:
+case class VariantIrregA[X, A, R[_, _], S[_, _]](as: Seq[A], phi: A => Boolean, f: A => X) extends VariantAT[X, A, R, S]:
   def rectComprehension[Z](using c: ComprehensionA[R], t: ClassTag[Z]) = ???
-  def irregComprehension[Z](using c: ComprehensionA[S]) = c.irregular(as, f, _)
+  def irregComprehension[Z](using c: ComprehensionA[S]) = c.irregular(as, phi, f, _)
 
 trait VariantBT[X, A, B, R[_, _, _], S[_, _, _]]:
   def as: Seq[A]

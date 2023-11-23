@@ -23,7 +23,7 @@ given AugmentE[MultiArrayE, SeqE] = AugmentE()
 given Effects[BasicIO] = Effects()
 
 object augment:
-
+  
   def apply[Z, A, R[_, _], S[_, _]]                                     (f: A => Z)               (using aug: AugmentA[R, S]) = aug (f)
   def apply[Z, A, B, R[_, _, _], S[_, _, _]]                            (f: (A, B) => Z)          (using aug: AugmentB[R, S]) = aug (f)
   def apply[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]]                   (f: (A, B, C) => Z)       (using aug: AugmentC[R, S]) = aug (f)
@@ -66,6 +66,8 @@ object augment:
 object image:
   def apply[Z, A](as: Seq[A], f: A => Z)(using ClassTag[Z]) =
     augment(f)(as)
+  def apply[Z, A](as: Seq[A], phi: A => Boolean, f: A => Z)(using ClassTag[Z]) =
+    augment(f)(as, phi)
 
   def apply[Z, A, B](f: (A, B) => Z, as: Seq[A], bs: Seq[B])(using ClassTag[Z]) =
     augment(f)(as, bs)
@@ -77,26 +79,42 @@ object image:
   def apply[Z, A, B](as: Seq[A], bs: GenSeqB[A, B], f: (A, B) => Z) =
     augment(f)(as, bs)
 
+  def apply[Z, A, B](as: Seq[A], bs: GenSeqB[A, B], phi: (A, B) => Boolean, f: (A, B) => Z) =
+    augment(f)(as, bs, phi)
+
   def apply[Z, A, B, C](f: (A, B, C) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C])(using ClassTag[Z]) =
     augment(f)(as, bs, cs)
 
   def apply[Z, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], f: (A, B, C) => Z)(using ClassTag[Z]) =
     augment(f)(as, bs, cs)
 
-  def apply[Z, A, B, C, D]
-      (f: (A, B, C, D) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D])(using ClassTag[Z]) =
+  def apply[Z, A, B, C](as: Seq[A], bs: DepSeqB[A, B], cs: DepSeqB[B, C], f: (A, B, C) => Z)(using
+      ClassTag[Z]
+  ): Seq[Z] =
+    apply(as, bs, (_, b) => cs(b), f)
+
+  def apply[Z, A, B, C](as: Seq[A], bs: DepSeqB[A, B], cs: DepSeqC[A, B, C], f: (A, B, C) => Z)(using ClassTag[Z]) =
+    augment(f)(as, bs, cs)
+
+  def apply[T[_], Z, A, B, C](as: T[A], bs: DepTB[T, A, B], cs: DepTC[T, A, B, C], f: (A, B, C) => Z)(using
+      Mappable[T]
+  ) =
+    augment(f)(as, bs, cs)
+
+  def apply[Z, A, B, C, D](f: (A, B, C, D) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D])(using ClassTag[Z]) =
     augment(f)(as, bs, cs, ds)
 
-  def apply[Z, A, B, C, D]
-      (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], f: (A, B, C, D) => Z)(using ClassTag[Z]) =
+  def apply[Z, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], f: (A, B, C, D) => Z)(using ClassTag[Z]) =
     augment(f)(as, bs, cs, ds)
 
-  def apply[Z, A, B, C, D, E]
-      (f: (A, B, C, D, E) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E])(using ClassTag[Z]) =
+  def apply[Z, A, B, C, D, E](f: (A, B, C, D, E) => Z, as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E])(using
+      ClassTag[Z]
+  ) =
     augment(f)(as, bs, cs, ds, es)
 
-  def apply[Z, A, B, C, D, E]
-      (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], f: (A, B, C, D, E) => Z)(using ClassTag[Z]) =
+  def apply[Z, A, B, C, D, E](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], f: (A, B, C, D, E) => Z)(using
+      ClassTag[Z]
+  ) =
     augment(f)(as, bs, cs, ds, es)
 
   def apply[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](
@@ -153,11 +171,17 @@ case class Effects[T[_]]()(using Mappable[T]):
 
 object select:
 
+  def apply[A, B](as: Seq[A], bs: Seq[B]) =
+    image(tupledB, as, bs)
+
   def apply[A, B](as: Seq[A], bs: GenSeqB[A, B]) =
     image(tupledB, as, bs)
 
   def apply[A, B](as: Seq[A], bs: GenSeqB[A, B], phi: (A, B) => Boolean = (a: A, b: B) => true) =
     image(tupledB, as, a => seq(bs)(a).filter(phi(a, _)))
+
+  def apply[A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C]) =
+    image(tupledC, as, bs, cs)
 
   def apply[A, B, C](as: Seq[A], bs: GenSeqB[A, B], cs: GenSeqC[A, B, C]) =
     image(tupledC, as, bs, seq(cs)(_, _))
@@ -186,10 +210,10 @@ object count:
 object sequence:
 
   def apply[T[_], A, B, C](a: => A, b: => B, cs: B => C, z: Boolean = true)(using fx: Effects[T], t: Mappable[T]) =
-    lastC applyBC (a.unit(), a => b.unit(), cs(_).unit())
+    lastC applyAC (a.unit(), a => b.unit(), (_, b) => cs(b).unit())
 
   def apply[T[_], A, B, C](a: => A, bs: A => B, cs: B => C)(using fx: Effects[T], t: Mappable[T]) =
-    lastC applyBC (a.unit(), bs(_).unit(), cs(_).unit())
+    lastC applyAC (a.unit(), bs(_).unit(), (_, b) => cs(b).unit())
 
   def apply[T[_], A, B, C](a: => A, b: => B, cs: (A, B) => C)(using fx: Effects[T], t: Mappable[T]) =
     lastC applyC (a.unit(), b.unit(), cs(_, _).unit())
@@ -234,11 +258,11 @@ object sequence:
 
 object last:
 
-  def apply[T[_], A, B, C, D](a: => A, bs: A => B, cs: B => C, ds: C => D)(using fx: Effects[T], t: Mappable[T]) =
-    lastD applyCD (a.unit(), bs(_).unit(), cs(_).unit(), ds(_).unit())
-
   def apply[T[_], A, B, C](as: T[A], bs: T[B], cs: (A, B) => T[C])(using t: Mappable[T]) =
     lastC applyC (as, bs, cs)
+
+  def apply[T[_], A, B, C, D](a: => A, bs: A => B, cs: B => C, ds: C => D)(using fx: Effects[T], t: Mappable[T]) =
+    lastD applyCD (a.unit(), bs(_).unit(), cs(_).unit(), ds(_).unit())
 
 // used from Java
 object augmentJ:
@@ -309,6 +333,7 @@ case class AugmentA[R[_, _], S[_, _]]()(using cx: ComprehensionA[R], cy: Compreh
   def apply[Z, A](f: A => Z) = AugmentedFunctionA[Z, A, R, S](f)
   def apply[Z, A](f: A => Z, c: Conditions[Z, A]) = AugmentedFunctionA[Z, A, R, S](c exec (f, _))
   def apply[Z, A](as: Seq[A], f: A => Z) = VariantRectA[Z, A, R, S](as, f)
+  def apply[Z, A](as: Seq[A], phi: A => Boolean, f: A => Z) = VariantIrregA[Z, A, R, S](as, phi, f)
 
 case class AugmentB[R[_, _, _], S[_, _, _]]()(using cx: ComprehensionB[R], cy: ComprehensionB[S]):
   def apply[Z, A, B](f: (A, B) => Z) = AugmentedFunctionB[Z, A, B, R, S](f)
@@ -503,7 +528,7 @@ trait AugmentedFnA[Z, A, R[_, _], S[_, _]](using ComprehensionA[R], Comprehensio
     apply(it.toList)
 
   def apply(as: Seq[A], phi: A => Boolean): S[Z, A] =
-    val v = AugmentA[R, S]()(as.filter(phi), f)
+    val v = baseShape(as, phi, f)
     v.irregComprehension(id)
 
   def apply[X](as: Seq[X], nextDS: (Seq[X], Seq[X]) => Seq[X]): Seq[Z] =
@@ -706,6 +731,13 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cr: Comprehen
     val v = baseShape(as, bs, cs, f)
     v.irregComprehension[Z](id)
 
+  def apply(as: Seq[A], bs: DepSeqB[A, B], cs: DepSeqB[B, C]): S[Z, A, B, C] =
+    apply(as, bs, cs, (a, b, c) => true)
+
+  def apply(as: Seq[A], bs: DepSeqB[A, B], cs: DepSeqC[A, B, C]): S[Z, A, B, C] =
+    val v = baseShape(as, bs, cs, f)
+    v.irregComprehension[Z](id)
+
   def apply(as: Seq[A], bs: GenSeqB[A, B], cs: GenSeqB[B, C], phi: (A, B, C) => Boolean): S[Z, A, B, C] =
     val v = baseShape(as, bs, (a, b) => seq(cs)(b).filter(phi(a, b, _)), f)
     v.irregComprehension[Z](id)
@@ -738,10 +770,10 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cr: Comprehen
     val v = baseShape(as, a => bs, cs, f)
     v.irregComprehensionDerived[Z](id)
 
-  def applyBC[T[_]](as: T[A], bs: DepTB[T, A, B], cs: DepTB[T, B, C])(using Mappable[T]) =
+  def applyAC[T[_]](as: T[A], bs: DepTB[T, A, B], cs: DepTC[T, A, B, C])(using Mappable[T]) =
     apply(as, bs, cs)
 
-  def apply[T[_]](as: T[A], bs: DepTB[T, A, B], cs: DepTB[T, B, C])(using Mappable[T]) =
+  def apply[T[_]](as: T[A], bs: DepTB[T, A, B], cs: DepTC[T, A, B, C])(using Mappable[T]) =
     val v = baseShape(as, bs, cs, f)
     v.irregComprehensionDerived[Z](id)
 
