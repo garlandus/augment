@@ -10,7 +10,7 @@ lazy val root = project
   .configs(IntegrationTest)
   .settings(
     name := "augment",
-    version := "0.0.1",
+    version := "0.0.2",
     scalaVersion := scala3Version,
 
     // zero-dependency library: these are loaded only for testing
