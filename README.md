@@ -42,7 +42,7 @@ There are more detailed explanations in the [documentation](http://computist.co/
 
 In Scala, you can add the following to build.sbt:
 ```scala
-libraryDependencies += "co.computist" %% "augment" % "0.0.1"
+libraryDependencies += "co.computist" %% "augment" % "0.0.2"
 ```
 
 Imports to get you started:
