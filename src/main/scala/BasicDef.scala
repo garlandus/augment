@@ -1,12 +1,13 @@
 package basicdef
 
-import scala.compiletime.ops.boolean
-
 type JInteger = java.lang.Integer
 type JDouble = java.lang.Double
 type JList[A] = java.util.List[A]
 type JMap[A, B] = java.util.Map[A, B]
+type JStream[A] = java.util.stream.Stream[A]
 type JFunction[A, B] = java.util.function.Function[A, B]
+type JDepSeq[A, B] = A => JList[B]
+type JDepStream[A, B] = A => java.util.stream.BaseStream[B, _]
 
 def defaultMsg[A](a: A) = s"Condition not met by: $a"
 

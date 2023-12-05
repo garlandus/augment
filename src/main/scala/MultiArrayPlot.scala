@@ -155,25 +155,27 @@ object PlotExtensionsB:
       val s2 = s"""Plotly.newPlot('chart1', data)"""
       getHtmlLines(title, data ++ List(s1) ++ List(s2))
 
-    def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+    def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "plotB.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+    def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "flat.html")
       saveToFile(plotFldr, fileName, arr.toHtmlFlat(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+    def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "contour.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, "contour").mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean) =
+    def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "heatmap.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, "heatmap").mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
+
+    def graph(): Unit = plot()
 
 def rectsAsJson(rects: Array[FilledRectangle]): String =
   val entries: Array[Any] = rects.map(r => Array(r.x0, r.y0, r.x1, r.y1, r.line.color, r.fillcolor))
@@ -380,6 +382,8 @@ object PlotExtensionsC:
       saveToFile(plotFldr, fileName, arr.toHTML(title, false, false, None, 750, visibleAxes).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
+    def graph(): Unit = plot()
+
     def animate(
         title: String = "",
         flat: Boolean = false,
@@ -451,7 +455,7 @@ def toJsExpr[A](expr: A, ro: RelOffset = RelOffset(0, 0)): TextNode =
 
 def toJSON[A](a: A, ro: RelOffset = RelOffset(0, 0)): TextNode =
   a match
-    case x: (Int | Float | Double) => TextNode(ro, x.toString)
+    case x: (Int | Long | Float | Double) => TextNode(ro, x.toString)
     case b: Boolean                => TextNode(ro, b.toString)
     case c: Char                   => TextNode(ro, s"\'$c\'")
     case s: String                 => TextNode(ro, s"\"$s\"")
@@ -493,7 +497,7 @@ def toJSON[A](a: A, ro: RelOffset = RelOffset(0, 0)): TextNode =
       val brackets = (tn.subNodes.head, tn.subNodes.last)
       val mapBrackets = (TextNode(tn.subNodes.head.ro, "{"), TextNode(tn.subNodes.head.ro, "}"))
       TextNode(tn.ro, tn.s, Array(mapBrackets._1) ++ tn.subNodes.drop(1).dropRight(1) ++ List((mapBrackets._2)))
-    case _ => throw new Exception(s"Case not found: [$a]")
+    case _ => throw new Exception(s"Case not found: $a (${a.getClass})")
 
 object PlotExtensionsSeq:
 
@@ -779,13 +783,15 @@ object PlotExtensionsSeq:
         .map(t => (t.first.toInt, t.second.toInt, t.third.toInt))
         .plot(title, sphereSize, duration, visibleAxes, color, addTimeStamp)
 
+    def animTriples(title: String, sphereSize: Int, duration: Duration): Unit = animateTriples (title, sphereSize, duration)
+
     def animateTriples(
         title: String,
         sphereSize: Int,
         duration: Duration,
-        visibleAxes: Boolean,
-        color: Color,
-        addTimeStamp: Boolean
+        visibleAxes: Boolean = false,
+        color: Color = Color("lightblue"),
+        addTimeStamp: Boolean = false
     ): Unit =
       a.asScala.toList
         .map(t => (t.first.toInt, t.second.toInt, t.third.toInt))

@@ -6,7 +6,7 @@
 
 
 This is a zero-dependency alternative to [comprehensions](https://en.wikipedia.org/wiki/List_comprehension) that requires no special syntax, and as such can be used from Java and other JVM languages.\
-Overall it provides a concise, direct-style notation that handles plain and "boxed" types indifferently, which can simplify effect handling.\
+Overall it provides a concise, direct-style notation that handles plain and container types indifferently, which can simplify effect handling.\
 It also inherently distinguishes the "rectangular" from everything else - or if you prefer, array comprehensions from list comprehensions, the parallelizable from the sequential, and applicatives from monads.
 
 ## Overview
@@ -40,6 +40,7 @@ There are more detailed explanations in the [documentation](http://computist.co/
 
 ## Quick start
 
+(For Java and Clojure, setup and examples follow further below.)\
 In Scala, you can add the following to build.sbt:
 ```scala
 libraryDependencies += "co.computist" %% "augment" % "0.0.2"
@@ -53,7 +54,7 @@ import augmented.given
 
 ## Examples
 
-### Pythagorean triangles
+### Pythagorean triples
 
 ```scala
 select(1 to n, _ to n, _ to n, (a, b, c) => a * a + b * b == c * c)
@@ -238,6 +239,133 @@ sequence(
 )
 ```
 
+## From Java
 
+### Quick start
 
+You can add the following to the dependencies in a *pom.xml* file:
+```xml
+<dependency>
+  <groupId>co.computist</groupId>
+  <artifactId>augment_3</artifactId>
+  <version>0.0.3</version>
+</dependency>
+<dependency>
+  <groupId>org.scala-lang</groupId>
+  <artifactId>scala3-library_3</artifactId>
+  <version>3.3.1</version>
+</dependency>  
+```
 
+Imports to get you started:
+```java
+import static augmented.augmentJ.*;
+import static java.util.stream.IntStream.range;
+```
+
+Although Java 8 is sufficient, Java 11 is recommended since *var* means you can avoid lengthy explicit type names (often with multiple generic parameters).
+
+### Examples
+
+### Pythagorean triples
+
+This can be compared with e.g. https://rosettacode.org/wiki/List_comprehensions#Java
+
+```java
+var n = 20;
+
+var triangles =
+  select(
+    range(1, n),
+    a -> range(a, n),
+    b -> range(b, n),
+    (a, b, c) -> a * a + b * b == c * c);     // [[3 4 5], [5 12 13], [6 8 10], [8 15 17], [9 12 15]]
+```
+
+### Propagation of future values
+
+```java
+import static mappable.Mapper.mappable;
+
+var mult = augment((Integer a, Integer b) -> a * b);
+var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
+
+mult.apply(4, 5);   // here mult returns an ordinary value (20)
+add.apply(4, 5, 6); // 15
+
+var executor = Executors.newSingleThreadExecutor();
+var futureVal = mappable(4, a -> executor.submit(() -> {Thread.sleep(500); return a;}));
+
+var x = mult.apply(futureVal, 5);
+var y = add.apply(2, x, 3);
+var z = mult.apply(4, y);   // here mult returns a future value
+
+assertEquals(z.mappable() instanceof FutureTask, true);
+assertEquals(z.hasValue(), false);
+Thread.sleep(1000);
+assertEquals(z.hasValue(), true);
+assertEquals(z.value(), (Integer) 100);
+```
+
+## From Clojure
+
+### Quick start
+
+You can add the following to the dependencies in a *project.clj* file:
+```clojure
+[co.computist/augment_3 "0.0.3"]
+[org.scala-lang/scala3-library_3 "3.3.1"]
+```
+
+### Examples
+
+### Pythagorean triples
+
+```clojure
+(defn augment [f] (augmentedClj.augment/apply f))
+(def triple (augment (fn [a b c] [a b c])))
+(def n 20)
+
+(def triples
+  (triple
+    (range 1 n)
+    #(range % n)
+    #(range % n)
+    (fn [a b c] (= (+ (* a a) (* b b)) (* c c)))))
+
+(is (= triples [[3 4 5] [5 12 13] [6 8 10] [8 15 17] [9 12 15]]))
+```
+
+### Function graph
+
+```clojure
+(def squares (augment (fn [a b] (- 100 (+ (* a a) (* b b))))))
+(squares 5 5)                                      ; 50
+(.graph (squares (range -10 11) (range -10 11)))   ; plots function using HTML / JavaScript / plotly
+```
+<img src="img/graph.png" width="500" height="250"/>
+
+### Propagation of future values
+
+```clojure
+(defn mappable [x] (augmentedClj.Mapper/mappable x))
+
+;; this returns a Clojure function, i.e. one that implements IFn
+(def mult (augment (fn [a b] (* a b))))
+(def add (augment (fn [a b c] (+ a b c))))
+
+(mult 4 5)  ; here mult returns an ordinary value (20)
+(add 4 5 6) ; 15
+
+(def futureVal (mappable (future (Thread/sleep 500) (println "done") (+ 1 3))))
+
+(def x (mult futureVal 5))
+(def y (add 2 x 3))
+(def z (mult 4 y))  ; here mult returns a future value
+
+(is (= (type (. z mappable)) FutureTask))
+(is (= (. z hasValue) false))
+(Thread/sleep 1000)
+(is (= (. z hasValue) true))
+(is (= (. z value) 100))
+```

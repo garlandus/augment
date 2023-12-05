@@ -8,7 +8,7 @@ import util._
 import scala.reflect.ClassTag
 import scala.deriving.Mirror
 
-// Dependent sets
+/** Dependent sets */
 
 type DepSetA[A]             = () => Set[A]
 type DepSetB[A, B]          = A => Set[B]
@@ -16,7 +16,7 @@ type DepSetC[A, B, C]       = (A, B) => Set[C]
 type DepSetD[A, B, C, D]    = (A, B, C) => Set[D]
 type DepSetE[A, B, C, D, E] = (A, B, C, D) => Set[E]
 
-// Generalized sets
+/** Generalized sets */
 
 type GenSetA[A]             = Set[A] | DepSetA[A]
 type GenSetB[A, B]          = Set[B] | DepSetB[A, B]
@@ -24,7 +24,7 @@ type GenSetC[A, B, C]       = Set[C] | DepSetC[A, B, C]
 type GenSetD[A, B, C, D]    = Set[D] | DepSetD[A, B, C, D]
 type GenSetE[A, B, C, D, E] = Set[E] | DepSetE[A, B, C, D, E]
 
-// Dependent sequences
+/** Dependent sequences */
 
 type DepSeqA[A]             = () => Seq[A]
 type DepSeqB[A, B]          = A => Seq[B]
@@ -32,7 +32,7 @@ type DepSeqC[A, B, C]       = (A, B) => Seq[C]
 type DepSeqD[A, B, C, D]    = (A, B, C) => Seq[D]
 type DepSeqE[A, B, C, D, E] = (A, B, C, D) => Seq[E]
 
-// Generalized sequences
+/** Generalized sequences */
 
 type GenSeqA[A]             = Seq[A] | DepSeqA[A]
 type GenSeqB[A, B]          = Seq[B] | DepSeqB[A, B]
@@ -40,11 +40,11 @@ type GenSeqC[A, B, C]       = Seq[C] | DepSeqC[A, B, C]
 type GenSeqD[A, B, C, D]    = Seq[D] | DepSeqD[A, B, C, D]
 type GenSeqE[A, B, C, D, E] = Seq[E] | DepSeqE[A, B, C, D, E]
 
-// Derived types
+/** Derived types */
 
 type Mixed[A, T[_]]         = A | T[A]
 
-// Dependent derived types
+/** Dependent derived types */
 
 type DepTA[T[_], A]             = () => T[A]
 type DepTB[T[_], A, B]          = A => T[B]
@@ -52,13 +52,15 @@ type DepTC[T[_], A, B, C]       = (A, B) => T[C]
 type DepTD[T[_], A, B, C, D]    = (A, B, C) => T[D]
 type DepTE[T[_], A, B, C, D, E] = (A, B, C, D) => T[E]
 
-// Generalized derived types
+/** Generalized derived types */
 
 type GenTA[T[_], A]             = T[A] | DepTA[T, A]
 type GenTB[T[_], A, B]          = T[B] | DepTB[T, A, B]
 type GenTC[T[_], A, B, C]       = T[C] | DepTC[T, A, B, C]
 type GenTD[T[_], A, B, C, D]    = T[D] | DepTD[T, A, B, C, D]
 type GenTE[T[_], A, B, C, D, E] = T[E] | DepTE[T, A, B, C, D, E]
+
+/** Some containers that can be returned by comprehensions */
 
 type IdA[Z, A]              = Z
 type SeqA[Z, A]             = Seq[Z]
@@ -110,6 +112,8 @@ type ProdE[X, A, B, C, D, E] = Mirror.Product {
 type ProdF[X, A, B, C, D, E, F] = Mirror.Product {
   type MirroredType = X; type MirroredMonoType = X; type MirroredElemTypes = (A, B, C, D, E, F)
 }
+
+/** Column vector, used for standard vectorization */
 
 case class ColVector[A](vec: Vector[A])
 

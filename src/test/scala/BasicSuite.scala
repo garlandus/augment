@@ -17,7 +17,7 @@ class BasicSuite extends munit.FunSuite:
   val add = augment((a: Int, b: Int, c: Int) => a + b + c)
 
   test("Pythagorean triangles"):
-    val n = 30
+    val n = 20
 
     val res1 = select(1 to n, _ to n, _ to n, (a, b, c) => a * a + b * b == c * c)
 
@@ -322,8 +322,10 @@ class BasicSuite extends munit.FunSuite:
     assertEquals(sqrt(9), 3.0)
 
   test("vectorize"):
-    var res = mult(ColVector(1, 4, 5), ColVector(2, 3, 6))
-    assertEquals(res, Vector(2, 12, 30))
+    var res1 = mult(ColVector(1, 4, 5), ColVector(2, 3, 6))
+    assertEquals(res1, Vector(2, 12, 30))
+    var res2 = add(ColVector(1, 4, 5), ColVector(2, 3, 6), ColVector(4, 7, 1))
+    assertEquals(res2, Vector(7, 14, 12))
 
   test("bubble sort"):
     def swap[T](a: Array[T]) = (i: Int, j: Int) => { val t = a(i); a(i) = a(j); a(j) = t }

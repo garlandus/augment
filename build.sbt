@@ -10,11 +10,12 @@ lazy val root = project
   .configs(IntegrationTest)
   .settings(
     name := "augment",
-    version := "0.0.2",
+    version := "0.0.3",
     scalaVersion := scala3Version,
 
-    // zero-dependency library: these are loaded only for testing
+    // zero-dependency library: these are loaded only for testing (apart from clojure)
     libraryDependencies ++= Seq (
+      "org.clojure" % "clojure" % "1.11.1",
       "org.scalameta" %% "munit" % "1.0.0-M10" % "it,test",
       "org.junit.jupiter" % "junit-jupiter-api" % "5.10.1" % "it,test",
       "com.github.sbt" % "junit-interface" % "0.13.3" % "it,test",

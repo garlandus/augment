@@ -1,5 +1,9 @@
 package augmented
 
+/** Augmented functions: extending existing functions to handle additional argument types, particularly to reproduce
+  * comprehensions.
+  */
+
 import basicdef._
 import comprehension._
 import comprehension.given
@@ -7,12 +11,14 @@ import mappable._
 import mappable.given
 import multiarray._
 import shape._
-import util.timed
+import util._
 import util.JavaUtil.{Pair, Triple}
 import variant._
 
 import collection.JavaConverters._
 import scala.reflect.ClassTag
+import java.util.Spliterators
+import java.util.stream._
 
 given AugmentA[ArrayNA, SeqA] = AugmentA()
 given AugmentB[MultiArrayB, SeqB] = AugmentB()
@@ -23,37 +29,59 @@ given AugmentE[MultiArrayE, SeqE] = AugmentE()
 given Effects[BasicIO] = Effects()
 
 object augment:
-  
+
+  /** The main way to augment a function, using the type of containers that have been specified
+   *  by a "given" statement (see above for the defaults).
+   * 
+   *  For instance
+   *    given AugmentB[MultiArrayB, SeqB] = AugmentB()
+   *  states that in the rectangular case, a comprehension will return a 2D array, whereas in the
+   *  more general case, it will return a sequence: essentially a hybrid of an array comprehension
+   *  and a list comprehension.
+   * 
+   *  Z is the element type, and R and S are the higher-kinded container types returned in the
+   *  rectangular and irregular cases respectively.
+   *  The original argument types (A, B, C, ...) are retained in the case of an array (for the axes),
+   *  but are ignored elsewhere.
+   */
   def apply[Z, A, R[_, _], S[_, _]]                                     (f: A => Z)               (using aug: AugmentA[R, S]) = aug (f)
   def apply[Z, A, B, R[_, _, _], S[_, _, _]]                            (f: (A, B) => Z)          (using aug: AugmentB[R, S]) = aug (f)
   def apply[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]]                   (f: (A, B, C) => Z)       (using aug: AugmentC[R, S]) = aug (f)
   def apply[Z, A, B, C, D, R[_, _, _, _, _], S[_, _, _, _, _]]          (f: (A, B, C, D) => Z)    (using aug: AugmentD[R, S]) = aug (f)
   def apply[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]] (f: (A, B, C, D, E) => Z) (using aug: AugmentE[R, S]) = aug (f)
   
+  /** The original list comprehension: always return a sequence */
   def flat[Z, A]              (f: A => Z)               = AugmentA[SeqA, SeqA]() (f)
   def flat[Z, A, B]           (f: (A, B) => Z)          = AugmentB[SeqB, SeqB]() (f)
   def flat[Z, A, B, C]        (f: (A, B, C) => Z)       = AugmentC[SeqC, SeqC]() (f)
   def flat[Z, A, B, C, D]     (f: (A, B, C, D) => Z)    = AugmentD[SeqD, SeqD]() (f)
   def flat[Z, A, B, C, D, E]  (f: (A, B, C, D, E) => Z) = AugmentE[SeqE, SeqE]() (f)
 
+  /** Specifies that comprehensions should return nested sequences
+   *  For instance Pascal's triangle can be given by a comprehension with
+   *    val binomialCoefficient = augment seq (CombinatoricsUtils.binomialCoefficient)
+   */
   def seq[Z, A]               (f: A => Z)               = AugmentA[SeqNA, SeqNA]() (f)
   def seq[Z, A, B]            (f: (A, B) => Z)          = AugmentB[SeqNB, SeqNB]() (f)
   def seq[Z, A, B, C]         (f: (A, B, C) => Z)       = AugmentC[SeqNC, SeqNC]() (f)
   def seq[Z, A, B, C, D]      (f: (A, B, C, D) => Z)    = AugmentD[SeqND, SeqND]() (f)
   def seq[Z, A, B, C, D, E]   (f: (A, B, C, D, E) => Z) = AugmentE[SeqNE, SeqNE]() (f)
-
+  
+  /** Return maps in the rectangular case and sequences otherwise */
   def mapped[Z, A]            (f: A => Z)               = AugmentA[MapA, SeqA]() (f)
   def mapped[Z, A, B]         (f: (A, B) => Z)          = AugmentB[MapB, SeqB]() (f)
   def mapped[Z, A, B, C]      (f: (A, B, C) => Z)       = AugmentC[MapC, SeqC]() (f)
   def mapped[Z, A, B, C, D]   (f: (A, B, C, D) => Z)    = AugmentD[MapD, SeqD]() (f)
   def mapped[Z, A, B, C, D, E](f: (A, B, C, D, E) => Z) = AugmentE[MapE, SeqE]() (f)
 
+  /** Return sets */
   def set[Z, A]               (f: A => Z)               = AugmentA[SetA, SetA]() (f)
   def set[Z, A, B]            (f: (A, B) => Z)          = AugmentB[SetB, SetB]() (f)
   def set[Z, A, B, C]         (f: (A, B, C) => Z)       = AugmentC[SetC, SetC]() (f)
   def set[Z, A, B, C, D]      (f: (A, B, C, D) => Z)    = AugmentD[SetD, SetD]() (f)
   def set[Z, A, B, C, D, E]   (f: (A, B, C, D, E) => Z) = AugmentE[SetE, SetE]() (f)
   
+  /** Allows you to specify pre- and post-conditions */
   def apply[Z, A]             (f: A => Z, c: Conditions[Z, A])                            = AugmentA[ArrayNA, SeqA]()(f, c)
   def apply[Z, A, B]          (f: (A, B) => Z, c: Conditions[Z, (A, B)])                  = AugmentB[MultiArrayB, SeqB]()(f, c)
   def apply[Z, A, B, C]       (f: (A, B, C) => Z, c: Conditions[Z, (A, B, C)])            = AugmentC[MultiArrayC, SeqC]()(f, c)
@@ -63,6 +91,10 @@ object augment:
   def apply[Z, A]             (f: A => Z, preCond: Condition[A], postCond: Condition[(Z, A)]) =
     AugmentA[ArrayNA, SeqA]()(f, Conditions(preCond, postCond))
 
+/** Usually an existing function is first augmented, then applied: by contrast here the base lambda function is provided
+ *  along with its arguments. Although it might be preferable to have it as the first argument, type inference currently
+ *  works better when the lambda function is the last argument.
+ */
 object image:
   def apply[Z, A](as: Seq[A], f: A => Z)(using ClassTag[Z]) =
     augment(f)(as)
@@ -140,6 +172,7 @@ object image:
   def apply[T[_]: Mappable, Z, A, B, C](as: T[A], bs: T[B], cs: T[C], f: (A, B, C) => Z)(using ClassTag[Z]) =
     augment(f) applyT (as, bs, cs)
 
+/** Handling mixed "mappables", e.g. applicatives */
 object apply:
 
   def apply[T[_]: Mappable, U[_]: Mappable, Z, A, B](as: => T[A], bs: => U[B], f: (A, B) => Z, z: Boolean = true)(using
@@ -169,6 +202,7 @@ object apply:
 case class Effects[T[_]]()(using Mappable[T]):
   def apply() = ()
 
+/** This simplfies a common case: a base function that simply returns a tuple of its arguments */
 object select:
 
   def apply[A, B](as: Seq[A], bs: Seq[B]) =
@@ -264,13 +298,13 @@ object last:
   def apply[T[_], A, B, C, D](a: => A, bs: A => B, cs: B => C, ds: C => D)(using fx: Effects[T], t: Mappable[T]) =
     lastD applyCD (a.unit(), bs(_).unit(), cs(_).unit(), ds(_).unit())
 
-// used from Java
+/** used from Java */
 object augmentJ:
 
   def augment[Z, A](f: java.util.function.Function[A, Z]) =
     AugmentA[MultiArrayA, SeqA]()((a: A) => f(a))
   def augment[Z, A, B](f: java.util.function.BiFunction[A, B, Z]) =
-    AugmentB[MultiArrayB, SeqB]()((a: A, b: B) => f(a, b))
+        AugmentB[MultiArrayB, SeqB]()((a: A, b: B) => f(a, b))
   def augment[Z, A, B, C](f: (A, B, C) => Z) = AugmentC[MultiArrayC, SeqC]()(f)
   def augment[Z, A, B, C, D](f: (A, B, C, D) => Z) = AugmentD[MultiArrayD, SeqD]()(f)
   def augment[Z, A, B, C, D, E](f: (A, B, C, D, E) => Z) = AugmentE[MultiArrayE, SeqE]()(f)
@@ -278,7 +312,7 @@ object augmentJ:
   def select[A, B, C](as: JList[A], bs: JList[B], cs: JList[C], phi: (A, B, C) => Boolean) =
     tupleJTriple applyJ (as, (a: A) => bs, (b: B) => cs, phi)
 
-  def select[A, B, C](as: JList[A], bs: JDepSeq[A, B], phi: (A, B) => Boolean) =
+  def select[A, B](as: JList[A], bs: JDepSeq[A, B], phi: (A, B) => Boolean) =
     tupleJPair(as, bs, phi)
 
   def select[A, B, C](as: JList[A], bs: JDepSeq[A, B], cs: JDepSeq[B, C]) =
@@ -287,8 +321,37 @@ object augmentJ:
   def select[A, B, C](as: JList[A], bs: JDepSeq[A, B], cs: JDepSeq[B, C], phi: (A, B, C) => Boolean) =
     tupleJTriple applyJ (as, bs, cs, phi)
 
-  def count[A, B, C](as: JList[A], bs: JDepSeq[A, B], cs: JDepSeq[B, C]) =
-    (tupleJTriple applyJ (as, bs, cs)).size()
+  def select[A, B](as: BaseStream[A, _], bsDep: A => BaseStream[B, _]) =
+    val as1 = streamToLazyList(as)
+    val bsDep1 = (a: A) => streamToLazyList(bsDep(a))
+    tupleJPair(as1, bsDep1).asJava
+
+  def select[A, B, C](as: BaseStream[A, _], bs: BaseStream[B, _], cs: BaseStream[C, _], phi: (A, B, C) => Boolean) =
+    val (as1, bs1, cs1) = (streamToLazyList(as), streamToLazyList(bs), streamToLazyList(cs))
+    tupleJTriple(as1, (a: A) => bs1, (b: B) => cs1, phi).asJava
+
+  def select[A, B, C](as: BaseStream[A, _], bsDep: A => BaseStream[B, _], csDep: B => BaseStream[C, _]) =
+    val as1 = streamToLazyList(as)
+    val bsDep1 = (a: A) => streamToLazyList(bsDep(a))
+    val csDep1 = (b: B) => streamToLazyList(csDep(b))
+    tupleJTriple(as1, bsDep1, csDep1, (a, b, c) => true).asJava
+
+  def select[A, B, C](
+      as: BaseStream[A, _],
+      bsDep: A => BaseStream[B, _],
+      csDep: B => BaseStream[C, _],
+      phi: (A, B, C) => Boolean
+  ) =
+    val as1 = streamToLazyList(as)
+    val bsDep1 = (a: A) => streamToLazyList(bsDep(a))
+    val csDep1 = (b: B) => streamToLazyList(csDep(b))
+    tupleJTriple(as1, bsDep1, csDep1, phi).asJava
+
+  def count[A, B, C](as: JList[A], bsDep: JDepSeq[A, B], csDep: JDepSeq[B, C]) =
+    (tupleJTriple applyJ (as, bsDep, csDep)).size()
+
+  def count[A, B, C](as: BaseStream[A, _], bsDep: JDepStream[A, B], csDep: JDepStream[B, C]) =
+    (select(as, bsDep, csDep, (a, b, c) => true)).size()
 
   def sequence[B](as: java.lang.Runnable, b: => B, cs: java.util.function.Consumer[B]) =
     MappableW(augmented.sequence(as.run(), _ => b, cs.accept(_)))
@@ -325,9 +388,6 @@ def lastB[A, B] = augment((a: A, b: B) => b)
 def lastC[A, B, C] = augment((a: A, b: B, c: C) => c)
 def lastD[A, B, C, D] = augment((a: A, b: B, c: C, d: D) => d)
 def lastE[A, B, C, D, E] = augment((a: A, b: B, c: C, d: D, e: E) => e)
-
-type JDepSeq[A, B] = A => JList[B]
-type JDepSeqC[A, B, C] = (A, B) => JList[C]
 
 case class AugmentA[R[_, _], S[_, _]]()(using cx: ComprehensionA[R], cy: ComprehensionA[S]):
   def apply[Z, A](f: A => Z) = AugmentedFunctionA[Z, A, R, S](f)
@@ -542,6 +602,11 @@ trait AugmentedFnA[Z, A, R[_, _], S[_, _]](using ComprehensionA[R], Comprehensio
             fr(nextDS(as, xl), xl)
     fr(as, List())
 
+  def apply(as: JList[A]): R[Z, A] =
+    val as1 = as.asScala.toList
+    given ClassTag[Z] = ClassTag(f(as1.head).getClass)
+    apply(as1)
+
 trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R], cy: ComprehensionB[S])
     extends AugmentFnBBase[Z, A, B]:
 
@@ -650,6 +715,31 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
   def apply(as: JList[A], bsDep: JDepSeq[A, B], phi: (A, B) => Boolean): JList[Z] =
     val v = AugmentB[SeqB, SeqB]()(as.asScala.toList, a => bsDep(a).asScala.toList.filter(phi(a, _)), f)
     v.irregComprehension[Z](id).toList.asJava
+
+  def applySeq(as: BaseStream[A, _], bsDep: JDepStream[A, B]): JList[JList[Z]] =
+    val v = AugmentB[SeqNB, SeqNB]()(streamToLazyList(as), a => streamToLazyList(bsDep(a)), f)
+    v.irregComprehension[Z](id).map(_.asJava).asJava
+
+  def apply(as: BaseStream[A, _], bs: BaseStream[B, _]): MultiArrayB[Z, A, B] =
+    val (as1, bs1) = (streamToLazyList(as), streamToLazyList(bs))
+    val v = AugmentB[MultiArrayB, SeqB]()(as1, bs1, f)
+    given ClassTag[Z] = ClassTag(f(as1.head, bs1.head).getClass)
+    v.rectComprehension[Z](id)
+
+  def apply(as: JList[A], bs: BaseStream[B, _]): MultiArrayB[Z, A, B] =
+    val (as1, bs1) = (as.asScala.toList, streamToLazyList(bs))
+    val v = AugmentB[MultiArrayB, SeqB]()(as1, bs1, f)
+    given ClassTag[Z] = ClassTag(f(as1.head, bs1.head).getClass)
+    v.rectComprehension[Z](id)
+
+  def apply(as: BaseStream[A, _], bs: JList[B], phi: (A, B) => Boolean): JList[Z] =
+    val v = AugmentB[SeqB, SeqB]()(streamToLazyList(as), a => bs.asScala.filter(phi(a, _)).toList, f)
+    v.irregComprehension[Z](id).asJava
+
+  def apply(as: BaseStream[A, _], bsDep: JDepStream[A, B]): BaseStream[Z, _] =
+    val v = AugmentB[SeqB, SeqB]()(streamToLazyList(as), a => streamToLazyList(bsDep(a)), f)
+    val res = v.irregComprehension[Z](id)
+    StreamSupport.stream(Spliterators.spliteratorUnknownSize(res.iterator.asJava, 0), false)
 
   def apply(as: ColVector[A], bs: ColVector[B]): Vector[Z] =
     (as.vec zip bs.vec).map(f(_, _))
@@ -815,6 +905,12 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cr: Comprehen
     )
     v.irregComprehension[Z](id).toList.asJava
 
+  def apply(as: BaseStream[A, _], bs: BaseStream[B, _], cs: JList[C]): R[Z, A, B, C] =
+    apply(streamToList (as), streamToList (bs), cs)
+
+  def apply(as: ColVector[A], bs: ColVector[B], cs: ColVector[C]): Vector[Z] =
+    (as.vec zip bs.vec zip cs.vec).map(_ match { case ((a, b), c) => f(a, b, c) })
+
   def crossCheck(as: Seq[A], bs: GenSeqB[A, B], cs: GenSeqC[A, B, C], r: Seq[Z]) =
     val vf = AugmentC[SeqC, SeqC]()(as, bs, cs, f)
     val (rf, tf) = timed(vf.irregComprehension[Z](id))
@@ -934,6 +1030,20 @@ trait AugmentedFnD[Z, A, B, C, D, R[_, _, _, _, _], S[_, _, _, _, _]](using
     val v = AugmentD[MultiArrayD, SeqD]()(as1, bs1, cs1, ds1, f)
     v.rectComprehension(id)
 
+  def apply(
+      as: BaseStream[A, _],
+      bs: BaseStream[B, _],
+      cs: BaseStream[C, _],
+      ds: BaseStream[D, _]
+  ): MultiArrayD[Z, A, B, C, D] =
+    val (as1, bs1, cs1, ds1) = (streamToLazyList(as), streamToLazyList(bs), streamToLazyList(cs), streamToLazyList(ds))
+    val v = AugmentD[MultiArrayD, SeqD]()(as1, bs1, cs1, ds1, f)
+    given ClassTag[Z] = ClassTag(f(as1.head, bs1.head, cs1.head, ds1.head).getClass)
+    v.rectComprehension[Z](id)
+
+  def apply(as: ColVector[A], bs: ColVector[B], cs: ColVector[C], ds: ColVector[D]): Vector[Z] =
+    (as.vec zip bs.vec zip cs.vec zip ds.vec).map(_ match { case (((a, b), c), d) => f(a, b, c, d) })
+
 trait AugmentedFnE[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]](using
     cr: ComprehensionE[R],
     cs: ComprehensionE[S]
@@ -979,15 +1089,12 @@ trait AugmentedFnE[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]](u
     val v = AugmentB[MultiArrayB, SeqB]()(fs, gs, g)
     v.rectComprehension(f(_, _, _, _, _))
 
-  def apply(as: JList[A], bs: JList[B], cs: JList[C], ds: JList[D], es: JList[E])(using ClassTag[Z]) =
-    val (as1, bs1, cs1, ds1, es1) =
-      (as.asScala.toList, bs.asScala.toList, cs.asScala.toList, ds.asScala.toList, es.asScala.toList)
-    val v = baseShape(as1, bs1, cs1, ds1, es1, f)
-    v.rectComprehension[Z](id)
-
   def apply(as: JList[A], bs: JList[B], cs: JList[C], ds: JList[D], es: JList[E]) =
     val (as1, bs1, cs1, ds1, es1) =
       (as.asScala.toList, bs.asScala.toList, cs.asScala.toList, ds.asScala.toList, es.asScala.toList)
     given ClassTag[Z] = ClassTag(f(as1.head, bs1.head, cs1.head, ds1.head, es1.head).getClass)
     val v = baseShape(as1, bs1, cs1, ds1, es1, f)
     v.rectComprehension(id)
+
+  def apply(as: ColVector[A], bs: ColVector[B], cs: ColVector[C], ds: ColVector[D], es: ColVector[E]): Vector[Z] =
+    (as.vec zip bs.vec zip cs.vec zip ds.vec zip es.vec).map(_ match { case ((((a, b), c), d), e) => f(a, b, c, d, e) })

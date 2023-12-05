@@ -222,7 +222,7 @@ given Mappable[Thunk] with
 
 object Mapper:
 
-  def getMappable[A](a: A, unit: A => Any): MappableW[A, _] =
+  def mappable[A](a: A, unit: A => Any): MappableW[A, _] =
     val x = unit(a)
     x match
       case (x: java.util.Optional[_])          => MappableW(x.asInstanceOf[java.util.Optional[A]])

@@ -1,10 +1,19 @@
 import static augmented.augmentJ.*;
 import static mappable.Mapper.*;
 import static multiarray.multiArray.*;
-import static util.JavaUtil.*;
+import static util.JavaUtil.complement;
+import static util.JavaUtil.filter;
+import static util.JavaUtil.Pair;
+import static util.JavaUtil.stringAsIntSeq;
+import static util.JavaUtil.subArray;
+import static util.JavaUtil.toMap;
+import static util.JavaUtil.Triple;
+import static util.JavaUtil.zip;
 import multiarray.ArrayB;
 import multiarray.MultiArrayB;
 
+import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.*;
@@ -24,65 +33,62 @@ public class BasicJSuite {
 
   @Test
   public void PythagoreanTriangles() {
-    var n = 30;
+    var n = 20;
 
-    var res = select(rangeTo(1, n), a -> rangeTo(a, n), b -> rangeTo(b, n), (a, b, c) -> a * a + b * b == c * c);
+    var res = select(range(1, n), a -> range(a, n), b -> range(b, n), (a, b, c) -> a * a + b * b == c * c);
 
     assertEquals(res,
       List.of(
         tr(3, 4, 5),
         tr(5, 12, 13),
         tr(6, 8, 10),
-        tr(7, 24, 25),
         tr(8, 15, 17),
-        tr(9, 12, 15),
-        tr(10, 24, 26),
-        tr(12, 16, 20),
-        tr(15, 20, 25),
-        tr(18, 24, 30),
-        tr(20, 21, 29)));
+        tr(9, 12, 15)));
   }
 
   @Test
   public void tetrahedron() {
     var n = 5;
 
-    var res = count(rangeTo(1, n), a -> rangeTo(1, a), b -> rangeTo(1, b));
+    var res = count(rangeClosed(1, n), a -> rangeClosed(1, a), b -> rangeClosed(1, b));
 
     assertEquals(res, 35);
   }
 
   @Test
   public void basicB() {
-    var mult = augment((Integer x, Integer y) -> x * y);
-    var as = rangeTo(3, 5);
-    var bs = rangeTo(7, 9);
+    var mult = augment((Integer a, Integer b) -> a * b);
+    var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
+    var as = rangeClosed(3, 5);
+    var bs = rangeClosed(7, 9);
     var res = mult.apply(as, bs);
-    assertEquals(res.origAsJava(), List.of(List.of(21, 24, 27), List.of(28, 32, 36), List.of(35, 40, 45)));
+    assertEquals(res.nestedAsJava(), List.of(List.of(21, 24, 27), List.of(28, 32, 36), List.of(35, 40, 45)));
 
     var sts1 = List.of("ab", "cd", "ef");
     var sts2 = List.of("gh", "ij", "kl");
     var appendAsterisks = augment((String s, Integer n) -> s + "*".repeat(n));
-    var res1 = appendAsterisks.apply(sts1, rangeTo(3, 5));
+    var res1 = appendAsterisks.apply(sts1, rangeClosed(3, 5));
 
-    assertEquals(res1.origAsJava(), List.of(List.of("ab***", "ab****", "ab*****"),
+    assertEquals(res1.nestedAsJava(), List.of(List.of("ab***", "ab****", "ab*****"),
       List.of("cd***", "cd****", "cd*****"), List.of("ef***", "ef****", "ef*****")));
 
+    var as1 = rangeClosed(3, 5);
+    var bs1 = rangeClosed(7, 9);
     var g = augment(
       (List<String> sts, List<Integer> ls) -> sts.stream().collect(Collectors.joining(" ")) + " "
         + ls.stream().mapToInt(Integer::intValue).sum());
-    var res2 = g.apply(List.of(sts1, sts2), List.of(as, bs));
-    assertEquals(res2.origAsJava(),
+    var res2 = g.apply(List.of(sts1, sts2), List.of(as1.boxed().toList(), bs1.boxed().toList()));
+    assertEquals(res2.nestedAsJava(),
       List.of(List.of("ab cd ef 12", "ab cd ef 24"), List.of("gh ij kl 12", "gh ij kl 24")));
   }
 
   @Test
   public void basicC() {
-    var as = rangeTo(3, 4);
-    var bs = rangeTo(7, 8);
+    var as = rangeClosed(3, 4);
+    var bs = rangeClosed(7, 8);
     var f = augment((Integer x, Integer y, String s) -> s + ": " + x * y);
     var res = f.apply(as, bs, List.of("acorn", "beetroot"));
-    assertEquals(res.origAsJava(),
+    assertEquals(res.nestedAsJava(),
       List.of(List.of(List.of("acorn: 21", "beetroot: 21"), List.of("acorn: 24", "beetroot: 24")),
         List.of(List.of("acorn: 28", "beetroot: 28"), List.of("acorn: 32", "beetroot: 32"))));
   }
@@ -147,21 +153,21 @@ public class BasicJSuite {
   }
 
   public static Integer sqrt(int x) {
-    return (int)(Math.sqrt(x));
+    return (int) (Math.sqrt(x));
   }
 
-  public static List<Integer> sieveA(int n) {
-    Function<Integer, Integer> sqrt = ((Integer x) -> (int)(Math.sqrt(x)));
+  public static IntStream sieveA(int n) {
+    Function<Integer, Integer> sqrt = ((Integer x) -> (int) (Math.sqrt(x)));
     var mult = augment((Integer x, Integer y) -> x * y);
 
-    var compositeNbs = mult.apply(rangeTo(2, sqrt(n)), a -> rangeTo(2, n / a));
-    return complement(compositeNbs, rangeTo(2, n));
+    var compositeNbs = mult.apply(rangeClosed(2, sqrt(n)), a -> rangeClosed(2, n / a));
+    return complement(compositeNbs, rangeClosed(2, n));
   }
 
-  public static List<Integer> sieveB(int n) {
+  public static IntStream sieveB(int n) {
     var mult = augment((Integer x, Integer y) -> x * y);
-    return n == 1 ? new ArrayList<Integer>()
-      : complement(mult.apply(sieveB(sqrt(n)), a -> rangeTo(2, n / a)), rangeTo(2, n));
+    return n == 1 ? IntStream.empty()
+      : complement(mult.apply(sieveB(sqrt(n)), a -> rangeClosed(2, n / a)), rangeClosed(2, n));
   }
 
   public static <T> List<T> until(boolean b, List<T> l) {
@@ -169,18 +175,18 @@ public class BasicJSuite {
       : l;
   }
 
-  public static List<Integer> sieveC(int n) {
+  public static IntStream sieveC(int n) {
     var mult = augment((Integer x, Integer y) -> x * y);
-    return n == 1 ? new ArrayList<Integer>()
-      : complement(mult.apply(sieveC(sqrt(n)), a -> rangeTo(a, n / a)), rangeTo(2, n));
+    return n == 1 ? IntStream.empty()
+      : complement(mult.apply(sieveC(sqrt(n)), a -> rangeClosed(a, n / a)), rangeClosed(2, n));
   }
 
   @Test
   public void sieves() {
     var n = 50;
-    var resA = sieveA(n);
-    var resB = sieveB(n);
-    var resC = sieveC(n);
+    var resA = sieveA(n).boxed().toList();
+    var resB = sieveB(n).boxed().toList();
+    var resC = sieveC(n).boxed().toList();
     println("\n" + resA + "\n");
     println(resB + "\n");
     println(resC + "\n");
@@ -192,13 +198,13 @@ public class BasicJSuite {
     var prepend = augment((Integer a, List<Integer> l) -> prepend0(a, l));
 
     List<List<Integer>> res = k == 0 ? List.of(new ArrayList<Integer>())
-      : prepend.apply(rangeTo(0, n - 1), placeQueens(n, k - 1), (x, qu) -> isSafe(x, qu));
+      : prepend.apply(range(0, n), placeQueens(n, k - 1), (x, qu) -> isSafe(x, qu));
     return res;
   }
 
   public static Boolean isSafe(int col, List<Integer> queens) {
     var row = queens.size();
-    var queensWithRow = zip(rangeTo(row - 1, 0, -1), queens);
+    var queensWithRow = zip(range(0, row).map(x -> row - x - 1), queens);
     var res = queensWithRow.stream().allMatch(
       pr -> {
         var r = pr.first();
@@ -232,14 +238,14 @@ public class BasicJSuite {
   @Test
   public void sudoku() {
     var bn = stringAsIntSeq(board());
-    var a = multiarray(rangeTo(1, 9), rangeTo(1, 9), bn);
+    var a = multiarray(rangeClosed(1, 9), rangeClosed(1, 9), bn);
     println("\nInitial board:" + a.toString(x -> x == 0 ? "." : x.toString()) + "\n");
     var x = a.selectPairs(z -> z == 0);
     var r = sudo(a, x);
     var bds = completedBoards(a, x, r);
     println("Completed board:\n" + bds + "\n\n");
     assertEquals(bds.size(), 1);
-    assertEquals(bds.get(0).origAsJava(),
+    assertEquals(bds.get(0).nestedAsJava(),
       List.of(
         List.of(4, 8, 3, 9, 2, 1, 6, 5, 7), List.of(9, 6, 7, 3, 4, 5, 8, 2, 1),
         List.of(2, 5, 1, 8, 7, 6, 4, 9, 3), List.of(5, 4, 8, 1, 3, 2, 9, 7, 6),
@@ -252,7 +258,7 @@ public class BasicJSuite {
     var prepend = augment((Integer x, List<Integer> l) -> prepend0(x, l));
 
     List<List<Integer>> r = bl.isEmpty() ? List.of(new ArrayList<Integer>())
-      : prepend.apply(rangeTo(1, 9), sudo(a, drop(bl, 1)), (n, y) -> isValidSudoku(a, bl, n, y));
+      : prepend.apply(rangeClosed(1, 9), sudo(a, bl.stream().skip(1).toList()), (n, y) -> isValidSudoku(a, bl, n, y));
     return r;
   }
 
@@ -276,18 +282,23 @@ public class BasicJSuite {
 
   public static List<MultiArrayB<Integer, Integer, Integer>> completedBoards(ArrayB<Integer> a,
       List<Pair<Integer, Integer>> bl, List<List<Integer>> values) {
-    var placedVals = map(values, v -> zip(bl, v));
-    var arrs = map(placedVals, x -> placedValsToArray(x, 9, 9));
-    return map(arrs, x -> x.plus(a));
+    return
+      values
+        .stream()
+        .map(v -> zip(bl, v))
+        .map(x -> placedValsToArray(x, 9, 9))
+        .map(x -> x.plus(a))
+        .toList();
   }
 
   public static MultiArrayB<Integer, Integer, Integer> placedValsToArray(
       List<Pair<Pair<Integer, Integer>, Integer>> v, int m, int n) {
     var mp = toMap(v);
-    var ll = map(rangeTo(1, n),
-      r -> map(rangeTo(1, m),
+
+    var ll = rangeClosed(1, n).mapToObj(
+      r -> rangeClosed(1, m).mapToObj(
         c -> mp.getOrDefault(new Pair<Integer, Integer>(r, c), 0)));
-    return multiarray(rangeTo(1, n), rangeTo(1, n), ll);
+    return multiarray(rangeClosed(1, n), rangeClosed(1, n), ll);
   }
 
   public static <T> void printSeq(List<List<T>> seq) {

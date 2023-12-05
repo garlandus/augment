@@ -1,6 +1,7 @@
 
 .bloop/
 .bsp
+.cache
 .ensime
 .ensime_cache/
 .history

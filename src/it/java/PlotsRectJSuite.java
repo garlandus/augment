@@ -5,8 +5,12 @@ import multiarray.*;
 import static multiarray.multiArray.*;
 import static multiarrayplot.PlotExtensionsSeq.*;
 import static plotutil.imageSrcs.*;
-import static util.JavaUtil.*;
+import static util.JavaUtil.append;
+import static util.JavaUtil.namedFn;
+import static util.JavaUtil.toMap;
 
+import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 import info.debatty.java.stringsimilarity.interfaces.StringDistance;
 import info.debatty.java.stringsimilarity.*;
 import java.util.ArrayList;
@@ -88,7 +92,7 @@ public class PlotsRectJSuite {
         .collect(Collectors.toList()))
       .collect(Collectors.toList());
     Collections.reverse(board);
-    var arr = multiarray(rangeTo(0, 0), range(0, board.size()), range(0, board.get(0).size()), List.of(board));
+    var arr = multiarray(rangeClosed(0, 0), range(0, board.size()), range(0, board.get(0).size()), List.of(board));
     var res = nextStep(arr, 50);
     res.animate("Pulsar [J]", true, 750, false, false, (x, y) -> "green");
   }
@@ -111,10 +115,11 @@ public class PlotsRectJSuite {
       var defaultValue = 0;
       var f = augment((Integer i, Integer j, Integer da,
         Integer db) -> a.get(i + da, j + db, defaultValue) != defaultValue ? 1 : 0);
-      var arrD = f.apply(range(0, a.la()), range(0, a.lb()), rangeTo(-1, 1), rangeTo(-1, 1));
+      var arrD = f.apply(range(0, a.la()), range(0, a.lb()), rangeClosed(-1, 1), rangeClosed(-1, 1));
       var arrB = arrD.map(s -> nextStepStatus(s, 1, 0));
       int i = arr.lengths(0) + 1;
-      var arrC = multiarray(range(0, i), range(0, a.la()), range(0, a.lb()), append(arr.nested(), List.of(arrB.nested())));
+      var arrC = multiarray(range(0, i), range(0, a.la()), range(0, a.lb()),
+        append(arr.nestedAsJava(), List.of(arrB.nestedAsJava())));
       return nextStep(arrC, n - 1);
     }
   }

@@ -7,6 +7,8 @@ import java.io.{File, FileWriter, BufferedWriter}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.Spliterators
+import java.util.stream.{BaseStream, IntStream, StreamSupport}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.Set
 import scala.reflect.ClassTag
@@ -87,6 +89,12 @@ def stringAsIntArr(s: String): Array[Array[Int]] =
 def stringAsIntSeq(s: String): Seq[Seq[Int]] =
   s.trim.split("\n").map(_.trim.map(_.toInt - 48).toList).toList
 
+def streamToLazyList[A](st: BaseStream[A, _]): LazyList[A] =
+  LazyList.from(st.iterator.asScala)
+
+def streamToList[A](st: BaseStream[A, _]): JList[A] =
+  StreamSupport.stream(st.spliterator(), false).toList
+
 object StringExtensions:
   extension [A](s: String)
     infix def stripMrgn =
@@ -138,17 +146,29 @@ object JavaUtil:
   def rangeDblTo(a: Int, b: Int) =
     (a to b).map(_.toDouble.asInstanceOf[JDouble]).asJava
 
-  def complement[T](l: JList[T], full: JList[T]) =
+  def complement[T](l: JList[T], full: JList[T]): JList[T] =
     full.asScala.filter(!l.contains(_)).asJava
+  def complement[T](l: JList[T], full: BaseStream[T, _]): JList[T] =
+    streamToLazyList(full).filter(!l.contains(_)).asJava
+
+  def complement[T](st: BaseStream[JInteger, _], full: BaseStream[JInteger, _]): IntStream =
+    val l1 = st.iterator().asScala.toList
+    val l2 = streamToLazyList(full).filter(!l1.contains(_))
+    StreamSupport.stream(Spliterators.spliteratorUnknownSize(l2.iterator.asJava, 0), false).mapToInt(x => x)
 
   def named[A](a: A, name: String) = Named(a, name)
   def namedFn[A, B](f: JFunction[A, B], name: String) = Named(f, name)
 
-  case class Pair[A, B](first: A, second: B)
-  case class Triple[A, B, C](first: A, second: B, third: C)
+  case class Pair[A, B](first: A, second: B):
+    override def toString(): String = s"[$first $second]"
+  case class Triple[A, B, C](first: A, second: B, third: C):
+    override def toString(): String = s"[$first $second $third]"
 
   def zip[A, B](l1: JList[A], l2: JList[B]): JList[Pair[A, B]] =
     (l1.asScala zip l2.asScala).map(Pair(_, _)).asJava
+
+  def zip[A, B](st: BaseStream[A, _], l: JList[B]): JList[Pair[A, B]] =
+    (streamToLazyList(st) zip l.asScala).map(Pair(_, _)).asJava
 
   def toMap[A, B](as: JList[A], bs: JList[B]): JMap[A, B] =
     (as.asScala zip bs.asScala).toMap.asJava
@@ -160,7 +180,8 @@ object JavaUtil:
     l.asScala.filter(f(_)).asJava
 
   def append[A](l1: Seq[A], l2: Seq[A]) = l1 ++ l2
-  def append[A](l1: Seq[A], l2: JList[A]) = l1 ++ l2.asScala
+  def append[A](l1: JList[A], l2: JList[A]): JList[A] =
+    java.util.stream.Stream.concat(l1.stream, l2.stream).toList
 
   def stringAsIntArr(s: String): Array[Array[Int]] =
     s.trim.split("\n").map(_.trim.map(_.toInt - 48).toArray)

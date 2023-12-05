@@ -25,7 +25,7 @@ public class FxJSuite {
   @Test
   public void addAndMultOptions() {
     var mult = augment((Integer a, Integer b) -> a * b);
-    var xOpt = getMappable(4, a -> Optional.of(a));
+    var xOpt = mappable(4, a -> Optional.of(a));
 
     var res0 = mult.apply(4, 5);
     var res1 = mult.apply(xOpt, 5);
@@ -43,7 +43,7 @@ public class FxJSuite {
     var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var xOpt = getMappable(4, a -> Optional.of(a));
+    var xOpt = mappable(4, a -> Optional.of(a));
     var x0 = mult.apply(4, 5);
     var y0 = add.apply(2, x0, 3);
     var z0 = mult.apply(4, y0);
@@ -62,7 +62,7 @@ public class FxJSuite {
     var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var xDerived = getMappable(4, a -> new scala.util.Left("not found"));
+    var xDerived = mappable(4, a -> new scala.util.Left("not found"));
     var x = mult.apply(xDerived, 5);
     var y = add.apply(2, x, 3);
     var z = mult.apply(4, y);
@@ -74,10 +74,10 @@ public class FxJSuite {
 
   @Test
   public void propagateTry() {
-    var mult = augment((Integer a, Integer b) -> a * b);
+        var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var derivedVal1 = getMappable(4, a -> Try.apply(() -> 1 / 0));
+    var derivedVal1 = mappable(4, a -> Try.apply(() -> 1 / 0));
     var x1 = mult.apply(derivedVal1, 5);
     var y1 = add.apply(2, x1, 3);
     var z1 = mult.apply(4, y1);
@@ -87,7 +87,7 @@ public class FxJSuite {
       "java.lang.ArithmeticException: / by zero");
     assertEquals(z1.hasValue(), false);
 
-    var derivedVal = getMappable(4, a -> Try.apply(() -> a));
+    var derivedVal = mappable(4, a -> Try.apply(() -> a));
     var x = mult.apply(derivedVal, 5);
     var y = add.apply(2, x, 3);
     var z = mult.apply(4, y);
@@ -117,7 +117,7 @@ public class FxJSuite {
     var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var derivedVal = getMappable(4, a -> new RandomWait().start(a));
+    var derivedVal = mappable(4, a -> new RandomWait().start(a));
 
     var x = mult.apply(derivedVal, 5);
     var y = add.apply(2, x, 3);
