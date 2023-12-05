@@ -43,7 +43,7 @@ There are more detailed explanations in the [documentation](http://computist.co/
 (For Java and Clojure, setup and examples follow further below.)\
 In Scala, you can add the following to build.sbt:
 ```scala
-libraryDependencies += "co.computist" %% "augment" % "0.0.2"
+libraryDependencies += "co.computist" %% "augment" % "0.0.3"
 ```
 
 Imports to get you started:
