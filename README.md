@@ -11,6 +11,21 @@ Augmented functions are a generalization of the idea of vectorization.
 
 [Documentation](http://computist.co/augment.html)
 
+## Quick start
+
+(For Java and Clojure, setup and examples follow further below.)\
+In Scala, you can add the following to build.sbt:
+```scala
+libraryDependencies += "co.computist" %% "augment" % "0.0.4"
+```
+
+Imports to get you started:
+```scala
+import augmented._
+import augmented.given
+import augmented.Extensions._
+```
+
 ## Examples
 
 ### Pythagorean triples
@@ -207,12 +222,12 @@ You can add the following to the dependencies in a *pom.xml* file:
 <dependency>
   <groupId>co.computist</groupId>
   <artifactId>augment_3</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
 </dependency>
 <dependency>
   <groupId>org.scala-lang</groupId>
   <artifactId>scala3-library_3</artifactId>
-  <version>3.3.1</version>
+  <version>3.5.2</version>
 </dependency>  
 ```
 
@@ -272,8 +287,8 @@ assertEquals(z.value(), (Integer) 100);
 
 You can add the following to the dependencies in a *project.clj* file:
 ```clojure
-[co.computist/augment_3 "0.0.3"]
-[org.scala-lang/scala3-library_3 "3.3.1"]
+[co.computist/augment_3 "0.0.4"]
+[org.scala-lang/scala3-library_3 "3.5.2"]
 ```
 
 ### Examples
