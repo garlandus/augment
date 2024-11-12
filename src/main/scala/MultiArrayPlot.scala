@@ -64,8 +64,8 @@ object PlotExtensionsB:
     def axesToJS(): (String, String) =
       val xs = s"x = ${toJSON(arr.bs.toList)}"
       val yNames = arr.as.head match
-        case x: Named[_] => arr.as.map(a => a.asInstanceOf[Named[_]].name).toList
-                case _           => arr.as.toList
+        case x: Named[_] => arr.as.map(a => a.asInstanceOf[Named[?]].name).toList
+        case _           => arr.as.toList
       val ys = s"y = ${toJSON(yNames)}"
       (xs, ys)
 
@@ -142,7 +142,7 @@ object PlotExtensionsB:
       val js = toJsFlat()
       val data = js.split("\n")
       val yNames = arr.as.head match
-        case x: Named[_] => arr.as.map(_.asInstanceOf[Named[_]].name)
+        case x: Named[_] => arr.as.map(_.asInstanceOf[Named[?]].name)
         case _           => arr.as
 
       val inds = 0 to arr.as.length - 1
@@ -155,27 +155,37 @@ object PlotExtensionsB:
       val s2 = s"""Plotly.newPlot('chart1', data)"""
       getHtmlLines(title, data ++ List(s1) ++ List(s2))
 
-    def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    def plotB(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "plotB.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    def plotFlatB(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "flat.html")
       saveToFile(plotFldr, fileName, arr.toHtmlFlat(title).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    def plotContourB(
+        title: String = "",
+        addTimeStamp: Boolean = false,
+        name: String = "",
+        visibleAxes: Boolean = true
+    ) =
       val fileName = getFileName(title, addTimeStamp, name, "contour.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, "contour").mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    def plotHeatMapB(
+        title: String = "",
+        addTimeStamp: Boolean = false,
+        name: String = "",
+        visibleAxes: Boolean = true
+    ) =
       val fileName = getFileName(title, addTimeStamp, name, "heatmap.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, "heatmap").mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def graph(): Unit = plot()
+    def graphB(): Unit = plotB()
 
 def rectsAsJson(rects: Array[FilledRectangle]): String =
   val entries: Array[Any] = rects.map(r => Array(r.x0, r.y0, r.x1, r.y1, r.line.color, r.fillcolor))
@@ -377,14 +387,14 @@ object PlotExtensionsC:
       val data = js.split("\n") ++ List("\n")
       getHtmlLines(title, data)
 
-    def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
+    def plotC(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
       val fileName = getFileName(title, addTimeStamp, name, "plotC.html")
       saveToFile(plotFldr, fileName, arr.toHTML(title, false, false, None, 750, visibleAxes).mkString("\n"), "html")
       openInBrowser(s"$plotFldr/$fileName")
 
-    def graph(): Unit = plot()
+    def graphC(): Unit = plotC()
 
-    def animate(
+    def animateC(
         title: String = "",
         flat: Boolean = false,
         duration: Duration,
@@ -423,13 +433,13 @@ case class TextNode(
     areSubNodesStatements: Boolean = false
 ):
 
-  override def toString(): String = toSt(flush)
+  override def toString(): String = toStr(flush)
 
-  def toSt(offsetFromOrigin: RelOffset): String =
+  def toStr(offsetFromOrigin: RelOffset): String =
     val fullOffset = offsetFromOrigin.add(ro)
     val offsetSt = "\n" * ro.lineDepth + indentSt * fullOffset.indentLevel
     val subNodeSeparator = if areSubNodesStatements then "\n" else ","
-    s"$offsetSt$s${subNodes.map(_.toSt(fullOffset)).mkString(subNodeSeparator).replace("[,", "[").replace(",]", "]").replace(":,", ":").replace("{,", "{").replace(",}", "}")}"
+    s"$offsetSt$s${subNodes.map(_.toStr(fullOffset)).mkString(subNodeSeparator).replace("[,", "[").replace(",]", "]").replace(":,", ":").replace("{,", "{").replace(",}", "}")}"
 
   def maxOffset(): RelOffset =
     subNodes match
@@ -456,10 +466,10 @@ def toJsExpr[A](expr: A, ro: RelOffset = RelOffset(0, 0)): TextNode =
 def toJSON[A](a: A, ro: RelOffset = RelOffset(0, 0)): TextNode =
   a match
     case x: (Int | Long | Float | Double) => TextNode(ro, x.toString)
-    case b: Boolean                => TextNode(ro, b.toString)
-    case c: Char                   => TextNode(ro, s"\'$c\'")
-    case s: String                 => TextNode(ro, s"\"$s\"")
-    case Verbatim(s: String)       => TextNode(ro, s)
+    case b: Boolean                       => TextNode(ro, b.toString)
+    case c: Char                          => TextNode(ro, s"\'$c\'")
+    case s: String                        => TextNode(ro, s"\"$s\"")
+    case Verbatim(s: String)              => TextNode(ro, s)
     case l: Seq[_] =>
       val x = l.map(toJSON(_, flush))
       val m = sum(x.map(_.maxOffset()))
@@ -783,7 +793,8 @@ object PlotExtensionsSeq:
         .map(t => (t.first.toInt, t.second.toInt, t.third.toInt))
         .plot(title, sphereSize, duration, visibleAxes, color, addTimeStamp)
 
-    def animTriples(title: String, sphereSize: Int, duration: Duration): Unit = animateTriples (title, sphereSize, duration)
+    def animTriples(title: String, sphereSize: Int, duration: Duration): Unit =
+      animateTriples(title, sphereSize, duration)
 
     def animateTriples(
         title: String,

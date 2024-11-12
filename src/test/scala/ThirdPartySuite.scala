@@ -1,5 +1,6 @@
 import augmented._
 import augmented.given
+import augmented.Extensions._
 import basicdef._
 import comprehension._
 import comprehension.given
@@ -36,7 +37,6 @@ class ThirdPartySuite extends munit.FunSuite:
     def PascalsTriangle(n: Int) = binomialCoefficient(0 to n, 0 to _)
 
     val res = PascalsTriangle(5)
-    printSeq(res)
     assertEquals(res.map(_.length).sum, 21)
 
   test("Guava table / multiset"):
@@ -77,7 +77,6 @@ class ThirdPartySuite extends munit.FunSuite:
     )
 
   test("ZIO basic"):
-    given Effects[zIO] = Effects()
 
     def getName() =
       Thread.sleep(25)
@@ -86,7 +85,7 @@ class ThirdPartySuite extends munit.FunSuite:
       sequence(
         println("What is your name?"),
         getName(),
-        name => { println(s"Hello, $name\n\n"); name }
+        name => { println(s"Hello, $name"); name }
       )
 
     assertEquals(r.value(), getName())
@@ -94,15 +93,24 @@ class ThirdPartySuite extends munit.FunSuite:
   val add = augment((a: Int, b: Int, c: Int) => a + b + c)
   val mult = augment flat ((a: Int, b: Int, c: Int) => a * b * c)
 
+  test("ZIO numeric"):
+    val res1 = ZIO.succeed(4) + ZIO.succeed(5)
+    val res2 = ZIO.succeed(4) * 5
+    val res3 = 4 * ZIO.succeed(5) + ZIO.succeed(6)
+    assertEquals(res1.value(), 9)
+    assertEquals(res2.value(), 20)
+    assertEquals(res3.value(), 26)
+
+
   test("Cats applicatives"):
     val o1 = Some(1).asInstanceOf[Option[Int]]
     val o2 = Some(2)
     val o3 = Some(3)
     val res1 = (o1, o2, o3).mapN { _ + _ + _ }
     val res2 = (o1, o2, o3).mapN(add.apply)
-    val res3 = add(o1, o2, o3)
-    val res4 = add(1, 2, o3)
-    val res5 = add(1, None, o3)
+    val res3 = o1 + o2 + o3
+    val res4 = 1 + 2 + o3
+    val res5 = 1 + None + o3
 
     assertEquals(res1, res2)
     assertEquals(res1, res3)
@@ -122,7 +130,7 @@ class ThirdPartySuite extends munit.FunSuite:
         b <- 32.writer(Vector("x", "y", "z"))
       yield a + b
 
-    def addB[B] = augment((a: Int, b: B, c: Int) => a + c)
+    def addB[B] = (a: Int, b: B, c: Int) => a + c
 
     assertEquals(addB(10, "ignore", 32), 42)
     assertEquals(addB(10, (), 32), 42)
@@ -134,7 +142,11 @@ class ThirdPartySuite extends munit.FunSuite:
         32.writer(Vector("x", "y", "z"))
       )
 
+    val logged3 = 10.pure[CatsLogged] + 0.writer(Vector("a", "b", "c")) + 32.writer(Vector("x", "y", "z"))
+
+    assertEquals(logged2.toString(), "WriterT((Vector(a, b, c, x, y, z),42))")
     assertEquals(logged1, logged2)
+    assertEquals(logged1, logged3)
 
   type Stack[A] = List[A]
   def pop[A] = cats.data.State[Stack[A], A]:
@@ -146,25 +158,25 @@ class ThirdPartySuite extends munit.FunSuite:
   test("Cats state"):
     val stack: Stack[Int] = List(3, 4, 5)
 
-    val st1: cats.data.State[Stack[Int], _] =
+    val st1: cats.data.State[Stack[Int], ?] =
       for
         a <- pop
         b <- pop
         _ <- push(a * b)
       yield ()
 
-    val st2: cats.data.State[Stack[Int], _] =
-      last(
+    val st2: cats.data.State[Stack[Int], ?] =
+      sequence(
         pop,
         pop,
         (a, b) => push(a * b)
       )
 
-    val st3: cats.data.State[Stack[Int], _] =
+    val st3: cats.data.State[Stack[Int], ?] =
       sequence(
         pop,
         pop,
-        (_: Int) * _,
+        _ * _,
         push(_)
       )
 
@@ -172,7 +184,7 @@ class ThirdPartySuite extends munit.FunSuite:
     assertEquals(st2.run(stack).value._1.head, 12)
     assertEquals(st3.run(stack).value._1.head, 12)
 
-    val st4: cats.data.State[Stack[Int], _] =
+    val st4: cats.data.State[Stack[Int], ?] =
       for
         a <- pop
         b <- pop
@@ -180,7 +192,7 @@ class ThirdPartySuite extends munit.FunSuite:
         _ <- push(a * b + c)
       yield ()
 
-    val st5: cats.data.State[Stack[Int], _] =
+    val st5: cats.data.State[Stack[Int], ?] =
       sequence(
         pop,
         pop,
@@ -192,7 +204,7 @@ class ThirdPartySuite extends munit.FunSuite:
     assertEquals(st4.run(stack).value._1.head, 17)
     assertEquals(st5.run(stack).value._1.head, 17)
 
-    val st6: cats.data.State[Stack[Int], _] =
+    val st6: cats.data.State[Stack[Int], ?] =
       for
         _ <- modify[Stack[Int]](_.map(_ * 10))
         a <- pop
@@ -200,12 +212,12 @@ class ThirdPartySuite extends munit.FunSuite:
         _ <- push(a + b)
       yield ()
 
-    val st7: cats.data.State[Stack[Int], _] =
+    val st7: cats.data.State[Stack[Int], ?] =
       sequence(
         modify[Stack[Int]](_.map(_ * 10)),
         pop,
         pop,
-        _ + _,
+        (_, x, y) => x + y,
         push(_)
       )
 
@@ -231,7 +243,6 @@ class ThirdPartySuite extends munit.FunSuite:
   def sendZIO[A](ch: Channel[A], a: A) = ZIO.attempt(ch.send(a))
 
   test("applicatives"):
-    val mult = augment((a: Int, b: Int) => a * b)
     initChannels(7, 8, Some(9))
 
     val resCats2 =
@@ -260,17 +271,17 @@ class ThirdPartySuite extends munit.FunSuite:
         c <- readZIO(c3)
       yield a * b * c
 
-    val resA2 = mult(Some(c1.delayedRead()), Some(c2.delayedRead()))
-    val resA3 = add(Future(c1.delayedRead()), Future(c2.delayedRead()), Future(c3.delayedRead()))
+    val resA2 = Some(c1.delayedRead()) * Some(c2.delayedRead())
+    val resA3 = Future(c1.delayedRead()) + Future(c2.delayedRead()) + Future(c3.delayedRead())
 
-    val resB2 = image(Try(c1.delayedRead()), Try(c2.delayedRead()), _ * _)
-    val resB3 = image(Future(c1.delayedRead()), Future(c2.delayedRead()), Future(c3.delayedRead()), _ + _ + _)
+    val resB2 = Try(c1.delayedRead()) * Try(c2.delayedRead())
+    val resB3 = Future(c1.delayedRead()) + Future(c2.delayedRead()) + Future(c3.delayedRead())
 
-    val resC2 = image(Right(c1.delayedRead()), Right(c2.delayedRead()), _ * _)
-    val resC3 = image(Future(c1.delayedRead()), Future(c2.delayedRead()), Future(c3.delayedRead()), _ * _ * _)
+    val resC2 = Right(c1.delayedRead()) * Right(c2.delayedRead())
+    val resC3 = Future(c1.delayedRead()) * Future(c2.delayedRead()) * Future(c3.delayedRead())
 
-    val resD2 = image(Try(c1.delayedRead()), Try(c2.delayedRead()), _ * _)
-    val resD3 = image(Some(c1.delayedRead()), Some(c2.delayedRead()), Some(c3.delayedRead()), _ * _ * _)
+    val resD2 = Try(c1.delayedRead()) * Try(c2.delayedRead())
+    val resD3 = Some(c1.delayedRead()) * Some(c2.delayedRead()) * Some(c3.delayedRead())
 
     val resCats2Val = resCats2.value()
     val resCats3Val = resCats3.value()
@@ -286,7 +297,7 @@ class ThirdPartySuite extends munit.FunSuite:
     assertEquals(resD2.value(), resZio2Val)
     assertEquals(resD3.value(), resZio3Val)
 
-  def getChannelIO[T[_]](using Effects[T], Mappable[T])() =
+  def getChannelIO[T[_]: Mappable](using Effects[T])() =
     val res1 =
       sequence(
         c1.read(),
@@ -324,7 +335,7 @@ class ThirdPartySuite extends munit.FunSuite:
     }
 
   test("Basic IO channel"):
-    // by default: BasicIO
+    /** by default: BasicIO */
     val (res1, res2) = getChannelIO()
 
     initChannels(3, 7)
@@ -380,7 +391,7 @@ class ThirdPartySuite extends munit.FunSuite:
         Thread.sleep(delay)
         n * 10
 
-    val io1 = add(f(3), f(4), f(5))
+    val io1 = f(3) + f(4) + f(5)
     val io2 = image(f(3), f(4), f(5), _ + _ + _)
     val io3 = (f(3), f(4), f(5)).mapN(_ + _ + _)
     val io4 = (f(3), f(4), f(5)).parMapN(_ + _ + _)
@@ -420,23 +431,23 @@ class ThirdPartySuite extends munit.FunSuite:
     val ioBasicB = BasicIO(() => delayedSendToChannel("B", n))
     val ioBasicC = BasicIO(() => delayedSendToChannel("C", n))
 
-    // Cats: sequential
+    /** Cats: sequential */
     val catsSeqIO =
       (ioCatsA, ioCatsB, ioCatsC).mapN:
         (_, _, _)
 
-    // Cats: parallel
+    /** Cats: parallel */
     val catsParIO =
       (ioCatsA, ioCatsB, ioCatsC).parMapN:
         (_, _, _)
 
-    // ZIO: sequential
+    /** ZIO: sequential */
     val zioSeqIO = zioA.zip(zioB.zip(zioC))
 
-    // ZIO: parallel
+    /** ZIO: parallel */
     val zioParIO = zioA.zipPar(zioB.zipPar(zioC))
 
-    // Basic IO (parallel)
+    /** Basic IO (parallel) */
     val basicParCats = image(ioCatsA, ioCatsB, ioCatsC, (_, _, _))
     val basicParZIO = image(zioA, zioB, zioC, (_, _, _))
     val basicPar = image(ioBasicA, ioBasicB, ioBasicC, (_, _, _))

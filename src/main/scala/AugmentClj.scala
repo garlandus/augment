@@ -551,5 +551,5 @@ trait AugmentedFnCljC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cr: Compre
 
 object Mapper:
 
-  def mappable(ft: java.util.concurrent.Future[Object]): MappableW[Object, _] =
+  def mappable(ft: java.util.concurrent.Future[Object]): MappableW[Object, ?] =
     MappableW(ft)

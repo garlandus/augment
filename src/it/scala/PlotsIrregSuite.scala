@@ -17,13 +17,13 @@ class PlotsIrregSuite extends munit.FunSuite:
     val n = 5
     val res0 = select(1 to n, 1 to _, 1 to _)
     val res = res0.map((a, b, c) => (c, b, a))
-    res plot ("Tetra", sphereSize = 5, visibleAxes = false, color = Color("lightgreen"))
+    res.plot("Tetra", sphereSize = 5, visibleAxes = false, color = Color("lightgreen"))
 
   test("tetrahedron (animated)"):
     val n = 5
     val res = select(1 to n, 1 to _, 1 to _)
     val duration = Durations(List((20, 1), (500, 1), (200, 2), (1000, 1), (100, 5), (1000, 1), (50, 9), (1000, 1)))
-    res animate ("Tetra (animated)", sphereSize = 5, visibleAxes = false, duration = duration)
+    res.animate("Tetra (animated)", sphereSize = 5, visibleAxes = false, duration = duration)
 
   test("2D-printed triangle"):
     val n = 5
@@ -56,6 +56,6 @@ class PlotsIrregSuite extends munit.FunSuite:
 
     val res1 = res.map(l => l.map(listFromInd(_, n).toArray).toArray).toArray
     val res2 = res.map(l => l.map(listFromInd(_, n)))
-    val arr = multiArray apply (0 until res1.length, 1 to n, (1 to n).map(x => (x + 64).toChar).toList, res2)
+    val arr = multiArray(0 until res1.length, 1 to n, (1 to n).map(x => (x + 64).toChar).toList, res2)
 
     arr.animate("Queens", true, 750, false, "", false, Some(imageSrcs.chessImageSrcs))

@@ -14,11 +14,12 @@ import java.util.stream.BaseStream
 
 case class MultiArrayA[X, A](as: Seq[A], arr: Array[X])(using ClassTag[X]) extends MultiArrayT[X]:
 
+  def flat() = arr.toList  
+  def axes = List(as)
   val length = as.length
   val axisLengths = List(1)
-  def flat() = arr.toList
+  def head = apply(as.head)
   def isEmpty = as.isEmpty
-  def axes = List(as)
 
   def apply(a: A) =
     val ia = as.indexOf(a)
@@ -37,6 +38,10 @@ case class MultiArrayA[X, A](as: Seq[A], arr: Array[X])(using ClassTag[X]) exten
   def plot(title: String, addTimeStamp: Boolean, name: String, visibleAxes: Boolean) = ???
 
   override def toString(): String = s"[A:$length]\n${arr.mkString(" ")}\n"
+
+def getAxisLengths[A](axes: List[Seq[A]]) =
+  val length = axes.map(_.length).product
+  (1 to axes.length).map(i => length / (axes.take(i)).map(_.length).product)
 
 trait MultiArrayT[X]:
   val length: Int
@@ -131,25 +136,25 @@ object multiArray:
       )
     else throw new Exception(s"Non-rectangular inputs used to construct array")
 
-  def multiarray[X, A, B](as: BaseStream[A, _], bs: BaseStream[B, _], na: JList[JList[X]]): MultiArrayB[X, A, B] =
+  def multiarray[X, A, B](as: BaseStream[A, ?], bs: BaseStream[B, ?], na: JList[JList[X]]): MultiArrayB[X, A, B] =
     multiarray(streamToList(as), streamToList(bs), na)
 
-  def multiarray[X, A, B](as: BaseStream[A, _], bs: BaseStream[B, _], na: JStream[JStream[X]]): MultiArrayB[X, A, B] =
+  def multiarray[X, A, B](as: BaseStream[A, ?], bs: BaseStream[B, ?], na: JStream[JStream[X]]): MultiArrayB[X, A, B] =
     val l: JList[JList[X]] = streamToList(na).asScala.map(streamToList).asJava
     multiarray(as, bs, l)
 
   def multiarray[X, A, B, C](
-      as: BaseStream[A, _],
-      bs: BaseStream[B, _],
-      cs: BaseStream[C, _],
+      as: BaseStream[A, ?],
+      bs: BaseStream[B, ?],
+      cs: BaseStream[C, ?],
       na: JList[JList[JList[X]]]
   ): MultiArrayC[X, A, B, C] =
     multiarray(streamToList(as), streamToList(bs), streamToList(cs), na)
 
-  def multiarray[X, A, B, C, D <: BaseStream[X, _]](
-      as: BaseStream[A, _],
-      bs: BaseStream[B, _],
-      cs: BaseStream[C, _],
+  def multiarray[X, A, B, C, D <: BaseStream[X, ?]](
+      as: BaseStream[A, ?],
+      bs: BaseStream[B, ?],
+      cs: BaseStream[C, ?],
       na: JStream[JStream[D]]
   ): MultiArrayC[X, A, B, C] =
     val l = na.map(_.map(streamToList(_)).toList).toList
@@ -221,12 +226,15 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
   def this(as: Seq[A], bs: Seq[B], na: Seq[Seq[X]])(using ClassTag[X]) =
     this(as, bs, na.flatten.toArray)
 
-  override val length = as.length * bs.length
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[X]] = augment.seq(this(_, _))(as, bs)
   def nestedAsJava(): JList[JList[X]] = nested().map(_.asJava).asJava
-  def isEmpty = as.isEmpty || bs.isEmpty
+  
   def axes = List(as, bs)
+  override val length = axes.map(_.length).product
+  val axisLengths = List(bs.length, 1)
+  def head = apply(as.head, bs.head)
+  def isEmpty = as.isEmpty || bs.isEmpty
 
   def apply(a: A, b: B) =
     val ia = as.indexOf(a)
@@ -275,8 +283,6 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
   def row(a: A) = rows()(as.indexOf(a))
   def col(b: B) = cols()(bs.indexOf(b))
 
-  def head = apply(as.head, bs.head)
-
   def subArray(a: A): MultiArrayA[X, B] =
     val ia = as.indexOf(a)
     val subSeq = nested()(ia)
@@ -310,10 +316,10 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
     val ys = (na.arr zip this.arr).map(_ :+ _)
     multiArray(as, bs, ys)
 
-  def select(phi: X => Boolean): Seq[(A, B)] =
+  infix def select(phi: X => Boolean): Seq[(A, B)] =
     tupleB(as, bs, (a: A, b: B) => phi(this(a, b)))
 
-  def selectPairs(phi: X => Boolean): JList[Pair[A, B]] =
+  infix def selectPairs(phi: X => Boolean): JList[Pair[A, B]] =
     var f = augment((x: A, y: B) => Pair(x, y))
     f(as.asJava, (a: A) => bs.asJava, (a: A, b: B) => phi(this(a, b)))
 
@@ -329,7 +335,7 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
       bs,
       cs,
       nested().map(_.map(x =>
-        if !x.isInstanceOf[Map[_, _]] then
+        if !x.isInstanceOf[Map[?, ?]] then
           throw new Exception(s"Expected values of type map but found: ${x.getClass}:\n$x\n")
         val m = x.asInstanceOf[Map[C, Y]]
         cs.map(c => m(c))
@@ -342,7 +348,7 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
       bs,
       cs,
       nested().map(_.map(x =>
-        if !x.isInstanceOf[Map[_, _]] then
+        if !x.isInstanceOf[Map[?, ?]] then
           throw new Exception(s"Expected values of type map but found: ${x.getClass}:\n$x\n")
         val m = x.asInstanceOf[Map[C, Y]]
         cs.map(c => m.getOrElse(c, altC(c)))
@@ -352,21 +358,19 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
   def transpose(): MultiArrayB[X, B, A] =
     image(bs, as, (b, a) => this(a, b))
 
-  val axisLengths = List(bs.length, 1)
-
   def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsB.plot(this)(title, addTimeStamp, name, visibleAxes)
+    multiarrayplot.PlotExtensionsB.plotB(this)(title, addTimeStamp, name, visibleAxes)
 
   def plotFlat(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsB.plotFlat(this)(title, addTimeStamp, name, visibleAxes)
+    multiarrayplot.PlotExtensionsB.plotFlatB(this)(title, addTimeStamp, name, visibleAxes)
 
   def plotContour(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsB.plotContour(this)(title, addTimeStamp, name, visibleAxes)
+    multiarrayplot.PlotExtensionsB.plotContourB(this)(title, addTimeStamp, name, visibleAxes)
 
   def plotHeatMap(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsB.plotHeatMap(this)(title, addTimeStamp, name, visibleAxes)
+    multiarrayplot.PlotExtensionsB.plotHeatMapB(this)(title, addTimeStamp, name, visibleAxes)
 
-  def graph() = multiarrayplot.PlotExtensionsB.graph(this)()
+  def graph() = multiarrayplot.PlotExtensionsB.graphB(this)()
 
   def saveToFile(
       folder: String,
@@ -392,21 +396,22 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
             case _          => replaceFn(x)
     "\n" + disp.reverse.map(_.mkString(" ")).mkString("\n") + "\n"
 
-// A, B, C <-> Z, Y, X
+/** A, B, C <-> Z, Y, X */
 
 case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Array[X])(using
     ClassTag[X]
 ) extends MultiArrayT[X]:
 
-  val length = as.length * bs.length * cs.length
   def lengths(i: Int) = List(as, bs, cs)(i).length
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[Seq[X]]] = augment.seq(this(_, _, _))(as, bs, cs)
   def nestedAsJava(): JList[JList[JList[X]]] = nested().map(_.map(_.asJava).asJava).asJava
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty
+  
   def axes = List(as, bs, cs)
+  val length = axes.map(_.length).product
   val axisLengths = List(bs.length * cs.length, cs.length, 1)
   def head = apply(as.head, bs.head, cs.head)
+  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty
 
   def apply(a: A, b: B, c: C): X =
     val ia = as.indexOf(a)
@@ -476,9 +481,9 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
     )
 
   def plot(title: String = "", addTimeStamp: Boolean = false, name: String = "", visibleAxes: Boolean = true) =
-    multiarrayplot.PlotExtensionsC.plot(this)(title, addTimeStamp, name, visibleAxes)
+    multiarrayplot.PlotExtensionsC.plotC(this)(title, addTimeStamp, name, visibleAxes)
 
-  def graph() = multiarrayplot.PlotExtensionsC.graph(this)()
+  def graph() = multiarrayplot.PlotExtensionsC.graphC(this)()
 
   def animate(
       title: String = "",
@@ -491,7 +496,7 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
       getGridColors: (Int, Int) => Color = (_, _) => Color("#FFFFFF")
   ) =
     multiarrayplot.PlotExtensionsC
-      .animate(this)(title, flat, duration, addTimeStamp, name, visibleAxes, imageSources, getGridColors)
+      .animateC(this)(title, flat, duration, addTimeStamp, name, visibleAxes, imageSources, getGridColors)
 
   def animate(
       title: String,
@@ -505,7 +510,7 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
       case b: Boolean              => None
       case opt: Option[(URL, URL)] => opt
     multiarrayplot.PlotExtensionsC
-      .animate(this)(title, flat, duration, false, "", visibleAxes, imageSources, (a, b) => Color(getGridColors(a, b)))
+      .animateC(this)(title, flat, duration, false, "", visibleAxes, imageSources, (a, b) => Color(getGridColors(a, b)))
 
   override def toString(): String =
     val disp =
@@ -520,12 +525,15 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
 case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], arr: Array[X])(using ClassTag[X])
     extends MultiArrayT[X]:
 
-  val length = as.length * bs.length * cs.length * ds.length
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[Seq[Seq[X]]]] = augment.seq(this(_, _, _, _))(as, bs, cs, ds)
   def nestedAsJava(): JList[JList[JList[JList[X]]]] = nested().map(_.map(_.map(_.asJava).asJava).asJava).asJava
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty
+  
   def axes = List(as, bs, cs, ds)
+  val length = axes.map(_.length).product
+  val axisLengths = getAxisLengths(axes)
+  def head = apply(as.head, bs.head, cs.head, ds.head)
+  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty
 
   def apply(a: A, b: B, c: C, d: D) =
     val ia = as.indexOf(a)
@@ -561,8 +569,6 @@ case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Se
           )
     multiArray(as, bs, sq)
 
-  def head = apply(as.head, bs.head, cs.head, ds.head)
-
   def subArray[Z](a: A, f: X => Z)(using ClassTag[Z]): MultiArrayC[Z, B, C, D] =
     val ia = as.indexOf(a)
     if ia == -1 then throw new Exception(s"Index $a not found in ${as}\n${this}")
@@ -592,8 +598,6 @@ case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Se
     val subArrays = as.map(subArray(_, f))
     val zArr = subArrays.head.transform(_ => Numeric[Z].zero)
     subArrays.foldLeft(zArr)(_.plus(_))
-
-  val axisLengths = List(bs.length * cs.length * ds.length, cs.length * ds.length, ds.length, 1)
 
   def transform[Z](f: X => Z)(using ClassTag[Z]) =
     MultiArrayD(as, bs, cs, ds, arr.map(f))
@@ -662,13 +666,16 @@ case class MultiArrayE[X, A, B, C, D, E](
 )(using ClassTag[X])
     extends MultiArrayT[X]:
 
-  val length = as.length * bs.length * cs.length * ds.length * es.length
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[Seq[Seq[Seq[X]]]]] = augment.seq(this(_, _, _, _, _))(as, bs, cs, ds, es)
   def nestedAsJava(): JList[JList[JList[JList[JList[X]]]]] =
     nested().map(_.map(_.map(_.map(_.asJava).asJava).asJava).asJava).asJava
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty || es.isEmpty
+  
   def axes = List(as, bs, cs, ds, es)
+  val length = axes.map(_.length).product
+  val axisLengths = getAxisLengths(axes)
+  def head = apply(as.head, bs.head, cs.head, ds.head, es.head)
+  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty || es.isEmpty
 
   def apply(a: A, b: B, c: C, d: D, e: E) =
     val ia = as.indexOf(a)
@@ -678,16 +685,6 @@ case class MultiArrayE[X, A, B, C, D, E](
     val ie = es.indexOf(e)
     val i = getIndex(Array(ia, ib, ic, id, ie), axisLengths, length, List(a, b, c, d, e))
     arr(i)
-
-  val axisLengths = List(
-    bs.length * cs.length * ds.length * es.length,
-    cs.length * ds.length * es.length,
-    ds.length * es.length,
-    es.length,
-    1
-  )
-
-  def head = apply(as.head, bs.head, cs.head, ds.head, es.head)
 
   def subArray[Z](a: A, f: X => Z)(using ClassTag[Z]): MultiArrayD[Z, B, C, D, E] =
     val ia = as.indexOf(a)

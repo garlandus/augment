@@ -1,18 +1,9 @@
 import static augmented.augmentJ.*;
 import static mappable.Mapper.*;
-import static multiarray.multiArray.*;
-import static util.JavaUtil.*;
-import multiarray.ArrayB;
-import multiarray.MultiArrayB;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.*;
 
 import scala.util.Either;
 import scala.util.Try;
@@ -62,29 +53,29 @@ public class FxJSuite {
     var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var xDerived = mappable(4, a -> new scala.util.Left("not found"));
+    var xDerived = mappable(4, _ -> new scala.util.Left<String, Integer>("not found"));
     var x = mult.apply(xDerived, 5);
     var y = add.apply(2, x, 3);
     var z = mult.apply(4, y);
 
     assertEquals(z.mappable() instanceof Either, true);
-    assertEquals(z.mappable(), new scala.util.Left("not found"));
+    assertEquals(z.mappable(), new scala.util.Left<String, Integer>("not found"));
     assertEquals(z.hasValue(), false);
   }
 
   @Test
   public void propagateTry() {
-        var mult = augment((Integer a, Integer b) -> a * b);
+    var mult = augment((Integer a, Integer b) -> a * b);
     var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
 
-    var derivedVal1 = mappable(4, a -> Try.apply(() -> 1 / 0));
+    var derivedVal1 = mappable(4, _ -> Try.apply(() -> 1 / 0));
     var x1 = mult.apply(derivedVal1, 5);
     var y1 = add.apply(2, x1, 3);
     var z1 = mult.apply(4, y1);
 
     assertEquals(z1.mappable() instanceof Try, true);
-    assertEquals(((Try<Integer>) z1.mappable()).fold(x -> x.toString(), y -> ""),
-      "java.lang.ArithmeticException: / by zero");
+    @SuppressWarnings(value="unchecked") var z1Try = (Try<Integer>) z1.mappable();
+    assertEquals(z1Try.fold(x -> x.toString(), _ -> ""), "java.lang.ArithmeticException: / by zero");
     assertEquals(z1.hasValue(), false);
 
     var derivedVal = mappable(4, a -> Try.apply(() -> a));
@@ -93,7 +84,7 @@ public class FxJSuite {
     var z = mult.apply(4, y);
 
     assertEquals(z.mappable() instanceof Try, true);
-    assertEquals(z.mappable(), new scala.util.Success(100));
+    assertEquals(z.mappable(), new scala.util.Success<Integer>(100));
     assertEquals(z.hasValue(), true);
     assertEquals(z.value(), (Integer) 100);
   }
@@ -136,8 +127,8 @@ public class FxJSuite {
 
   @Test
   public void basicIO() {
-    var r = sequence(
-      () -> println("\n\nEnter a number:"),
+    var r = queue(
+      () -> println("Enter a number:"),
       () -> readLineStub(),
       s -> Integer.parseInt(s),
       n -> {

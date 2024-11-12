@@ -73,6 +73,8 @@ def getOS(): OS =
 def timeSt() =
   DateTimeFormatter.ofPattern("MM.dd_HH.mm").format(LocalDateTime.now)
 
+def floatToSt(x: Float) = if x % 1 == 0 then f"$x%.0f" else f"$x%.1f"
+
 def getFileName(title: String, addTimeStamp: Boolean, name: String, default: String) =
   (title, name) match
     case ("", "") => default
@@ -89,10 +91,10 @@ def stringAsIntArr(s: String): Array[Array[Int]] =
 def stringAsIntSeq(s: String): Seq[Seq[Int]] =
   s.trim.split("\n").map(_.trim.map(_.toInt - 48).toList).toList
 
-def streamToLazyList[A](st: BaseStream[A, _]): LazyList[A] =
+def streamToLazyList[A](st: BaseStream[A, ?]): LazyList[A] =
   LazyList.from(st.iterator.asScala)
 
-def streamToList[A](st: BaseStream[A, _]): JList[A] =
+def streamToList[A](st: BaseStream[A, ?]): JList[A] =
   StreamSupport.stream(st.spliterator(), false).toList
 
 object StringExtensions:
@@ -128,30 +130,12 @@ object Channel:
 
 object JavaUtil:
 
-  def range(a: Int, b: Int) =
-    (a until b).map(x => x.asInstanceOf[JInteger]).asJava
-
-  def rangeTo(a: Int, b: Int) =
-    (a to b).map(x => x.asInstanceOf[JInteger]).asJava
-
-  def rangeTo(a: Int, b: Int, step: Int) =
-    (a to b by step).map(x => x.asInstanceOf[JInteger]).asJava
-
-  def range(x: Int): JList[Integer] = range(0, x)
-  def rangeTo(x: Int): JList[Integer] = rangeTo(0, x)
-
-  def rangeDbl(a: Int, b: Int) =
-    (a until b).map(_.toDouble.asInstanceOf[JDouble]).asJava
-
-  def rangeDblTo(a: Int, b: Int) =
-    (a to b).map(_.toDouble.asInstanceOf[JDouble]).asJava
-
   def complement[T](l: JList[T], full: JList[T]): JList[T] =
     full.asScala.filter(!l.contains(_)).asJava
-  def complement[T](l: JList[T], full: BaseStream[T, _]): JList[T] =
+  def complement[T](l: JList[T], full: BaseStream[T, ?]): JList[T] =
     streamToLazyList(full).filter(!l.contains(_)).asJava
 
-  def complement[T](st: BaseStream[JInteger, _], full: BaseStream[JInteger, _]): IntStream =
+  def complement[T](st: BaseStream[JInteger, ?], full: BaseStream[JInteger, ?]): IntStream =
     val l1 = st.iterator().asScala.toList
     val l2 = streamToLazyList(full).filter(!l1.contains(_))
     StreamSupport.stream(Spliterators.spliteratorUnknownSize(l2.iterator.asJava, 0), false).mapToInt(x => x)
@@ -167,7 +151,7 @@ object JavaUtil:
   def zip[A, B](l1: JList[A], l2: JList[B]): JList[Pair[A, B]] =
     (l1.asScala zip l2.asScala).map(Pair(_, _)).asJava
 
-  def zip[A, B](st: BaseStream[A, _], l: JList[B]): JList[Pair[A, B]] =
+  def zip[A, B](st: BaseStream[A, ?], l: JList[B]): JList[Pair[A, B]] =
     (streamToLazyList(st) zip l.asScala).map(Pair(_, _)).asJava
 
   def toMap[A, B](as: JList[A], bs: JList[B]): JMap[A, B] =

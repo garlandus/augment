@@ -1,4 +1,4 @@
-val scala3Version = "3.3.1"
+val scala3Version = "3.5.2"
 
 lazy val FunTest = config("fun") extend(Test)
 def itFilter(name: String): Boolean = name endsWith "ITest"
@@ -10,21 +10,20 @@ lazy val root = project
   .configs(IntegrationTest)
   .settings(
     name := "augment",
-    version := "0.0.3",
+    version := "0.0.4",
     scalaVersion := scala3Version,
 
-    // zero-dependency library: these are loaded only for testing (apart from clojure)
-    libraryDependencies ++= Seq (
-      "org.clojure" % "clojure" % "1.11.1",
-      "org.scalameta" %% "munit" % "1.0.0-M10" % "it,test",
-      "org.junit.jupiter" % "junit-jupiter-api" % "5.10.1" % "it,test",
+	  // this is largely a zero-dependency library, but for now both Cats Effect and ZIO are included to simplify usage
+    libraryDependencies ++= Seq(
+      "org.clojure" % "clojure" % "1.12.0",
+      "org.scalameta" %% "munit" % "1.0.2" % "it,test",
+      "org.junit.jupiter" % "junit-jupiter-api" % "5.11.3" % "it,test",
       "com.github.sbt" % "junit-interface" % "0.13.3" % "it,test",
       "org.apache.commons" % "commons-math3" % "3.6.1" % "it,test",
-      "com.google.guava" % "guava" % "32.1.3-jre" % "it,test",
+      "com.google.guava" % "guava" % "33.3.1-jre" % "it,test",
       "info.debatty" % "java-string-similarity" % "2.0.0" % "it,test",
-      "org.typelevel" %% "cats-effect" % "3.5.2" % "it,test",
-      "dev.zio" %% "zio" % "2.0.19" % "it,test",
-      "dev.zio" %% "zio-prelude" % "1.0.0-RC21" % "it,test",
+      "org.typelevel" %% "cats-effect" % "3.5.5",
+      "dev.zio" %% "zio" % "2.1.12",
       "dev.zio" %% "zio-direct" % "1.0.0-RC7" % "it,test",
     ),
 
@@ -33,4 +32,4 @@ lazy val root = project
     inConfig(IntegrationTest)(Defaults.testSettings),
     FunTest / testOptions := Seq(Tests.Filter(itFilter)),
 )
- 
+

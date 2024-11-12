@@ -1,5 +1,6 @@
 import augmented._
 import augmented.given
+import augmented.Extensions._
 import basicdef._
 import mappable._
 import mappable.given
@@ -41,9 +42,9 @@ class PlotsRectSuite extends munit.FunSuite:
       Named(gf.value(_: Double), "fittedGaussian")
     )
 
-    val applyNamedFn = augment((f: Named[Double => Double], x: Double) => f.mainValue(x))
-    val res = applyNamedFn apply (namedFns, xVals)
-    res plotFlat ("Fitted Curves")
+    val applyNamedFn = (f: Named[Double => Double], x: Double) => f.mainValue(x)
+    val res = applyNamedFn(namedFns, xVals)
+    res.plotFlat("Fitted Curves")
 
   test("string distances"):
     val sts = List("ABCDEF", "ABDCEF", "BACDFE", "ABCDE", "BCDEF", "ABCGDEF", "WXYZ")
@@ -61,9 +62,9 @@ class PlotsRectSuite extends munit.FunSuite:
     )
     val namedFns = metrics.map(x => Named(x, x.getClass.getSimpleName))
 
-    val stringDist = augment((sd: Named[StringDistance], s1: String, s2: String) => sd.mainValue.distance(s1, s2))
-    val res = stringDist apply (namedFns, sts, sts2)
-    res plot ("String Distances")
+    val stringDist = (sd: Named[StringDistance], s1: String, s2: String) => sd.mainValue.distance(s1, s2)
+    val res = stringDist(namedFns, sts, sts2)
+    res.plot("String Distances")
 
   val pulsar = """
     000000000000000
@@ -86,14 +87,14 @@ class PlotsRectSuite extends munit.FunSuite:
   test("cellular"):
     val boardSt = pulsar
     val board = stringAsIntArr(boardSt)
-    val arr = multiArray apply (0 to 0, 0 until board.length, 0 until board.head.length, List(board.map(_.toList).toList))
+    val arr = multiArray(0 to 0, 0 until board.length, 0 until board.head.length, List(board.map(_.toList).toList))
     val res = nextStep(arr)(50)
     res.animate("Pulsar", true, 750, addTimeStamp = false, visibleAxes = false)
 
   def f0[A](a: MultiArrayB[A, Int, Int])(defaultValue: A)(i: Int, j: Int, da: Int, db: Int) =
     if a.get(i + da, j + db, defaultValue) != defaultValue then 1 else 0
 
-  def f1[A](a: MultiArrayB[A, Int, Int])(defaultValue: A) = augment(f0(a)(defaultValue))
+  def f1[A](a: MultiArrayB[A, Int, Int])(defaultValue: A) = f0(a)(defaultValue)
 
   def nextStepStatus[A](t: A, f: A)(s: Seq[Int]) =
     val current = s(s.length / 2)

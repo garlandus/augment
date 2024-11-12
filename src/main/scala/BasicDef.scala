@@ -7,7 +7,8 @@ type JMap[A, B] = java.util.Map[A, B]
 type JStream[A] = java.util.stream.Stream[A]
 type JFunction[A, B] = java.util.function.Function[A, B]
 type JDepSeq[A, B] = A => JList[B]
-type JDepStream[A, B] = A => java.util.stream.BaseStream[B, _]
+type JDepStream[A, B] = A => java.util.stream.BaseStream[B, ?]
+type JOption[A] = java.util.Optional[A]
 
 def defaultMsg[A](a: A) = s"Condition not met by: $a"
 
@@ -42,3 +43,11 @@ case class BasicIO[A](val thunk: () => A):
       try Right(thunk())
       catch case t: Throwable => Left(t)
     )
+
+type Result[T, E] = Either[E, T]
+type Ok[T, E]     = Right[T, E]
+type Err[T, E]    = Left[T, E]
+
+object Result:
+  def Ok[T, E](t: T): Result[T, E]   = Right(t)
+  def Err[T, E](e: E): Result[T, E]  = Left(e)

@@ -1,5 +1,6 @@
 import augmented._
 import augmented.given
+import augmented.Extensions._
 import basicdef._
 import mappable._
 import mappable.given
@@ -36,62 +37,62 @@ class FxSuite extends munit.FunSuite:
       c <- z
     yield a + b + c)
 
-    assertEquals(mult(4, 5), 20)
-    assertEquals(mult(Some(4), 5), Some(20))
-    assertEquals(mult(4, None), None)
+    assertEquals(4 * 5, 20)
+    assertEquals(Some(4) * 5, Some(20))
+    assertEquals(4 * None, None)
 
-    assertEquals(add(4, 5, 6), 15)
-    assertEquals(add(Some(4), 5, 6), Some(15))
-    assertEquals(add(Some(4), Some(5), Some(6)), Some(15))
-    assertEquals(add(4, None, 6), None)
+    assertEquals(4 + 5 + 6, 15)
+    assertEquals(Some(4) + 5 + 6, Some(15))
+    assertEquals(Some(4) + Some(5) + Some(6), Some(15))
+    assertEquals(4 + None + 6, None)
 
   test("propagate / bubble up"):
-    val x0 = mult(4, 5)
-    val y0 = add(2, x0, 3)
-    val z0 = mult(4, y0)
+    val x0 = 4 * 5
+    val y0 = 2 + x0 + 3
+    val z0 = 4 * y0
     assertEquals(z0, 100)
 
-    val x = mult(4, Some(5))
-    val y = add(2, x, 3)
-    val z = mult(4, y)
+    val x = 4 * Some(5)
+    val y = 2 + x + 3
+    val z = 4 * y
     assertEquals(z, Some(100))
     assertEquals(z.value(), 100)
 
   test("either"):
     val NaN: Either[String, Int] = Left("NaN")
 
-    assertEquals(add(4, 5, 6), 15)
-    assertEquals(add(Right(4), 5, Right(6)), Right(15))
-    assertEquals(add(5, Right(4), Right(6)), Right(15))
-    assertEquals(add(4, NaN, 6), Left("NaN"))
+    assertEquals(4 + 5 + 6, 15)
+    assertEquals(Right(4) + 5 + Right(6), Right(15))
+    assertEquals(5 + Right(4) + Right(6), Right(15))
+    assertEquals(4 + NaN + 6, Left("NaN"))
 
-    val x = mult(4, Right(5))
-    val y = add(2, x, 3)
-    val z = mult(4, y)
+    val x = 4 * Right(5)
+    val y = 2 + x + 3
+    val z = 4 * y
     assertEquals(z, Right(100))
     assertEquals(z.value(), 100)
 
   test("try"):
-    val x1 = mult(4, Try(1 / 0))
-    val y1 = add(2, x1, 3)
-    val z1 = mult(4, y1)
+    val x1 = 4 * Try(1 / 0)
+    val y1 = 2 + x1 + 3
+    val z1 = 4 * y1
     assert(z1.isFailure)
 
-    val x = mult(Success(4), 5)
-    val y = add(2, x, 3)
-    val z = mult(4, y)
+    val x = Success(4) * 5
+    val y = 2 + x + 3
+    val z = 4 * y
     assertEquals(z, Success(100))
     assertEquals(z.value(), 100)
 
   test("logged"):
-    val x1 = add(Logged(4, "a"), Logged(5, "b"), Logged(6, "c"))
-    val y1 = add(4, 5, Logged(6, "c"))
-    assertEquals(x1.value(), add(4, 5, 6))
+    val x1 = Logged(4, "a") + Logged(5, "b") + Logged(6, "c")
+    val y1 = 4 + 5 + Logged(6, "c")
+    assertEquals(x1.value(), 4 + 5 + 6)
     assertEquals(y1.value(), 15)
 
-    val x = mult(4, Logged(5, "b"))
-    val y = add(2, x, 3)
-    val z = mult(4, y)
+    val x = 4 * Logged(5, "b")
+    val y = 2 + x + 3
+    val z = 4 * y
     assertEquals(z.value(), 100)
 
   def randomWait[A](a: A): A =
@@ -100,11 +101,15 @@ class FxSuite extends munit.FunSuite:
     a
 
   test("random wait"):
-    val f = augment((a: Int, b: Int, c: Int) => (a + b) / c)
+    val f = (a: Double, b: Double, c: Double) => (a + b) / c
 
-    val (x, y, z) = (5, 7, -3)
+    val (x, y, z) = (5.0, 7.0, -3.0)
+    val r1 = (randomWait(x) + randomWait(y)) / Try(randomWait(z))
+    val r2 = (randomWait(x) + Try(randomWait(y))) / randomWait(z)
+    assertEquals(r1.value(), -4.0)
+    assertEquals(r2.value(), -4.0)
 
-    f crossCheckFX (randomWait(x), randomWait(y), Try(randomWait(z)),
+    augment(f) crossCheckFX (randomWait(x), randomWait(y), Try(randomWait(z)),
     for
       a <- Try(randomWait(x))
       b <- Try(randomWait(y))
@@ -119,7 +124,8 @@ class FxSuite extends munit.FunSuite:
     val futY2 = Future(randomWait(7))
     val z2 = randomWait(8)
 
-    val f1 = add(futX2, futY2, z2)
+    val f1 = futX2 + futY2 + z2
+
     val f2 =
       for
         a <- futX1
@@ -131,11 +137,9 @@ class FxSuite extends munit.FunSuite:
     assertEquals(f1.value(), res)
 
   test("basic IO"):
-    given Effects[BasicIO] = Effects()
-
     def relDiff(a: Double, b: Double) = abs((a - b) / b)
     val res: BasicIO[Double] =
-      last(
+      sequence(
         5.0,
         Math.sqrt,
         _ + 1,
@@ -144,8 +148,8 @@ class FxSuite extends munit.FunSuite:
     def f(d: Double) = pow(d * 2 - 1, 2)
     assert(relDiff(f(res.value()), 5.0) < 0.0000000001)
 
-    val res2 =
-      last(
+    val res2: BasicIO[(Double, String)] =
+      sequenceAlt(
         (5.0, "Initial value 5, "),
         (x, s) => (Math.sqrt(x), s + "take square root, "),
         (x, s) => (x + 1, s + "add 1, "),
@@ -162,7 +166,7 @@ class FxSuite extends munit.FunSuite:
         n * 10
       )
 
-    val io1 = add(f(3), f(4), f(5))
+    val io1 = f(3) + f(4) + f(5)
     val io2 = image(f(3), f(4), f(5), _ + _ + _)
 
     val (res1, t1) = timed(io1.value())
@@ -175,49 +179,3 @@ class FxSuite extends munit.FunSuite:
     assertEquals(isParallel1, true)
     assertEquals(isParallel2, true)
 
-  test("mixed applicatives"):
-    val sOpt: Option[String] = Some("xyz")
-    val nOpt: Option[Int] = Some(3)
-    val xOpt: Option[Int] = None
-    val sFut = Future(randomWait("xyz"))
-    val nFut = Future(randomWait(3))
-    val xFut = Future.failed(new Exception("not found"))
-    val sEith: Either[String, String] = Right("xyz")
-    val nEith: Either[String, Int] = Right(3)
-    val xEith: Either[String, Int] = Left("not found")
-    val sTry: Try[String] = Success("xyz")
-    val nTry: Try[Int] = Success(3)
-    val xTry: Try[Int] = Try(1 / 0)
-
-    val resB1 = apply(sOpt, nTry, _ + "*" * _)
-    val resB2 = apply(sTry, nOpt, _ + "*" * _)
-    val resB3 = apply(sTry, nFut, _ + "*" * _)
-    val resB4 = apply(sFut, nOpt, _ + "*" * _)
-    val resB5 = apply(sFut, xOpt, _ + "*" * _)
-    val resB6 = apply(sFut, xEith, _ + "*" * _)
-
-    val f0 = (a: String, b: Int, c: Int) => a + "*" * (b + c - 3)
-    val resC1 = apply(sTry, nFut, nEith, f0)
-    val resC2 = apply(sFut, nOpt, nTry, f0)
-    val resC3 = apply(sOpt, nTry, nEith, f0)
-    val resC4 = apply(sEith, xTry, nEith, f0)
-    val resC5 = apply(sOpt, nTry, xEith, f0)
-    val resC6 = apply(sFut, nOpt, nTry, _.length + _ + _)
-
-    val res = "xyz***"
-
-    assertEquals(resB1.finalValue2(), res)
-    assertEquals(resB2.finalValue2(), res)
-    assertEquals(resB3.finalValue2(), res)
-    assertEquals(resB4.finalValue2(), res)
-    assertEquals(resB5.hasFinalValue2(), false)
-    assertEquals(resB5.value(), None)
-    assertEquals(resB6.hasFinalValue2(), false)
-    assertEquals(resB6.value(), Left("not found"))
-
-    assertEquals(resC1.finalValue(), res)
-    assertEquals(resC2.finalValue(), res)
-    assertEquals(resC3.finalValue(), res)
-    assertEquals(resC4.hasFinalValue(), false)
-    assertEquals(resC5.hasFinalValue(), false)
-    assertEquals(resC6.finalValue(), 9)

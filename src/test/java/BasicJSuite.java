@@ -1,34 +1,22 @@
 import static augmented.augmentJ.*;
-import static mappable.Mapper.*;
 import static multiarray.multiArray.*;
-import static util.JavaUtil.complement;
-import static util.JavaUtil.filter;
-import static util.JavaUtil.Pair;
-import static util.JavaUtil.stringAsIntSeq;
-import static util.JavaUtil.subArray;
-import static util.JavaUtil.toMap;
-import static util.JavaUtil.Triple;
-import static util.JavaUtil.zip;
+import static util.JavaUtil.*;
 import multiarray.ArrayB;
 import multiarray.MultiArrayB;
 
-import static java.util.stream.IntStream.range;
-import static java.util.stream.IntStream.rangeClosed;
+import static java.util.stream.IntStream.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.function.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.*;
 
-import scala.util.Try;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class BasicJSuite {
 
-  static Triple tr(Integer a, Integer b, Integer c) {
-    return new Triple(a, b, c);
+  static Triple<Integer, Integer, Integer> tr(Integer a, Integer b, Integer c) {
+    return new Triple<Integer, Integer, Integer>(a, b, c);
   }
 
   @Test
@@ -58,7 +46,6 @@ public class BasicJSuite {
   @Test
   public void basicB() {
     var mult = augment((Integer a, Integer b) -> a * b);
-    var add = augment((Integer a, Integer b, Integer c) -> a + b + c);
     var as = rangeClosed(3, 5);
     var bs = rangeClosed(7, 9);
     var res = mult.apply(as, bs);
@@ -157,7 +144,6 @@ public class BasicJSuite {
   }
 
   public static IntStream sieveA(int n) {
-    Function<Integer, Integer> sqrt = ((Integer x) -> (int) (Math.sqrt(x)));
     var mult = augment((Integer x, Integer y) -> x * y);
 
     var compositeNbs = mult.apply(rangeClosed(2, sqrt(n)), a -> rangeClosed(2, n / a));
@@ -187,9 +173,6 @@ public class BasicJSuite {
     var resA = sieveA(n).boxed().toList();
     var resB = sieveB(n).boxed().toList();
     var resC = sieveC(n).boxed().toList();
-    println("\n" + resA + "\n");
-    println(resB + "\n");
-    println(resC + "\n");
     assertEquals(resB, resA);
     assertEquals(resC, resA);
   }
@@ -239,11 +222,9 @@ public class BasicJSuite {
   public void sudoku() {
     var bn = stringAsIntSeq(board());
     var a = multiarray(rangeClosed(1, 9), rangeClosed(1, 9), bn);
-    println("\nInitial board:" + a.toString(x -> x == 0 ? "." : x.toString()) + "\n");
     var x = a.selectPairs(z -> z == 0);
     var r = sudo(a, x);
     var bds = completedBoards(a, x, r);
-    println("Completed board:\n" + bds + "\n\n");
     assertEquals(bds.size(), 1);
     assertEquals(bds.get(0).nestedAsJava(),
       List.of(
@@ -276,7 +257,7 @@ public class BasicJSuite {
 
     var r = bd.row(ij.first());
     var c = bd.col(ij.second());
-    var isInRowOrCol = r.contains(n) || c.contains(n);
+    var isInRowOrCol = seqContains(r, n) || seqContains(c, n);
     return !(isInSubSquare || isInRowOrCol);
   }
 
@@ -299,26 +280,5 @@ public class BasicJSuite {
       r -> rangeClosed(1, m).mapToObj(
         c -> mp.getOrDefault(new Pair<Integer, Integer>(r, c), 0)));
     return multiarray(rangeClosed(1, n), rangeClosed(1, n), ll);
-  }
-
-  public static <T> void printSeq(List<List<T>> seq) {
-    println(seq);
-    var res = seq.stream().map(x -> x.stream()
-      .map(y -> y.toString())
-      .collect(Collectors.joining(" ")))
-      .collect(Collectors.joining("\n"));
-    println("\n" + res + "\n\n");
-  }
-
-  public static void println() {
-    System.out.println();
-  }
-
-  public static void println(String s) {
-    System.out.println(s);
-  }
-
-  public static <A> void println(A a) {
-    System.out.println(a.toString());
   }
 }

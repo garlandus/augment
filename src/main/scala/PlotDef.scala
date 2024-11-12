@@ -22,7 +22,7 @@ case class AxisLayoutsVol(xaxis: AxisLayout, yaxis: AxisLayout, zaxis: AxisLayou
 case class RangeBreak(bounds: List[Float | String], pattern: String = "")
 case class Scene(camera: Camera = Camera())
 
-type AxisLayout = AxisLayoutBasic | AxisLayoutA | AxisLayoutB | AxisLayoutDates | AxisLayoutRange[_]
+type AxisLayout = AxisLayoutBasic | AxisLayoutA | AxisLayoutB | AxisLayoutDates | AxisLayoutRange[?]
 type AxisLayouts = AxisLayoutsFlat | AxisLayoutsVol
 
 case class ImageSpec(source: String, sizex: Float, sizey: Float)
