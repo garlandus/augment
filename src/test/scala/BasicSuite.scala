@@ -428,10 +428,10 @@ class BasicSuite extends munit.FunSuite:
       yield toTriangle(a, b, c)
 
     val trianglesB =
-      (1 to n).flatMap (
-        a => (a to n).flatMap (
-          b => getThirdLength(a, b).map (
-            c => toTriangle (a, b, c))))
+      (1 to n).flatMap(
+        a => (a to n).flatMap(
+          b => getThirdLength(a, b).map(
+            c => toTriangle(a, b, c))))
 
     val trianglesC = toTriangle(1 to n, _ to n, getThirdLength)
 
@@ -440,8 +440,8 @@ class BasicSuite extends munit.FunSuite:
     val trianglesE = sequence(
                     1 to n,
       a         =>  a to n,
-      (a, b)    =>  getThirdLength (a, b),
-      (a, b, c) =>  toTriangle (a, b, c)
+      (a, b)    =>  getThirdLength(a, b),
+      (a, b, c) =>  toTriangle(a, b, c)
     )
 
     assertEquals(trianglesA, trianglesB)

@@ -2,14 +2,11 @@
 
 ## Augmented functions
 
-
-
-
-Augmented functions are a generalization of the idea of vectorization.
+Augmenting a function means implementing "type constructor polymorphism": if its original argument types were A, B and C, it will now be applicable to arguments of type T[A, B, C], for a wide range of values of T.
 
 ## Overview
 
-[Documentation](http://computist.co/augment.html)
+The additional behavior depends on the value of T: this can go from simple vectorization (T = Vector) as found in R and MATLAB, to representating monadic chains, in other words doing the work of a for-comprehension (or nested flatMap calls), to representing "near-monadic chains" that in fact imply the use of a monad transformer.
 
 ## Quick start
 
@@ -23,16 +20,74 @@ Imports to get you started:
 ```scala
 import augmented._
 import augmented.given
+import mappable.given
+import mappablethirdparty.given   // for Cats Effect, ZIO, Guava, etc
+```
+
+If you want all (true) functions to be augmented by default:
+```scala
 import augmented.Extensions._
 ```
 
-## Examples
+(Note that Scala methods will not be affected by default. There are a number of simple ways to convert a method to a function, including assigning it to a variable, or following it with an underscore.)
 
-### Pythagorean triples
+## Why augmented function notation is often the most concise
+
+Augmented function calls can fully replace for-comprehensions, and are often more concise. To see how, let's look at the example of Pythagorean triples, starting with a for-comprehension:
 
 ```scala
-select(1 to n, _ to n, _ to n, (a, b, c) => a * a + b * b == c * c)
+case class Triangle(a: Int, b: Int, c: Int)
+val toTriangle = Triangle.apply
+
+def getThirdLength(a: Int, b: Int) = (b to n).filter(c => a * a + b * b == c * c)
+
+val trianglesA =
+  for
+    a <- 1 to n
+    b <- a to n
+    c <- getThirdLength(a, b)
+  yield toTriangle(a, b, c)
 ```
+
+(Here we've avoided the use of a separate guard, which might slightly muddy the waters.)
+
+The flatMap equivalent is then
+
+```scala
+val trianglesB =
+  (1 to n).flatMap(
+    a => (a to n).flatMap(
+      b => getThirdLength(a, b).map(
+        c => toTriangle(a, b, c))))
+```
+Now written as an augmented function call:
+
+
+```scala
+val trianglesC = toTriangle(1 to n, _ to n, getThirdLength)
+```
+
+Considerably shorter... but we can "reinflate" it to get back to something resembling both the for-comprehension and the nested flatMaps.
+We can start by using `sequence`, which will yield the value of the last element in the chain:
+
+```scala
+val trianglesD = sequence(1 to n, _ to n, getThirdLength, toTriangle)
+```
+
+We can then simply write this a bit differently, without changing its meaning at all:
+
+```scala
+val trianglesE = sequence(
+                1 to n,
+  a         =>  a to n,
+  (a, b)    =>  getThirdLength(a, b),
+  (a, b, c) =>  toTriangle(a, b, c)
+)
+```
+In doing so we see that the terms in both the for-comprehension and the nested flatMaps reappear: `1 to n`, `a to n`, `getThirdLength(a, b)` and `toTriangle(a, b, c)`. The original form had eliminated all the extras, and kept only the essential information that characterizes the chain.
+
+
+## Other Examples
 
 ### Pascal's triangle
 
@@ -46,172 +101,9 @@ binomialCoefficient(0 to n, 0 to _)
 select(1 to n, 1 to _, 1 to _)
 ```
 
+### ZIO
 
-### Permutations
-
-```scala
-def prepend[A] = augment((a: A, l: Seq[A]) => Seq(a) ++ l)
-
-def permutations[A](x: Seq[A]): Seq[Seq[A]] =
-  prepend(x, a => permutations(x -- Seq(a))) until x == Seq()
-```
-
-
-### Sieve of Erastosthenes (ish)
-
-```scala
-val mult = augment((a: Int, b: Int) => a * b)
-
-def primes(n: Int): Seq[Int] =
-  complement(mult(primes(sqrt(n)), x => x to n / x), 2 to n) until n == 1
-```
-
-### 8 queens problem
-
-```scala
-def isSafe(col: Int, queens: Seq[Int]): Boolean = ...
-
-def queens(n: Int, k: Int = 0): Seq[Seq[Int]] =
-  prepend(0 until n, queens(n, k + 1), isSafe) until k == n
-```
-
-## Applicative examples
-
-### Mixed function arguments
-```scala
-val mult = augment((a: Int, b: Int) => a * b)
-val add = augment((a: Int, b: Int, c: Int) => a + b + c)
-
-mult(4, 5)        // 20
-mult(Some(4), 5)  // Some(20)
-mult(4, None)     // None
-
-add(4, 5, 6)                    // 15
-add(4, 5, Some(6))              // Some(15)
-add(Some(4), Some(5), Some(6))  // Some(15)
-add(4, None, 6)                 // None
-```
-
-### Type propagation: "bubbling up"
-```scala
-val a = mult(4, 5)    // 20
-val b = add(2, a, 3)  // 25
-val c = mult(4, b)    // 100
-
-val n = mult(4, Success(5)) // Success(20)
-val p = add(2, n, 3)        // Success(25)
-val q = mult(4, p)          // Success(100)
-q.value()                   // 100
-
-val x = mult(4, Future(5))  // Future(<not completed>)
-val y = add(2, x, 3)        // Future(<not completed>)
-val z = mult(4, y)          // Future(<not completed>)
-z.value()                   // 100
-```
-
-## IO
-
-### Basic IO / deferred valuing
-```scala
-val nameFromIO =
-  sequence(
-    println("What is your name?"),    // ordinary println and readLine, not "lifted" versions
-    scala.io.StdIn.readLine,
-    name => { println(s"Hello, $name\n"); name }
-  )
-val name = nameFromIO.value() // name is not retrieved from command line until value() is called
-
-val ratioIO =
-  sequence(
-      5.0,
-      Math.sqrt,
-      _ + 1,
-      _ / 2.0
-  )
-val ratio = ratioIO.value() // ratio is not calculated until value() is called 
-```
-
-### IO with retries
-```scala
-val n = 
-  sequence(
-    println("Enter a number: "),
-    scala.io.StdIn.readLine,
-    _.toInt
-  )
-val p = add(4, 5, n)
-val res = mult(4, p)
-res.retry(2).value() // will ignore a duff entry or two
-```
-
-### IO with retries: Cats Effect version
-```scala
-given Effects[cats.effect.IO] = Effects()
-
-// rest of code is identical
-// res is now of type cats.effect.IO
-```
-
-### IO with retries: ZIO version
-```scala
-given Effects[zIO] = Effects()
-
-// rest of code is identical
-// res is now of type ZIO[Any, IOException, Int]
-```
-
-### Cats Effect example: sequential vs parallel
-```scala
-def f(n: Int) =
-  cats.effect.IO:
-    Thread.sleep(250)
-    n * 10
-
-// cats.effect.IO computations that produce the same result, either sequentially or in parallel
-add(f(3), f(4), f(5))                 // parallel
-image(f(3), f(4), f(5), _ + _ + _)    // parallel
-(f(3), f(4), f(5)).mapN(_ + _ + _)    // sequential
-(f(3), f(4), f(5)).parMapN(_ + _ + _) // parallel
-
-add(f(3), f(4), f(5)).value()         // 120
-```
-
-### ZIO example: reading/sending over channel
-```scala
-def readZIO[A](ch: Channel[A])        = ZIO.attempt(ch.read())
-def sendZIO[A](ch: Channel[A], a: A)  = ZIO.attempt(ch.send(a))
-
-// Notations that describe the same effect
-
-// comprehension notation
-for
-  a <- readZIO(c1)
-  b <- readZIO(c2)
-  _ <- sendZIO(c3, a + b)
-yield()
-
-// ZIO direct
-defer {
-  val a = c1.read()
-  val b = c2.read()
-  c3.send(a + b)
-}
-
-// augmented function notation
-sequence(
-  c1.read(),
-  c2.read(),
-  _ + _,
-  c3.send
-)
-
-// or equivalently:
-sequence(
-  c1.read(),
-  c2.read(),
-  (a, b) => c3.send(a + b)
-)
-```
+There are some ZIO examples (in the `examples` folder), adapted from Alvin Alexander's tutorials (https://www.learnscala.dev/challenge-page/zio-2-functional-programming-fundamentals-course), that can show you the difference in syntax for more "real-world" cases. They also illustrate how the `sequence` syntax stays almost the same between Scala and Java: it's just function application.
 
 ## From Java
 
@@ -280,6 +172,11 @@ Thread.sleep(1000);
 assertEquals(z.hasValue(), true);
 assertEquals(z.value(), (Integer) 100);
 ```
+
+### ZIO
+
+Please see the comments about ZIO examples in the Scala section, above.
+
 
 ## From Clojure
 
