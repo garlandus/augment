@@ -7,7 +7,7 @@ Augmenting a function means implementing "type constructor polymorphism": if its
 ## Overview
 
 The additional behavior depends on the value of T: this can go from simple vectorization (T = Vector) as found in R and MATLAB, to representating monadic chains, in other words doing the work of a for-comprehension (or nested flatMap calls), to representing "near-monadic chains" that in fact imply the use of a monad transformer.\
-Implements applicative/monadic ⟷ ×/Σ, originally described as rectangular/irregular [here](http://computist.co/augment.html).
+Implements applicative/monadic ⟷ $\times$/$\Sigma$, originally described as rectangular/irregular [here](http://computist.co/augment.html).
 
 ## Quick start
 
