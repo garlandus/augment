@@ -159,7 +159,7 @@ class FxSuite extends munit.FunSuite:
     assertEquals(res2.value()._2, "Initial value 5, take square root, add 1, divide by 2")
 
   test("basic IO: parallel"):
-    val delay = 25
+    val delay = 75
     def f(n: Int) =
       BasicIO(() =>
         Thread.sleep(delay)
