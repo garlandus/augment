@@ -4,6 +4,7 @@ import mappable._
 import shape._
 
 import scala.reflect.ClassTag
+import mappable.given
 
 trait ComprehensionA[F[_, _]]:
 
@@ -11,21 +12,24 @@ trait ComprehensionA[F[_, _]]:
     (as, f, g) => irregular(as, _ => true, f, g)
   def irregular[X, Z, A]: IrregComprehensionA[F, X, Z, A]
 
-  def rectDerived[T[_], X, Z, A](using Mappable[T]): RectComprehensionDerivedA[F, T, X, Z, A] =
-    def f(as: => T[A], f: => A => X, g: => X => Z)(using t: Mappable[T]) =
-      t.map(as)((a: A) => g(f(a)))
-    f
+  def rectDerived[T[_], X, Z, A](using t: Mappable[T]): RectComprehensionDerivedA[F, T, X, Z, A] =
+    (as, f, g) => t.map(as)(f andThen g)
 
 trait ComprehensionB[F[_, _, _]]:
 
   def rectangular[X, Z, A, B](using ClassTag[Z]): RectComprehensionB[F, X, Z, A, B] =
-    (as, bs, f, g) => irregular(as, (a: A) => bs, f, g)
+    (as, bs, f, g) => irregular(as, _ => bs, f, g)
   def irregular[X, Z, A, B]: IrregComprehensionB[F, X, Z, A, B]
 
-  def rectDerived[T[_], X, Z, A, B](using Mappable[T]): RectComprehensionDerivedB[F, T, X, Z, A, B] =
-    def f(as: => T[A], bs: => T[B], f: => (A, B) => X, g: => X => Z)(using t: Mappable[T]) =
-      t.product(as, bs).map((a, b) => g(f(a, b)))
-    f
+  def rectDerived[T[_], X, Z, A, B](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedB[F, T, X, Z, A, B] =
+    (as, bs, f, g) => (as ⨉ bs).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedB[F, T, X, Z, A, B] =
+    (as, bs, f, g) => (as ⨉ bs).map(f.tupled andThen g)
 
   def rectDerivedMultiple[T[_]: Mappable, U[_]: Mappable, X, Z, A, B](as: T[A], bs: U[B], f: (A, B) => X) =
     () =>
@@ -33,28 +37,18 @@ trait ComprehensionB[F[_, _, _]]:
         bs.map: b =>
           f(a, b)
 
-  def irregularDerived[T[_], X, Z, A, B](using Mappable[T]): IrregComprehensionDerivedB[F, T, X, Z, A, B] =
-    def f(as: T[A], bsDep: DepTB[T, A, B], f: (A, B) => X, g: X => Z)(using
-        t: Mappable[T]
-    ) =
-      as.flatMap: a =>
-        bsDep(a).map: b =>
-          g(f(a, b))
-    f
-
 trait ComprehensionC[F[_, _, _, _]]:
 
   def rectangular[X, Z, A, B, C](using ClassTag[Z]): RectComprehensionC[F, X, Z, A, B, C] =
-    (as, bs, cs, f, g) =>
-      val bsDep = (a: A) => bs
-      val csDep = (a: A, b: B) => cs
-      irregular(as, bsDep, csDep, f, g)
+    (as, bs, cs, f, g) => irregular(as, _ => bs, (_, _) => cs, f, g)
+
   def irregular[X, Z, A, B, C]: IrregComprehensionC[F, X, Z, A, B, C]
 
-  def rectDerived[T[_], X, Z, A, B, C](using Mappable[T]): RectComprehensionDerivedC[F, T, X, Z, A, B, C] =
-    def f(as: => T[A], bs: => T[B], cs: => T[C], f: => (A, B, C) => X, g: => X => Z)(using t: Mappable[T]) =
-      t.product(as, bs, cs).map((a, b, c) => g(f(a, b, c)))
-    f
+  def rectDerived[T[_], X, Z, A, B, C](using t: Mappable[T]): RectComprehensionDerivedC[F, T, X, Z, A, B, C] =
+    (as, bs, cs, f, g) => (as ⨉ bs ⨉ cs).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B, C](using t: Mappable[T]): IrregComprehensionDerivedC[F, T, X, Z, A, B, C] =
+    (as, bs, cs, f, g) => (as ⨉ bs ⨉ cs).map(f.tupled andThen g)
 
   def rectDerivedMultiple[T[_]: Mappable, U[_]: Mappable, V[_]: Mappable, X, Z, A, B, C](
       as: T[A],
@@ -68,198 +62,84 @@ trait ComprehensionC[F[_, _, _, _]]:
           cs.map: c =>
             f(a, b, c)
 
-  def irregularDerived[T[_], X, Z, A, B, C](using Mappable[T]): IrregComprehensionDerivedC[F, T, X, Z, A, B, C] =
-    def f(as: T[A], bsDep: DepTB[T, A, B], csDep: DepTC[T, A, B, C], f: (A, B, C) => X, g: X => Z)(using
-        t: Mappable[T]
-    ) =
-      as.flatMap: a =>
-        bsDep(a).flatMap: b =>
-          csDep(a, b).map: c =>
-            g(f(a, b, c))
-    f
-
 trait ComprehensionD[F[_, _, _, _, _]]:
 
   def rectangular[X, Z, A, B, C, D](using ClassTag[Z]): RectComprehensionD[F, X, Z, A, B, C, D] =
-    (as, bs, cs, ds, f, g) =>
-      val bsDep = (a: A) => bs
-      val csDep = (a: A, b: B) => cs
-      val dsDep = (a: A, b: B, c: C) => ds
-      irregular(as, bsDep, csDep, dsDep, f, g)
+    (as, bs, cs, ds, f, g) => irregular(as, _ => bs, (_, _) => cs, (_, _, _) => ds, f, g)
 
   def irregular[X, Z, A, B, C, D]: IrregComprehensionD[F, X, Z, A, B, C, D]
 
-  def rectDerived[T[_], X, Z, A, B, C, D](using Mappable[T]): RectComprehensionDerivedD[F, T, X, Z, A, B, C, D] =
-    def f(as: => T[A], bs: => T[B], cs: => T[C], ds: => T[D], f: => (A, B, C, D) => X, g: => X => Z)(using
-        t: Mappable[T]
-    ) =
-      t.product(as, bs, cs, ds).map((a, b, c, d) => g(f(a, b, c, d)))
-    f
+  def rectDerived[T[_], X, Z, A, B, C, D](using t: Mappable[T]): RectComprehensionDerivedD[F, T, X, Z, A, B, C, D] =
+    (as, bs, cs, ds, f, g) => (as ⨉ bs ⨉ cs ⨉ ds).map(f.tupled andThen g)
 
-  def irregularDerived[T[_], X, Z, A, B, C, D](using Mappable[T]): IrregComprehensionDerivedD[F, T, X, Z, A, B, C, D] =
-    def f(
-        as: T[A],
-        bsDep: DepTB[T, A, B],
-        csDep: DepTC[T, A, B, C],
-        dsDep: DepTD[T, A, B, C, D],
-        f: (A, B, C, D) => X,
-        g: X => Z
-    )(using t: Mappable[T]) =
-      as.flatMap: a =>
-        bsDep(a).flatMap: b =>
-          csDep(a, b).flatMap: c =>
-            dsDep(a, b, c).map: d =>
-              g(f(a, b, c, d))
-    f
+  def irregularDerived[T[_], X, Z, A, B, C, D](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedD[F, T, X, Z, A, B, C, D] =
+    (as, bs, cs, ds, f, g) => (as ⨉ bs ⨉ cs ⨉ ds).map(f.tupled andThen g)
 
 trait ComprehensionE[F[_, _, _, _, _, _]]:
 
   def rectangular[X, Z, A, B, C, D, E](using ClassTag[Z]): RectComprehensionE[F, X, Z, A, B, C, D, E] =
-    (as, bs, cs, ds, es, f, g) =>
-      val bsDep = (a: A) => bs
-      val csDep = (a: A, b: B) => cs
-      val dsDep = (a: A, b: B, c: C) => ds
-      val esDep = (a: A, b: B, c: C, d: D) => es
-      irregular(as, bsDep, csDep, dsDep, esDep, f, g)
+    (as, bs, cs, ds, es, f, g) => irregular(as, _ => bs, (_, _) => cs, (_, _, _) => ds, (_, _, _, _) => es, f, g)
 
   def irregular[X, Z, A, B, C, D, E]: IrregComprehensionE[F, X, Z, A, B, C, D, E]
 
-  def rectDerived[T[_], X, Z, A, B, C, D, E](using Mappable[T]): RectComprehensionDerivedE[F, T, X, Z, A, B, C, D, E] =
-    def f(as: => T[A], bs: => T[B], cs: => T[C], ds: => T[D], es: => T[E], f: => (A, B, C, D, E) => X, g: => X => Z)(
-        using t: Mappable[T]
-    ) =
-      t.product(as, bs, cs, ds, es).map((a, b, c, d, e) => g(f(a, b, c, d, e)))
-    f
+  def rectDerived[T[_], X, Z, A, B, C, D, E](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedE[F, T, X, Z, A, B, C, D, E] =
+    (as, bs, cs, ds, es, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es).map(f.tupled andThen g)
 
   def irregularDerived[T[_], X, Z, A, B, C, D, E](using
-      Mappable[T]
+      t: Mappable[T]
   ): IrregComprehensionDerivedE[F, T, X, Z, A, B, C, D, E] =
-    def f(
-        as: T[A],
-        bsDep: DepTB[T, A, B],
-        csDep: DepTC[T, A, B, C],
-        dsDep: DepTD[T, A, B, C, D],
-        esDep: DepTE[T, A, B, C, D, E],
-        f: (A, B, C, D, E) => X,
-        g: X => Z
-    )(using t: Mappable[T]) =
-      as.flatMap: a =>
-        bsDep(a).flatMap: b =>
-          csDep(a, b).flatMap: c =>
-            dsDep(a, b, c).flatMap: d =>
-              esDep(a, b, c, d).map: e =>
-                g(f(a, b, c, d, e))
-    f
+    (as, bs, cs, ds, es, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es).map(f.tupled andThen g)
 
 trait ComprehensionF[FF[_, _, _, _, _, _, _]]:
 
   def rectangular[X, Z, A, B, C, D, E, F](using ClassTag[Z]): RectComprehensionF[FF, X, Z, A, B, C, D, E, F] =
     (as, bs, cs, ds, es, fs, f, g) =>
-      val bsDep = (a: A) => bs
-      val csDep = (a: A, b: B) => cs
-      val dsDep = (a: A, b: B, c: C) => ds
-      val esDep = (a: A, b: B, c: C, d: D) => es
-      val fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
-      irregular(as, bsDep, csDep, dsDep, esDep, fsDep, f, g)
+      irregular(as, _ => bs, (_, _) => cs, (_, _, _) => ds, (_, _, _, _) => es, (_, _, _, _, _) => fs, f, g)
 
   def irregular[X, Z, A, B, C, D, E, F]: IrregComprehensionF[FF, X, Z, A, B, C, D, E, F]
 
   def rectDerived[T[_], X, Z, A, B, C, D, E, F](using
-      Mappable[T]
+      t: Mappable[T]
   ): RectComprehensionDerivedF[FF, T, X, Z, A, B, C, D, E, F] =
-    def f(
-        as: => T[A],
-        bs: => T[B],
-        cs: => T[C],
-        ds: => T[D],
-        es: => T[E],
-        fs: => T[F],
-        f: => (A, B, C, D, E, F) => X,
-        g: => X => Z
-    )(using
-        t: Mappable[T]
-    ) =
-      t.product(as, bs, cs, ds, es, fs).map((a, b, c, d, e, f0) => g(f(a, b, c, d, e, f0)))
-    f
+    (as, bs, cs, ds, es, fs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs).map(f.tupled andThen g)
 
   def irregularDerived[T[_], X, Z, A, B, C, D, E, F](using
-      Mappable[T]
+      t: Mappable[T]
   ): IrregComprehensionDerivedF[FF, T, X, Z, A, B, C, D, E, F] =
-    def f(
-        as: T[A],
-        bsDep: DepTB[T, A, B],
-        csDep: DepTC[T, A, B, C],
-        dsDep: DepTD[T, A, B, C, D],
-        esDep: DepTE[T, A, B, C, D, E],
-        fsDep: DepTF[T, A, B, C, D, E, F],
-        f: (A, B, C, D, E, F) => X,
-        g: X => Z
-    )(using t: Mappable[T]) =
-      as.flatMap: a =>
-        bsDep(a).flatMap: b =>
-          csDep(a, b).flatMap: c =>
-            dsDep(a, b, c).flatMap: d =>
-              esDep(a, b, c, d).flatMap: e =>
-                fsDep(a, b, c, d, e).map: f0 =>
-                  g(f(a, b, c, d, e, f0))
-    f
+    (as, bs, cs, ds, es, fs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs).map(f.tupled andThen g)
 
 trait ComprehensionG[FF[_, _, _, _, _, _, _, _]]:
 
   def rectangular[X, Z, A, B, C, D, E, F, G](using ClassTag[Z]): RectComprehensionG[FF, X, Z, A, B, C, D, E, F, G] =
     (as, bs, cs, ds, es, fs, gs, f, g) =>
-      val bsDep = (a: A) => bs
-      val csDep = (a: A, b: B) => cs
-      val dsDep = (a: A, b: B, c: C) => ds
-      val esDep = (a: A, b: B, c: C, d: D) => es
-      val fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
-      val gsDep = (a: A, b: B, c: C, d: D, e: E, f0: F) => gs
-      irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, f, g)
+      irregular(
+        as,
+        _ => bs,
+        (_, _) => cs,
+        (_, _, _) => ds,
+        (_, _, _, _) => es,
+        (_, _, _, _, _) => fs,
+        (_, _, _, _, _, _) => gs,
+        f,
+        g
+      )
 
   def irregular[X, Z, A, B, C, D, E, F, G]: IrregComprehensionG[FF, X, Z, A, B, C, D, E, F, G]
 
   def rectDerived[T[_], X, Z, A, B, C, D, E, F, G](using
-      Mappable[T]
+      t: Mappable[T]
   ): RectComprehensionDerivedG[FF, T, X, Z, A, B, C, D, E, F, G] =
-    def f(
-        as: => T[A],
-        bs: => T[B],
-        cs: => T[C],
-        ds: => T[D],
-        es: => T[E],
-        fs: => T[F],
-        gs: => T[G],
-        f: => (A, B, C, D, E, F, G) => X,
-        g: => X => Z
-    )(using
-        t: Mappable[T]
-    ) =
-      t.product(as, bs, cs, ds, es, fs, gs).map((a, b, c, d, e, f0, g0) => g(f(a, b, c, d, e, f0, g0)))
-    f
+    (as, bs, cs, ds, es, fs, gs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs).map(f.tupled andThen g)
 
   def irregularDerived[T[_], X, Z, A, B, C, D, E, F, G](using
-      Mappable[T]
+      t: Mappable[T]
   ): IrregComprehensionDerivedG[FF, T, X, Z, A, B, C, D, E, F, G] =
-    def f(
-        as: T[A],
-        bsDep: DepTB[T, A, B],
-        csDep: DepTC[T, A, B, C],
-        dsDep: DepTD[T, A, B, C, D],
-        esDep: DepTE[T, A, B, C, D, E],
-        fsDep: DepTF[T, A, B, C, D, E, F],
-        gsDep: DepTG[T, A, B, C, D, E, F, G],
-        f: (A, B, C, D, E, F, G) => X,
-        g: X => Z
-    )(using t: Mappable[T]) =
-      as.flatMap: a =>
-        bsDep(a).flatMap: b =>
-          csDep(a, b).flatMap: c =>
-            dsDep(a, b, c).flatMap: d =>
-              esDep(a, b, c, d).flatMap: e =>
-                fsDep(a, b, c, d, e).flatMap: f0 =>
-                  gsDep(a, b, c, d, e, f0).map: g0 =>
-                    g(f(a, b, c, d, e, f0, g0))
-    f
+    (as, bs, cs, ds, es, fs, gs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs).map(f.tupled andThen g)
+
 type RectComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => X, X => Z) => F[Z, A]
 type IrregComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => Boolean, A => X, X => Z) => F[Z, A]
 
@@ -419,3 +299,27 @@ object ComprehensionShapes:
       cy: ComprehensionE[S]
   ): ComprehensionsE[R, S] =
     ComprehensionsE(cx, cy)
+
+def mapOverContext[T[_]: Mappable, A, Z](context: T[A], f: A => Z) =
+  context.map(f)
+
+def mapOverContext[T[_]: Mappable, A, B, Z](context: T[(A, B)], f: (A, B) => Z) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, Z](context: T[(A, B, C)], f: (A, B, C) => Z) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, Z](context: T[(A, B, C, D)], f: (A, B, C, D) => Z) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, Z](context: T[(A, B, C, D, E)], f: (A, B, C, D, E) => Z) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, Z](context: T[(A, B, C, D, E, F)], f: (A, B, C, D, E, F) => Z) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, Z](
+    context: T[(A, B, C, D, E, F, G)],
+    f: (A, B, C, D, E, F, G) => Z
+) =
+  context.map(f.tupled)

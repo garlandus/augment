@@ -51,12 +51,10 @@ trait AugmentedFnA[Z, A, R[_, _], S[_, _]](using ComprehensionA[R], Comprehensio
     applyRectangular(toDerived(as, m.isDelayed))
 
   infix def applyRectangular[T[_]: Mappable](as: => T[A]): T[Z] =
-    val v = baseShape(as, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as, f)
 
   def apply[T[_]: Mappable](as: => T[A]) =
-    val v = baseShape(as, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as, f)
 
   def apply(as: JList[A]): R[Z, A] =
     val as1 = as.asScala.toList
@@ -155,8 +153,7 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
     apply(as, a => bs.filter(phi(a, _)))
 
   infix def applyRectangular[T[_]: Mappable](as: => T[A], bs: => T[B]): T[Z] =
-    val v = baseShape(as, bs, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs, f)
 
   /** This is equivalent to:
    *    for
@@ -166,8 +163,7 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
    *      f(a, b)
    */
   infix def applyStandardForm[T[_]: Mappable](as: T[A], bs: DepTB[T, A, B]) =
-    val v = VariantIrregDerivedB[T, Z, A, B, R, S](as, bs, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs, f)
 
   infix def applyMixedRect[T[_]](as: => Mixed[A, T], bs: => Mixed[B, T])(using
       m: Mappable[T],
@@ -177,7 +173,7 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
       pb: Plain[B],
       pz: Plain[Z]
   ): T[Z] =
-    applyRectangular(toDerived(as, m.isDelayed), toDerived(bs, m.isDelayed))
+    mapOverContext(toDerived(as, m.isDelayed) ⨉ toDerived(bs, m.isDelayed), f)
 
   infix def applyMixed[T[_]](
       as: => Mixed[A, T],
@@ -190,7 +186,7 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
       pb: Plain[B],
       pz: Plain[Z]
   ): T[Z] =
-    applyStandardForm(toDerived(as, m.isDelayed), a => toDerived(bs(a), m.isDelayed))
+    mapOverContext(toDerived(as, m.isDelayed) ⨉ ((a: A) => toDerived(bs(a), m.isDelayed)), f)
 
   def apply[T[_]: Mappable](as: => Mixed[A, T], bs: => Mixed[B, T], z: Boolean = true)(using
       ta: ClassTag[A],
@@ -269,7 +265,7 @@ trait AugmentedFnB[Z, A, B, R[_, _, _], S[_, _, _]](using cx: ComprehensionB[R],
   infix def crossCheck(as: Seq[A], bs: Seq[B], g: (Seq[A], Seq[B]) => Seq[Z]): (Seq[Z], Seq[Z]) =
     crossCheck(g, as, bs)
 
-  infix def crossCheck(as: Seq[A], bs: DepSeqB[A, B], g: (Seq[A], DepSeqB[A, B]) => Seq[Z]): Unit =
+  infix def crossCheck(as: Seq[A], bs: DepSeqB[A, B], g: (Seq[A], DepSeqB[A, B]) => Seq[Z]) =
     val (r, t) = timed(g(as, bs))
     val vf = AugmentB[SeqB, SeqB]()(as, bs, f)
     val (rf, tf) = timed(vf.irregComprehension[Z](id))
@@ -385,8 +381,7 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cx: Comprehen
     applyStandardForm(a.unit(), bs(_).unit(), cs(_, _).unit())
 
   infix def applyRectangular[T[_]: Mappable](as: => T[A], bs: => T[B], cs: => T[C]) =
-    val v = baseShape(as, bs, cs, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs, f)
 
   /** This is equivalent to:
    *    for
@@ -397,8 +392,7 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cx: Comprehen
    *      f(a, b, c)
    */
   infix def applyStandardForm[T[_]: Mappable](as: T[A], bs: DepTB[T, A, B], cs: DepTC[T, A, B, C]) =
-    val v = VariantIrregDerivedC[T, Z, A, B, C, R, S](as, bs, cs, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs, f)
 
   /** The "threaded" form is equivalent to:
    *    for
@@ -421,7 +415,7 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cx: Comprehen
       pc: Plain[C],
       pz: Plain[Z]
   ) =
-    applyRectangular(toDerived(as, m.isDelayed), toDerived(bs, m.isDelayed), toDerived(cs, m.isDelayed))
+    mapOverContext(toDerived(as, m.isDelayed) ⨉ toDerived(bs, m.isDelayed) ⨉ toDerived(cs, m.isDelayed), f)
 
   infix def applyMixed[T[_]](as: => Mixed[A, T], bs: A => Mixed[B, T], cs: (A, B) => Mixed[C, T])(using
       m: Mappable[T],
@@ -433,7 +427,11 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cx: Comprehen
       pc: Plain[C],
       pz: Plain[Z]
   ) =
-    applyStandardForm(toDerived(as, m.isDelayed), a => toDerived(bs(a), m.isDelayed), (a, b) => toDerived(cs(a, b), m.isDelayed))
+    applyStandardForm(
+      toDerived(as, m.isDelayed),
+      a => toDerived(bs(a), m.isDelayed),
+      (a, b) => toDerived(cs(a, b), m.isDelayed)
+    )
 
   def apply[T[_]: Mappable](as: => T[A], bs: => T[B], cs: => T[C]) =
     applyRectangular(as, bs, cs)
@@ -453,7 +451,7 @@ trait AugmentedFnC[Z, A, B, C, R[_, _, _, _], S[_, _, _, _]](using cx: Comprehen
     applyStandardForm(as, _ => bs, (_, b) => cs(b))
 
   def apply[T[_]: Mappable](as: T[A], bs: DepTB[T, A, B], cs: DepTC[T, A, B, C]) =
-    applyStandardForm(as, bs, cs)
+    mapOverContext(as ⨉ bs ⨉ cs, f)
 
   def apply(as: MappableT[A], b: B, c: C) = as.getFnValueC1(f, b, c)
   def apply(a: A, bs: MappableT[B], c: C) = bs.getFnValueC2(f, a, c)
@@ -591,8 +589,7 @@ trait AugmentedFnD[Z, A, B, C, D, R[_, _, _, _, _], S[_, _, _, _, _]](using
     applyStandardForm(a.unit(), bs(_).unit(), cs(_, _).unit(), ds(_, _, _).unit())
 
   infix def applyRectangular[T[_]: Mappable](as: T[A], bs: T[B], cs: T[C], ds: T[D]) =
-    val v = baseShape(as, bs, cs, ds, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds, f)
 
   /** This is equivalent to:
    *    for
@@ -609,8 +606,7 @@ trait AugmentedFnD[Z, A, B, C, D, R[_, _, _, _, _], S[_, _, _, _, _]](using
       cs: DepTC[T, A, B, C],
       ds: DepTD[T, A, B, C, D]
   ) =
-    val v = VariantIrregDerivedD[T, Z, A, B, C, D, R, S](as, bs, cs, ds, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds, f)
 
   /** The "threaded" form is equivalent to:
    *    for
@@ -694,8 +690,7 @@ trait AugmentedFnE[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]](u
     applyStandardForm(a.unit(), bs(_).unit(), cs(_, _).unit(), ds(_, _, _).unit(), es(_, _, _, _).unit())
 
   infix def applyRectangular[T[_]: Mappable](as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E]) =
-    val v = baseShape(as, bs, cs, ds, es, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es, f)
 
   /** This is equivalent to:
    *    for
@@ -714,8 +709,7 @@ trait AugmentedFnE[Z, A, B, C, D, E, R[_, _, _, _, _, _], S[_, _, _, _, _, _]](u
       ds: DepTD[T, A, B, C, D],
       es: DepTE[T, A, B, C, D, E]
   ) =
-    val v = VariantIrregDerivedE[T, Z, A, B, C, D, E, R, S](as, bs, cs, ds, es, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es, f)
 
   /** The "threaded" form is equivalent to:
    *    for
@@ -810,8 +804,7 @@ trait AugmentedFnF[Z, A, B, C, D, E, F, R[_, _, _, _, _, _, _], S[_, _, _, _, _,
     )
 
   infix def applyRectangular[T[_]: Mappable](as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E], fs: T[F]) =
-    val v = baseShape(as, bs, cs, ds, es, fs, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs, f)
 
   /** This is equivalent to:
    *    for
@@ -832,8 +825,7 @@ trait AugmentedFnF[Z, A, B, C, D, E, F, R[_, _, _, _, _, _, _], S[_, _, _, _, _,
       es: DepTE[T, A, B, C, D, E],
       fs: DepTF[T, A, B, C, D, E, F]
   ) =
-    val v = VariantIrregDerivedF[T, Z, A, B, C, D, E, F, R, S](as, bs, cs, ds, es, fs, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs, f)
 
   /** The "threaded" form is equivalent to:
    *    for
@@ -941,8 +933,7 @@ trait AugmentedFnG[Z, A, B, C, D, E, F, G, R[_, _, _, _, _, _, _, _], S[_, _, _,
     )
 
   infix def applyRectangular[T[_]: Mappable](as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E], fs: T[F], gs: T[G]) =
-    val v = baseShape(as, bs, cs, ds, es, fs, gs, f)
-    v.rectComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs, f)
 
   /** This is equivalent to:
    *    for
@@ -965,8 +956,7 @@ trait AugmentedFnG[Z, A, B, C, D, E, F, G, R[_, _, _, _, _, _, _, _], S[_, _, _,
       fs: DepTF[T, A, B, C, D, E, F],
       gs: DepTG[T, A, B, C, D, E, F, G]
   ) =
-    val v = VariantIrregDerivedG[T, Z, A, B, C, D, E, F, G, R, S](as, bs, cs, ds, es, fs, gs, f)
-    v.irregComprehensionDerived[Z](id)
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs, f)
 
   /** The "threaded" form is equivalent to:
    *    for

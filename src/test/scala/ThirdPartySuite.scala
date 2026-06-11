@@ -12,10 +12,12 @@ import shape._
 import util._
 
 import cats.data.State._
+import cats.effect.IO
 import cats.syntax.all._
 import com.google.common.collect._
 import java.io.IOException
 import org.apache.commons.math3.util._
+import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.StdIn.readLine
@@ -76,10 +78,12 @@ class ThirdPartySuite extends munit.FunSuite:
       )
     )
 
+  val delay = 25
+
   test("ZIO basic"):
 
     def getName() =
-      Thread.sleep(25)
+      Thread.sleep(delay)
       "Fred"
     val r: ZIO[Any, IOException, String] =
       sequence(
@@ -100,7 +104,6 @@ class ThirdPartySuite extends munit.FunSuite:
     assertEquals(res1.value(), 9)
     assertEquals(res2.value(), 20)
     assertEquals(res3.value(), 26)
-
 
   test("Cats applicatives"):
     val o1 = Some(1).asInstanceOf[Option[Int]]
@@ -349,7 +352,8 @@ class ThirdPartySuite extends munit.FunSuite:
   test("Cats channel"):
     given Effects[cats.effect.IO] = Effects()
 
-    val (res1, res2): (cats.effect.IO[Unit], cats.effect.IO[Unit]) = getChannelIO()
+    val res: (cats.effect.IO[Unit], cats.effect.IO[Unit]) = getChannelIO()
+    val (res1, res2) = res
 
     initChannels(1, 9)
     catsChannel().value()
@@ -366,7 +370,8 @@ class ThirdPartySuite extends munit.FunSuite:
   test("ZIO channel"):
     given Effects[zIO] = Effects()
 
-    val (res1, res2): (zIO[Unit], zIO[Unit]) = getChannelIO()
+    val res: (zIO[Unit], zIO[Unit]) = getChannelIO()
+    val (res1, res2) = res
 
     initChannels(1, 9)
     zioChannelA().value()
@@ -385,11 +390,9 @@ class ThirdPartySuite extends munit.FunSuite:
     assertEquals(chRes1, chResZioA)
 
   test("Cats mapN / parMapN"):
-    val delay = 25
-    def f(n: Int) =
-      cats.effect.IO:
-        Thread.sleep(delay)
-        n * 10
+
+    def f(n: Int): IO[Int] =
+      IO.sleep(delay.millis).map(_ => n * 10)
 
     val io1 = f(3) + f(4) + f(5)
     val io2 = image(f(3), f(4), f(5), _ + _ + _)
@@ -417,19 +420,26 @@ class ThirdPartySuite extends munit.FunSuite:
     val n = 3
     def delayedSendToChannel(s: String, n: Int) =
       for (i <- 1 to n)
-        ch.delayedSend(s"$s$i", 25)
+        ch.delayedSend(s"$s$i", delay)
 
-    val ioCatsA = cats.effect.IO(delayedSendToChannel("A", n))
-    val ioCatsB = cats.effect.IO(delayedSendToChannel("B", n))
-    val ioCatsC = cats.effect.IO(delayedSendToChannel("C", n))
+    def delayedSendToChannelF[T[_]: Mappable](
+        s: String,
+        n: Int
+    ): T[Unit] =
+      (1 to n).foldLeft(().unit()): (acc, i) =>
+        acc.flatMap(_ => ch.delayedSendF[T](s"$s$i", delay))
 
-    val zioA = ZIO.attempt(delayedSendToChannel("A", n))
-    val zioB = ZIO.attempt(delayedSendToChannel("B", n))
-    val zioC = ZIO.attempt(delayedSendToChannel("C", n))
+    val ioCatsA = delayedSendToChannelF[cats.effect.IO]("A", n)
+    val ioCatsB = delayedSendToChannelF[cats.effect.IO]("B", n)
+    val ioCatsC = delayedSendToChannelF[cats.effect.IO]("C", n)
 
-    val ioBasicA = BasicIO(() => delayedSendToChannel("A", n))
-    val ioBasicB = BasicIO(() => delayedSendToChannel("B", n))
-    val ioBasicC = BasicIO(() => delayedSendToChannel("C", n))
+    val zioA = delayedSendToChannelF[zIO]("A", n)
+    val zioB = delayedSendToChannelF[zIO]("B", n)
+    val zioC = delayedSendToChannelF[zIO]("C", n)
+
+    val ioBasicA = delayedSendToChannelF[BasicIO]("A", n)
+    val ioBasicB = delayedSendToChannelF[BasicIO]("B", n)
+    val ioBasicC = delayedSendToChannelF[BasicIO]("C", n)
 
     /** Cats: sequential */
     val catsSeqIO =

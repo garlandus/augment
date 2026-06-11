@@ -1,6 +1,7 @@
 package util
 
 import basicdef._
+import mappable.Mappable
 import multiarray._
 
 import java.io.{File, FileWriter, BufferedWriter}
@@ -106,6 +107,7 @@ object StringExtensions:
 trait ChannelT[A]:
   def delayedRead(delay: Int): A
   def delayedSend(a: A, delay: Int): Unit
+  def delayedSendF[T[_]: Mappable](a: A, delay: Int): T[Unit]
   def clear(): Unit
 
 case class Channel[A](name: String, queue: ConcurrentLinkedDeque[A]) extends ChannelT[A]:
@@ -117,8 +119,14 @@ case class Channel[A](name: String, queue: ConcurrentLinkedDeque[A]) extends Cha
     queue.getLast()
   def send(a: A): Unit = delayedSend(a, 0)
   def delayedSend(a: A, delay: Int = defaultDelay): Unit =
-    Thread.sleep(delay)
+    Thread.sleep(delay.toLong)
     queue.add(a)
+    ()
+  def delayedSendF[T[_]](a: A, delay: Int = defaultDelay)(using T: Mappable[T]): T[Unit] =
+    T.sleepMillis(delay)
+      .map: _ =>
+        queue.add(a)
+        ()
   def contents =
     queue.toArray.toList.asInstanceOf[List[A]]
   def clear(): Unit =

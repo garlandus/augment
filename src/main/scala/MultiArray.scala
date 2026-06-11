@@ -14,7 +14,7 @@ import java.util.stream.BaseStream
 
 case class MultiArrayA[X, A](as: Seq[A], arr: Array[X])(using ClassTag[X]) extends MultiArrayT[X]:
 
-  def flat() = arr.toList  
+  def flat() = arr.toList
   def axes = List(as)
   val length = as.length
   val axisLengths = List(1)
@@ -169,7 +169,8 @@ object multiArray:
     val ys = (na.arr zip nb.arr).map(_ + _)
     multiArray(na.as, na.bs, ys)
 
-trait ArrayB[X](val arr: Array[X]):
+trait ArrayB[X]:
+  val arr: Array[X]
   def length: Int = 0
 
 def getIndex(subIndexes: Seq[Int], axisLengths: Seq[Int], l: Int, coords: Seq[Any]) =
@@ -219,8 +220,8 @@ def checkedMultiArray[X, A, B, C, D, E](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: 
   checkInputDim(as, bs, cs, ds, es, xs)
   MultiArrayE(as, bs, cs, ds, es, xs)
 
-case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[X])(using ClassTag[X])
-    extends ArrayB(arr)
+case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], arr: Array[X])(using ClassTag[X])
+    extends ArrayB[X]
     with MultiArrayT[X]:
 
   def this(as: Seq[A], bs: Seq[B], na: Seq[Seq[X]])(using ClassTag[X]) =
@@ -229,7 +230,7 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], override val arr: Array[
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[X]] = augment.seq(this(_, _))(as, bs)
   def nestedAsJava(): JList[JList[X]] = nested().map(_.asJava).asJava
-  
+
   def axes = List(as, bs)
   override val length = axes.map(_.length).product
   val axisLengths = List(bs.length, 1)
@@ -406,7 +407,7 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[Seq[X]]] = augment.seq(this(_, _, _))(as, bs, cs)
   def nestedAsJava(): JList[JList[JList[X]]] = nested().map(_.map(_.asJava).asJava).asJava
-  
+
   def axes = List(as, bs, cs)
   val length = axes.map(_.length).product
   val axisLengths = List(bs.length * cs.length, cs.length, 1)
@@ -528,7 +529,7 @@ case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Se
   def flat(): Seq[X] = arr.toList
   def nested(): Seq[Seq[Seq[Seq[X]]]] = augment.seq(this(_, _, _, _))(as, bs, cs, ds)
   def nestedAsJava(): JList[JList[JList[JList[X]]]] = nested().map(_.map(_.map(_.asJava).asJava).asJava).asJava
-  
+
   def axes = List(as, bs, cs, ds)
   val length = axes.map(_.length).product
   val axisLengths = getAxisLengths(axes)
@@ -670,7 +671,7 @@ case class MultiArrayE[X, A, B, C, D, E](
   def nested(): Seq[Seq[Seq[Seq[Seq[X]]]]] = augment.seq(this(_, _, _, _, _))(as, bs, cs, ds, es)
   def nestedAsJava(): JList[JList[JList[JList[JList[X]]]]] =
     nested().map(_.map(_.map(_.map(_.asJava).asJava).asJava).asJava).asJava
-  
+
   def axes = List(as, bs, cs, ds, es)
   val length = axes.map(_.length).product
   val axisLengths = getAxisLengths(axes)

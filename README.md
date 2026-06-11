@@ -1,5 +1,7 @@
 # augment
 
+![Tests](https://github.com/garlandus/augment/actions/workflows/test.yml/badge.svg)
+
 ## Augmented functions
 
 Augmenting a function means implementing "type constructor polymorphism": if its original argument types were A, B and C, it will now be applicable to arguments of type T[A, B, C], for a wide range of values of T.

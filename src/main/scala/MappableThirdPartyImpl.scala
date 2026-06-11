@@ -4,6 +4,7 @@ import comprehension._
 import mappable._
 import shape._
 
+import scala.concurrent.duration.*
 import scala.reflect.ClassTag
 import scala.util.Try
 import cats.data._
@@ -17,6 +18,10 @@ import zio.{ZIO, Console}
 
 /** Cats Effect */
 
+trait HasCatsProduct[T[_]: cats.Semigroupal] extends Mappable[T]:
+  def product[A, B](as: T[A], bs: T[B]): T[(A, B)] =
+    cats.Semigroupal[T].product(as, bs)
+
 given Mappable[cats.effect.IO] with
   import cats.effect.unsafe.implicits.global
   extension [A](a: => A) def unit(): IO[A] = IO.delay(a)
@@ -27,16 +32,17 @@ given Mappable[cats.effect.IO] with
       as.attempt.unsafeRunSync()
     def map[B](f: A => B): IO[B] = as.map(f)
     def flatMap[B](f: A => IO[B]): IO[B] = as.flatMap(f)
-  override def product[A, B](as: IO[A], bs: IO[B]): IO[(A, B)] =
+  def product[A, B](as: IO[A], bs: IO[B]): IO[(A, B)] =
     (as, bs).parMapN((_, _))
-  override def product[A, B, C](as: IO[A], bs: IO[B], cs: IO[C]): IO[(A, B, C)] =
+  def product[A, B, C](as: IO[A], bs: IO[B], cs: IO[C]): IO[(A, B, C)] =
     (as, bs, cs).parMapN((_, _, _))
   extension [A](as: IO[A])
     override def retry(n: Int) =
       as.handleErrorWith: e =>
         if (n > 0) then as.retry(n - 1) else IO.raiseError(e)
+  override def sleepMillis(ms: Int): IO[Unit] = IO.sleep(ms.millis)
 
-given Mappable[cats.Eval] with
+given Mappable[cats.Eval] with HasCatsProduct[cats.Eval] with
   extension [A](a: => A) def unit(): Eval[A] = a.pure[Eval]
   extension [A](as: Eval[A])
     def hasValue(): Boolean = true
@@ -47,7 +53,7 @@ given Mappable[cats.Eval] with
 
 type CatsReaderX = [F[_]] =>> [A] =>> [B] =>> cats.data.Kleisli[F, A, B]
 
-given [S]: Mappable[CatsReaderX[cats.Id][S]] with
+given [S]: Mappable[CatsReaderX[cats.Id][S]] with HasCatsProduct[CatsReaderX[cats.Id][S]] with
   override def isDelayed: Boolean = false
   extension [A](a: => A) def unit(): Reader[S, A] = Reader(s => a)
   extension [A](as: Reader[S, A])
@@ -59,7 +65,7 @@ given [S]: Mappable[CatsReaderX[cats.Id][S]] with
 
 type CatsWriterX = [L] =>> [A] =>> cats.data.Writer[L, A]
 
-given [L: cats.kernel.Monoid]: Mappable[CatsWriterX[L]] with
+given [L: cats.kernel.Monoid]: Mappable[CatsWriterX[L]] with HasCatsProduct[CatsWriterX[L]] with
   override def isDelayed: Boolean = false
   extension [A](a: => A)
     def unit(): Writer[L, A] =
@@ -71,12 +77,10 @@ given [L: cats.kernel.Monoid]: Mappable[CatsWriterX[L]] with
   extension [A](bs: Writer[L, A])
     def map[B2](f: A => B2): Writer[L, B2] = bs.map(f)
     def flatMap[B2](f: A => Writer[L, B2]): Writer[L, B2] = bs.flatMap(f)
-  override def product[A, B](as: Writer[L, A], bs: Writer[L, B]): Writer[L, (A, B)] =
-    Writer(as.run._1.combine(bs.run._1), (as.value, bs.value))
 
 type StateX = [S] =>> [A] =>> cats.data.State[S, A]
 
-given [S]: Mappable[StateX[S]] with
+given [S]: Mappable[StateX[S]] with HasCatsProduct[StateX[S]] with
   override def isDelayed: Boolean = false
   extension [A](a: => A) def unit(): State[S, A] = State((_, a))
   extension [A](as: State[S, A])
@@ -85,8 +89,6 @@ given [S]: Mappable[StateX[S]] with
     def result(): Either[Throwable, A] = Right(value())
     def map[B2](f: A => B2): State[S, B2] = as.map(f)
     def flatMap[B2](f: A => State[S, B2]): State[S, B2] = as.flatMap(f)
-  override def product[A, B](as: State[S, A], bs: State[S, B]): State[S, (A, B)] =
-    as.flatMap(a => bs.map(b => (a, b)))
 
 /** ZIO */
 
@@ -110,7 +112,7 @@ given [R, E]: Mappable[zIOX[R][E]] with
       res.toEither match
         case Right(a) => a
         case Left(e)  => throw e
-    
+
     def result(): Either[E, A] =
       val res = zio.Unsafe.unsafe(implicit u => zio.Runtime.default.unsafe.run(as.asInstanceOf[ZIO[Any, E, A]]))
       res.either.value()
@@ -123,26 +125,28 @@ given [R, E]: Mappable[zIOX[R][E]] with
 
   extension [A](as: () => ZIO[R, E, A] | A)
     override def unitFromThunk()(using ClassTag[A]): ZIO[R, E, A] =
-      val res = 
-        ZIO.attempt (
+      val res =
+        ZIO.attempt(
           as() match
             case a: A => a
             case _ =>
               val res = as().asInstanceOf[ZIO[R, E, A]].alternatives()
               res match
                 case a1: A => a1
-                case _ => throw res.asInstanceOf[Throwable] 
+                case _     => throw res.asInstanceOf[Throwable]
         )
       res.asInstanceOf[ZIO[R, E, A]]
 
   extension [A](as: ZIO[R, E, A])
     def map[B](f: A => B): ZIO[R, E, B] = as.map(f)
     def flatMap[B](f: A => ZIO[R, E, B]): ZIO[R, E, B] = as.flatMap(f)
-  override def product[A, B](as: ZIO[R, E, A], bs: ZIO[R, E, B]): ZIO[R, E, (A, B)] =
+  def product[A, B](as: ZIO[R, E, A], bs: ZIO[R, E, B]): ZIO[R, E, (A, B)] =
     as.zipPar(bs)
   extension [A](as: ZIO[R, E, A])
     override def retry(n: Int): ZIO[R, E, A] =
       as.retryN(n)
+  override def sleepMillis(ms: Int): ZIO[R, E, Unit] =
+    ZIO.sleep(zio.Duration.fromMillis(ms.toLong))
 
 /** Eitherish: collections broadly similar to Either */
 

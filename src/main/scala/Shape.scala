@@ -373,3 +373,7 @@ type NestedV[T[_], U[_], V[_]] = [Z] =>> T[U[V[Z]]]
 type NestedW[T[_], U[_], V[_], W[_]] = [Z] =>> T[U[V[W[Z]]]]
 type NestedX[T[_], U[_], V[_], W[_], X[_]] = [Z] =>> T[U[V[W[X[Z]]]]]
 
+extension [H <: Tuple, L, T[_]: Mappable](xs: T[(H, L)])
+  def flat: T[Tuple.Append[H, L]] =
+    xs.map:
+      case (h, t) => h :* t
