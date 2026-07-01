@@ -10,7 +10,7 @@ lazy val root = project
   .configs(IntegrationTest)
   .settings(
     name := "augment",
-    version := "0.0.4",
+    version := "0.0.5",
     scalaVersion := scala3Version,
 
 	  // this is largely a zero-dependency library, but for now both Cats Effect and ZIO are included to simplify usage
