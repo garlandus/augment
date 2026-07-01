@@ -12,37 +12,37 @@ import scala.annotation.targetName
 trait Applicative[T[_]] extends Mappable[T]:
   def tag: String = "Applicative"
 
-given [T[_]: Mappable as t, A, B]: Productive[T, A, B, T[B]] = t.product
-given [T[_]: Mappable as t, A, B]: Productive[T, A, B, DepTB[T, A, B]] = t.mproduct
+given [T[_], A, B](using t: Mappable[T]): Productive[T, A, B, T[B]] = t.product
+given [T[_], A, B](using t: Mappable[T]): Productive[T, A, B, DepTB[T, A, B]] = t.mproduct
 
-given [T[_]: Mappable as t, A, B, Z]: Productive[T, (A, B), Z, DepTC[T, A, B, Z]] =
+given [T[_], A, B, Z](using t: Mappable[T]): Productive[T, (A, B), Z, DepTC[T, A, B, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, Z]: Productive[T, (A, B, C), Z, DepTD[T, A, B, C, Z]] =
+given [T[_], A, B, C, Z](using t: Mappable[T]): Productive[T, (A, B, C), Z, DepTD[T, A, B, C, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, Z]: Productive[T, (A, B, C, D), Z, DepTE[T, A, B, C, D, Z]] =
+given [T[_], A, B, C, D, Z](using t: Mappable[T]): Productive[T, (A, B, C, D), Z, DepTE[T, A, B, C, D, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, Z]: Productive[T, (A, B, C, D, E), Z, DepTF[T, A, B, C, D, E, Z]] =
+given [T[_], A, B, C, D, E, Z](using t: Mappable[T]): Productive[T, (A, B, C, D, E), Z, DepTF[T, A, B, C, D, E, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, F, Z]: Productive[T, (A, B, C, D, E, F), Z, DepTG[T, A, B, C, D, E, F, Z]] =
+given [T[_], A, B, C, D, E, F, Z](using t: Mappable[T]): Productive[T, (A, B, C, D, E, F), Z, DepTG[T, A, B, C, D, E, F, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, F, G, Z]
+given [T[_], A, B, C, D, E, F, G, Z](using t: Mappable[T])
     : Productive[T, (A, B, C, D, E, F, G), Z, DepTH[T, A, B, C, D, E, F, G, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, Z]
+given [T[_], A, B, C, D, E, F, G, H, Z](using t: Mappable[T])
     : Productive[T, (A, B, C, D, E, F, G, H), Z, DepTI[T, A, B, C, D, E, F, G, H, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, I, Z]
+given [T[_], A, B, C, D, E, F, G, H, I, Z](using t: Mappable[T])
     : Productive[T, (A, B, C, D, E, F, G, H, I), Z, DepTJ[T, A, B, C, D, E, F, G, H, I, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
-given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, I, J, Z]
+given [T[_], A, B, C, D, E, F, G, H, I, J, Z](using t: Mappable[T])
     : Productive[T, (A, B, C, D, E, F, G, H, I, J), Z, DepTK[T, A, B, C, D, E, F, G, H, I, J, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 

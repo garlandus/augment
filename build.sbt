@@ -1,4 +1,4 @@
-val scala3Version = "3.9.0-RC1"
+val scala3Version = "3.3.8"
 
 lazy val FunTest = config("fun") extend(Test)
 def itFilter(name: String): Boolean = name endsWith "ITest"
@@ -10,7 +10,7 @@ lazy val root = project
   .configs(IntegrationTest)
   .settings(
     name := "augment",
-    version := "0.0.5",
+    version := "0.0.6",
     scalaVersion := scala3Version,
 
 	  // this is largely a zero-dependency library, but for now both Cats Effect and ZIO are included to simplify usage

@@ -16,7 +16,7 @@ Implements applicative/monadic ⟷ $\times$/$`\Sigma`$, originally described as 
 (For Java and Clojure, setup and examples follow further below.)\
 In Scala, you can add the following to build.sbt:
 ```scala
-libraryDependencies += "co.computist" %% "augment" % "0.0.5"
+libraryDependencies += "co.computist" %% "augment" % "0.0.6"
 ```
 
 Imports to get you started:
@@ -117,7 +117,7 @@ You can add the following to the dependencies in a *pom.xml* file:
 <dependency>
   <groupId>co.computist</groupId>
   <artifactId>augment_3</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
 </dependency>
 <dependency>
   <groupId>org.scala-lang</groupId>
@@ -187,7 +187,7 @@ Please see the comments about ZIO examples in the Scala section, above.
 
 You can add the following to the dependencies in a *project.clj* file:
 ```clojure
-[co.computist/augment_3 "0.0.5"]
+[co.computist/augment_3 "0.0.6"]
 [org.scala-lang/scala3-library_3 "3.5.2"]
 ```
 
