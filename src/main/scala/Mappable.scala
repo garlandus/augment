@@ -87,6 +87,34 @@ extension [A, B, C, D, E, F, T[_]: Mappable](xs: T[(A, B, C, D, E, F)])
   infix def ⨉[Z, Factor](ys: Factor)(using p: Productive[T, (A, B, C, D, E, F), Z, Factor]): T[(A, B, C, D, E, F, Z)] =
     p.product(xs, ys).flat
 
+extension [A, B, C, D, E, F, G, T[_]: Mappable](xs: T[(A, B, C, D, E, F, G)])
+  @targetName("productH")
+  infix def ⨉[Z, Factor](ys: Factor)(using
+      p: Productive[T, (A, B, C, D, E, F, G), Z, Factor]
+  ): T[(A, B, C, D, E, F, G, Z)] =
+    p.product(xs, ys).flat
+
+extension [A, B, C, D, E, F, G, H, T[_]: Mappable](xs: T[(A, B, C, D, E, F, G, H)])
+  @targetName("productI")
+  infix def ⨉[Z, Factor](ys: Factor)(using
+      p: Productive[T, (A, B, C, D, E, F, G, H), Z, Factor]
+  ): T[(A, B, C, D, E, F, G, H, Z)] =
+    p.product(xs, ys).flat
+
+extension [A, B, C, D, E, F, G, H, I, T[_]: Mappable](xs: T[(A, B, C, D, E, F, G, H, I)])
+  @targetName("productJ")
+  infix def ⨉[Z, Factor](ys: Factor)(using
+      p: Productive[T, (A, B, C, D, E, F, G, H, I), Z, Factor]
+  ): T[(A, B, C, D, E, F, G, H, I, Z)] =
+    p.product(xs, ys).flat
+
+extension [A, B, C, D, E, F, G, H, I, J, T[_]: Mappable](xs: T[(A, B, C, D, E, F, G, H, I, J)])
+  @targetName("productK")
+  infix def ⨉[Z, Factor](ys: Factor)(using
+      p: Productive[T, (A, B, C, D, E, F, G, H, I, J), Z, Factor]
+  ): T[(A, B, C, D, E, F, G, H, I, J, Z)] =
+    p.product(xs, ys).flat
+
 type EitherX = [E] =>> [A] =>> Either[E, A]
 type RightX = [E] =>> [A] =>> Right[E, A]
 type OptionE[E, A] = Option[A]

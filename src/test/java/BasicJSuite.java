@@ -1,4 +1,4 @@
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import static multiarray.multiArray.*;
 import static util.JavaUtil.*;
 import multiarray.ArrayB;

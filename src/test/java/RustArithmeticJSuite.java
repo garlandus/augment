@@ -1,4 +1,4 @@
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 
 import org.junit.Test;
 import static org.junit.Assert.*;

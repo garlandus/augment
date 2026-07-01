@@ -24,6 +24,10 @@ given AugmentD[MultiArrayD, SeqD] = AugmentD()
 given AugmentE[MultiArrayE, SeqE] = AugmentE()
 given AugmentF[MultiArrayF, SeqF] = AugmentF()
 given AugmentG[MultiArrayG, SeqG] = AugmentG()
+given AugmentH[MultiArrayH, SeqH] = AugmentH()
+given AugmentI[MultiArrayI, SeqI] = AugmentI()
+given AugmentJ[MultiArrayJ, SeqJ] = AugmentJ()
+given AugmentK[MultiArrayK, SeqK] = AugmentK()
 
 given Effects[BasicIO] = Effects()
 
@@ -52,6 +56,29 @@ object augment:
     (using aug: AugmentF[R, S]) = aug (f)
   def apply[Z, A, B, C, D, E, F, G, R[_, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _]]
     (f: (A, B, C, D, E, F, G) => Z) (using aug: AugmentG[R, S]) = aug (f)
+  def apply[Z, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]](
+      f: (A, B, C, D, E, F, G, H) => Z
+  )(using aug: AugmentH[R, S]) = aug(f)
+  def apply[Z, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _]](
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  )(using aug: AugmentI[R, S]) = aug(f)
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _, _]](
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  )(using aug: AugmentJ[R, S]) = aug(f)
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _
+  ]](f: (A, B, C, D, E, F, G, H, I, J, K) => Z)(using aug: AugmentK[R, S]) = aug(f)
 
   def apply[A, R[_, _], S[_, _]]                                        (f: A => Boolean)         (using aug: AugmentA[R, S]) = aug (f)
   def apply[T[_]: Applicative, Z, A, R[_, _], S[_, _]]                  (f: A => T[Z])            (using aug: AugmentA[R, S]) = aug (f)
@@ -67,6 +94,10 @@ object augment:
   infix def flat[Z, A, B, C, D, E]      (f: (A, B, C, D, E) => Z)       = AugmentE[SeqE, SeqE]() (f)
   infix def flat[Z, A, B, C, D, E, F]   (f: (A, B, C, D, E, F) => Z)    = AugmentF[SeqF, SeqF]() (f)
   infix def flat[Z, A, B, C, D, E, F, G](f: (A, B, C, D, E, F, G) => Z) = AugmentG[SeqG, SeqG]() (f)
+  infix def flat[Z, A, B, C, D, E, F, G, H]  (f: (A, B, C, D, E, F, G, H) => Z) = AugmentH[SeqH, SeqH]() (f)
+  infix def flat[Z, A, B, C, D, E, F, G, H, I]  (f: (A, B, C, D, E, F, G, H, I) => Z) = AugmentI[SeqI, SeqI]() (f)
+  infix def flat[Z, A, B, C, D, E, F, G, H, I, J]  (f: (A, B, C, D, E, F, G, H, I, J) => Z) = AugmentJ[SeqJ, SeqJ]() (f)
+  infix def flat[Z, A, B, C, D, E, F, G, H, I, J, K]  (f: (A, B, C, D, E, F, G, H, I, J, K) => Z) = AugmentK[SeqK, SeqK]() (f)
 
   /** Specifies that comprehensions should return nested sequences
    *  For instance Pascal's triangle can be given by a comprehension with
@@ -79,6 +110,10 @@ object augment:
   infix def seq[Z, A, B, C, D, E]       (f: (A, B, C, D, E) => Z)       = AugmentE[SeqNE, SeqNE]() (f)
   infix def seq[Z, A, B, C, D, E, F]    (f: (A, B, C, D, E, F) => Z)    = AugmentF[SeqNF, SeqNF]() (f)
   infix def seq[Z, A, B, C, D, E, F, G] (f: (A, B, C, D, E, F, G) => Z) = AugmentG[SeqNG, SeqNG]() (f)
+  infix def seq[Z, A, B, C, D, E, F, G, H]  (f: (A, B, C, D, E, F, G, H) => Z) = AugmentH[SeqNH, SeqNH]() (f)
+  infix def seq[Z, A, B, C, D, E, F, G, H, I]  (f: (A, B, C, D, E, F, G, H, I) => Z) = AugmentI[SeqNI, SeqNI]() (f)
+  infix def seq[Z, A, B, C, D, E, F, G, H, I, J]  (f: (A, B, C, D, E, F, G, H, I, J) => Z) = AugmentJ[SeqNJ, SeqNJ]() (f)
+  infix def seq[Z, A, B, C, D, E, F, G, H, I, J, K]  (f: (A, B, C, D, E, F, G, H, I, J, K) => Z) = AugmentK[SeqNK, SeqNK]() (f)
 
   /** Return maps in the rectangular case and sequences otherwise */
   infix def mapped[Z, A]                (f: A => Z)                     = AugmentA[MapA, SeqA]() (f)
@@ -604,6 +639,469 @@ case class AugmentG[R[_, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _]]()(usin
       f
     )
 
+case class AugmentH[R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]]()(using
+    cx: ComprehensionH[R],
+    cy: ComprehensionH[S]
+):
+  def apply[Z, A, B, C, D, E, F, G, H](f: (A, B, C, D, E, F, G, H) => Z) =
+    AugmentedFunctionH[Z, A, B, C, D, E, F, G, H, R, S](f)
+  def apply[Z, A, B, C, D, E, F, G, H](
+      f: (A, B, C, D, E, F, G, H) => Z,
+      cond: Conditions[Z, (A, B, C, D, E, F, G, H)]
+  ) =
+    AugmentedFunctionH[Z, A, B, C, D, E, F, G, H, R, S]((a, b, c, d, e, f0, g, h) =>
+      cond `exec` (f.tupled, (a, b, c, d, e, f0, g, h))
+    )
+
+  def apply[Z, A, B, C, D, E, F, G, H](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      f: (A, B, C, D, E, F, G, H) => Z
+  ) =
+    VariantRectH[Z, A, B, C, D, E, F, G, H, R, S](as, bs, cs, ds, es, fs, gs, hs, f)
+
+  def apply[Z, A, B, C, D, E, F, G, H](
+      as: Seq[A],
+      bsGen: DepSeqB[A, B],
+      csGen: DepSeqC[A, B, C],
+      dsGen: DepSeqD[A, B, C, D],
+      esGen: DepSeqE[A, B, C, D, E],
+      fsGen: DepSeqF[A, B, C, D, E, F],
+      gsGen: DepSeqG[A, B, C, D, E, F, G],
+      hsGen: DepSeqH[A, B, C, D, E, F, G, H],
+      f: (A, B, C, D, E, F, G, H) => Z
+  ) =
+    VariantIrregH[Z, A, B, C, D, E, F, G, H, R, S](as, bsGen, csGen, dsGen, esGen, fsGen, gsGen, hsGen, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H](
+      as: => T[A],
+      bs: => T[B],
+      cs: => T[C],
+      ds: => T[D],
+      es: => T[E],
+      fs: => T[F],
+      gs: => T[G],
+      hs: => T[H],
+      f: (A, B, C, D, E, F, G, H) => Z
+  )(using Mappable[T]) =
+    VariantRectDerivedH[T, Z, A, B, C, D, E, F, G, H, R, S](as, bs, cs, ds, es, fs, gs, hs, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTB[T, B, C],
+      dsDep: DepTB[T, C, D],
+      esDep: DepTB[T, D, E],
+      fsDep: DepTB[T, E, F],
+      gsDep: DepTB[T, F, G],
+      hsDep: DepTB[T, G, H],
+      f: (A, B, C, D, E, F, G, H) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedH[T, Z, A, B, C, D, E, F, G, H, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(b),
+      (a, b, c) => dsDep(c),
+      (a, b, c, d) => esDep(d),
+      (a, b, c, d, e) => fsDep(e),
+      (a, b, c, d, e, f0) => gsDep(f0),
+      (a, b, c, d, e, f0, g) => hsDep(g),
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTC[T, A, B, C],
+      dsDep: DepTD[T, A, B, C, D],
+      esDep: DepTE[T, A, B, C, D, E],
+      fsDep: DepTF[T, A, B, C, D, E, F],
+      gsDep: DepTG[T, A, B, C, D, E, F, G],
+      hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+      f: (A, B, C, D, E, F, G, H) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedH[T, Z, A, B, C, D, E, F, G, H, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(a, b),
+      (a, b, c) => dsDep(a, b, c),
+      (a, b, c, d) => esDep(a, b, c, d),
+      (a, b, c, d, e) => fsDep(a, b, c, d, e),
+      (a, b, c, d, e, f0) => gsDep(a, b, c, d, e, f0),
+      (a, b, c, d, e, f0, g) => hsDep(a, b, c, d, e, f0, g),
+      f
+    )
+
+case class AugmentI[R[_, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _]]()(using
+    cx: ComprehensionI[R],
+    cy: ComprehensionI[S]
+):
+  def apply[Z, A, B, C, D, E, F, G, H, I](f: (A, B, C, D, E, F, G, H, I) => Z) =
+    AugmentedFunctionI[Z, A, B, C, D, E, F, G, H, I, R, S](f)
+  def apply[Z, A, B, C, D, E, F, G, H, I](
+      f: (A, B, C, D, E, F, G, H, I) => Z,
+      cond: Conditions[Z, (A, B, C, D, E, F, G, H, I)]
+  ) =
+    AugmentedFunctionI[Z, A, B, C, D, E, F, G, H, I, R, S]((a, b, c, d, e, f0, g0, h, i) =>
+      cond `exec` (f.tupled, (a, b, c, d, e, f0, g0, h, i))
+    )
+
+  def apply[Z, A, B, C, D, E, F, G, H, I](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  ) =
+    VariantRectI[Z, A, B, C, D, E, F, G, H, I, R, S](as, bs, cs, ds, es, fs, gs, hs, is, f)
+
+  def apply[Z, A, B, C, D, E, F, G, H, I](
+      as: Seq[A],
+      bsDep: DepSeqB[A, B],
+      csDep: DepSeqC[A, B, C],
+      dsDep: DepSeqD[A, B, C, D],
+      esDep: DepSeqE[A, B, C, D, E],
+      fsDep: DepSeqF[A, B, C, D, E, F],
+      gsDep: DepSeqG[A, B, C, D, E, F, G],
+      hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+      isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  ) =
+    VariantIrregI[Z, A, B, C, D, E, F, G, H, I, R, S](as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I](
+      as: => T[A],
+      bs: => T[B],
+      cs: => T[C],
+      ds: => T[D],
+      es: => T[E],
+      fs: => T[F],
+      gs: => T[G],
+      hs: => T[H],
+      is: => T[I],
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  )(using Mappable[T]) =
+    VariantRectDerivedI[T, Z, A, B, C, D, E, F, G, H, I, R, S](as, bs, cs, ds, es, fs, gs, hs, is, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTB[T, B, C],
+      dsDep: DepTB[T, C, D],
+      esDep: DepTB[T, D, E],
+      fsDep: DepTB[T, E, F],
+      gsDep: DepTB[T, F, G],
+      hsDep: DepTB[T, G, H],
+      isDep: DepTB[T, H, I],
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedI[T, Z, A, B, C, D, E, F, G, H, I, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(b),
+      (a, b, c) => dsDep(c),
+      (a, b, c, d) => esDep(d),
+      (a, b, c, d, e) => fsDep(e),
+      (a, b, c, d, e, f0) => gsDep(f0),
+      (a, b, c, d, e, f0, g0) => hsDep(g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(h),
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTC[T, A, B, C],
+      dsDep: DepTD[T, A, B, C, D],
+      esDep: DepTE[T, A, B, C, D, E],
+      fsDep: DepTF[T, A, B, C, D, E, F],
+      gsDep: DepTG[T, A, B, C, D, E, F, G],
+      hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+      isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+      f: (A, B, C, D, E, F, G, H, I) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedI[T, Z, A, B, C, D, E, F, G, H, I, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(a, b),
+      (a, b, c) => dsDep(a, b, c),
+      (a, b, c, d) => esDep(a, b, c, d),
+      (a, b, c, d, e) => fsDep(a, b, c, d, e),
+      (a, b, c, d, e, f0) => gsDep(a, b, c, d, e, f0),
+      (a, b, c, d, e, f0, g0) => hsDep(a, b, c, d, e, f0, g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(a, b, c, d, e, f0, g0, h),
+      f
+    )
+
+case class AugmentJ[R[_, _, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _, _]]()(using
+    cx: ComprehensionJ[R],
+    cy: ComprehensionJ[S]
+):
+  def apply[Z, A, B, C, D, E, F, G, H, I, J](f: (A, B, C, D, E, F, G, H, I, J) => Z) =
+    AugmentedFunctionJ[Z, A, B, C, D, E, F, G, H, I, J, R, S](f)
+  def apply[Z, A, B, C, D, E, F, G, H, I, J](
+      f: (A, B, C, D, E, F, G, H, I, J) => Z,
+      cond: Conditions[Z, (A, B, C, D, E, F, G, H, I, J)]
+  ) =
+    AugmentedFunctionJ[Z, A, B, C, D, E, F, G, H, I, J, R, S]((a, b, c, d, e, f0, g0, h, i0, j) =>
+      cond `exec` (f.tupled, (a, b, c, d, e, f0, g0, h, i0, j))
+    )
+
+  def apply[Z, A, B, C, D, E, F, G, H, I, J](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J],
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  ) =
+    VariantRectJ[Z, A, B, C, D, E, F, G, H, I, J, R, S](as, bs, cs, ds, es, fs, gs, hs, is, js, f)
+
+  def apply[Z, A, B, C, D, E, F, G, H, I, J](
+      as: Seq[A],
+      bsDep: DepSeqB[A, B],
+      csDep: DepSeqC[A, B, C],
+      dsDep: DepSeqD[A, B, C, D],
+      esDep: DepSeqE[A, B, C, D, E],
+      fsDep: DepSeqF[A, B, C, D, E, F],
+      gsDep: DepSeqG[A, B, C, D, E, F, G],
+      hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+      isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+      jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  ) =
+    VariantIrregJ[Z, A, B, C, D, E, F, G, H, I, J, R, S](
+      as,
+      bsDep,
+      csDep,
+      dsDep,
+      esDep,
+      fsDep,
+      gsDep,
+      hsDep,
+      isDep,
+      jsDep,
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J](
+      as: => T[A],
+      bs: => T[B],
+      cs: => T[C],
+      ds: => T[D],
+      es: => T[E],
+      fs: => T[F],
+      gs: => T[G],
+      hs: => T[H],
+      is: => T[I],
+      js: => T[J],
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  )(using Mappable[T]) =
+    VariantRectDerivedJ[T, Z, A, B, C, D, E, F, G, H, I, J, R, S](as, bs, cs, ds, es, fs, gs, hs, is, js, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTB[T, B, C],
+      dsDep: DepTB[T, C, D],
+      esDep: DepTB[T, D, E],
+      fsDep: DepTB[T, E, F],
+      gsDep: DepTB[T, F, G],
+      hsDep: DepTB[T, G, H],
+      isDep: DepTB[T, H, I],
+      jsDep: DepTB[T, I, J],
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedJ[T, Z, A, B, C, D, E, F, G, H, I, J, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(b),
+      (a, b, c) => dsDep(c),
+      (a, b, c, d) => esDep(d),
+      (a, b, c, d, e) => fsDep(e),
+      (a, b, c, d, e, f0) => gsDep(f0),
+      (a, b, c, d, e, f0, g0) => hsDep(g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(h),
+      (a, b, c, d, e, f0, g0, h, i0) => jsDep(i0),
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTC[T, A, B, C],
+      dsDep: DepTD[T, A, B, C, D],
+      esDep: DepTE[T, A, B, C, D, E],
+      fsDep: DepTF[T, A, B, C, D, E, F],
+      gsDep: DepTG[T, A, B, C, D, E, F, G],
+      hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+      isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+      jsDep: DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+      f: (A, B, C, D, E, F, G, H, I, J) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedJ[T, Z, A, B, C, D, E, F, G, H, I, J, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(a, b),
+      (a, b, c) => dsDep(a, b, c),
+      (a, b, c, d) => esDep(a, b, c, d),
+      (a, b, c, d, e) => fsDep(a, b, c, d, e),
+      (a, b, c, d, e, f0) => gsDep(a, b, c, d, e, f0),
+      (a, b, c, d, e, f0, g0) => hsDep(a, b, c, d, e, f0, g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(a, b, c, d, e, f0, g0, h),
+      (a, b, c, d, e, f0, g0, h, i0) => jsDep(a, b, c, d, e, f0, g0, h, i0),
+      f
+    )
+
+case class AugmentK[R[_, _, _, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _, _, _]]()(using
+    cx: ComprehensionK[R],
+    cy: ComprehensionK[S]
+):
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, K](f: (A, B, C, D, E, F, G, H, I, J, K) => Z) =
+    AugmentedFunctionK[Z, A, B, C, D, E, F, G, H, I, J, K, R, S](f)
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, K](
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z,
+      cond: Conditions[Z, (A, B, C, D, E, F, G, H, I, J, K)]
+  ) =
+    AugmentedFunctionK[Z, A, B, C, D, E, F, G, H, I, J, K, R, S]((a, b, c, d, e, f0, g0, h, i0, j, k) =>
+      cond `exec` (f.tupled, (a, b, c, d, e, f0, g0, h, i0, j, k))
+    )
+
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, K](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J],
+      ks: Seq[K],
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  ) =
+    VariantRectK[Z, A, B, C, D, E, F, G, H, I, J, K, R, S](as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f)
+
+  def apply[Z, A, B, C, D, E, F, G, H, I, J, K](
+      as: Seq[A],
+      bsDep: DepSeqB[A, B],
+      csDep: DepSeqC[A, B, C],
+      dsDep: DepSeqD[A, B, C, D],
+      esDep: DepSeqE[A, B, C, D, E],
+      fsDep: DepSeqF[A, B, C, D, E, F],
+      gsDep: DepSeqG[A, B, C, D, E, F, G],
+      hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+      isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+      jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+      ksDep: DepSeqK[A, B, C, D, E, F, G, H, I, J, K],
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  ) =
+    VariantIrregK[Z, A, B, C, D, E, F, G, H, I, J, K, R, S](
+      as,
+      bsDep,
+      csDep,
+      dsDep,
+      esDep,
+      fsDep,
+      gsDep,
+      hsDep,
+      isDep,
+      jsDep,
+      ksDep,
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J, K](
+      as: => T[A],
+      bs: => T[B],
+      cs: => T[C],
+      ds: => T[D],
+      es: => T[E],
+      fs: => T[F],
+      gs: => T[G],
+      hs: => T[H],
+      is: => T[I],
+      js: => T[J],
+      ks: => T[K],
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  )(using Mappable[T]) =
+    VariantRectDerivedK[T, Z, A, B, C, D, E, F, G, H, I, J, K, R, S](as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f)
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J, K](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTB[T, B, C],
+      dsDep: DepTB[T, C, D],
+      esDep: DepTB[T, D, E],
+      fsDep: DepTB[T, E, F],
+      gsDep: DepTB[T, F, G],
+      hsDep: DepTB[T, G, H],
+      isDep: DepTB[T, H, I],
+      jsDep: DepTB[T, I, J],
+      ksDep: DepTB[T, J, K],
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedK[T, Z, A, B, C, D, E, F, G, H, I, J, K, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(b),
+      (a, b, c) => dsDep(c),
+      (a, b, c, d) => esDep(d),
+      (a, b, c, d, e) => fsDep(e),
+      (a, b, c, d, e, f0) => gsDep(f0),
+      (a, b, c, d, e, f0, g0) => hsDep(g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(h),
+      (a, b, c, d, e, f0, g0, h, i0) => jsDep(i0),
+      (a, b, c, d, e, f0, g0, h, i0, j) => ksDep(j),
+      f
+    )
+
+  def apply[T[_], Z, A, B, C, D, E, F, G, H, I, J, K](
+      as: T[A],
+      bsDep: DepTB[T, A, B],
+      csDep: DepTC[T, A, B, C],
+      dsDep: DepTD[T, A, B, C, D],
+      esDep: DepTE[T, A, B, C, D, E],
+      fsDep: DepTF[T, A, B, C, D, E, F],
+      gsDep: DepTG[T, A, B, C, D, E, F, G],
+      hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+      isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+      jsDep: DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+      ksDep: DepTK[T, A, B, C, D, E, F, G, H, I, J, K],
+      f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  )(using Mappable[T]) =
+    VariantIrregDerivedK[T, Z, A, B, C, D, E, F, G, H, I, J, K, R, S](
+      as,
+      bsDep,
+      (a, b) => csDep(a, b),
+      (a, b, c) => dsDep(a, b, c),
+      (a, b, c, d) => esDep(a, b, c, d),
+      (a, b, c, d, e) => fsDep(a, b, c, d, e),
+      (a, b, c, d, e, f0) => gsDep(a, b, c, d, e, f0),
+      (a, b, c, d, e, f0, g0) => hsDep(a, b, c, d, e, f0, g0),
+      (a, b, c, d, e, f0, g0, h) => isDep(a, b, c, d, e, f0, g0, h),
+      (a, b, c, d, e, f0, g0, h, i0) => jsDep(a, b, c, d, e, f0, g0, h, i0),
+      (a, b, c, d, e, f0, g0, h, i0, j) => ksDep(a, b, c, d, e, f0, g0, h, i0, j),
+      f
+    )
+
 case class AugmentedFunctionA[Z, A, R[_, _], S[_, _]](f: A => Z)(using cx: ComprehensionA[R], cy: ComprehensionA[S])
     extends AugmentedFnA[Z, A, R, S]
 
@@ -678,6 +1176,64 @@ case class AugmentedFunctionG[Z, A, B, C, D, E, F, G, R[_, _, _, _, _, _, _, _],
     cy: ComprehensionG[S]
 ) extends AugmentedFnG[Z, A, B, C, D, E, F, G, R, S]
 
+case class AugmentedFunctionH[Z, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]](
+    f: (A, B, C, D, E, F, G, H) => Z
+)(using
+    cx: ComprehensionH[R],
+    cy: ComprehensionH[S]
+) extends AugmentedFnH[Z, A, B, C, D, E, F, G, H, R, S]
+
+case class AugmentedFunctionI[Z, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](f: (A, B, C, D, E, F, G, H, I) => Z)(using
+    cx: ComprehensionI[R],
+    cy: ComprehensionI[S]
+) extends AugmentedFnI[Z, A, B, C, D, E, F, G, H, I, R, S]
+
+case class AugmentedFunctionJ[Z, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](f: (A, B, C, D, E, F, G, H, I, J) => Z)(using
+    cx: ComprehensionJ[R],
+    cy: ComprehensionJ[S]
+) extends AugmentedFnJ[Z, A, B, C, D, E, F, G, H, I, J, R, S]
+
+case class AugmentedFunctionK[Z, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](f: (A, B, C, D, E, F, G, H, I, J, K) => Z)(using
+    cx: ComprehensionK[R],
+    cy: ComprehensionK[S]
+) extends AugmentedFnK[Z, A, B, C, D, E, F, G, H, I, J, K, R, S]
+
 def id[A](a: A) = a
 
 trait AugmentedFnABase[Z, A]:
@@ -746,3 +1302,23 @@ trait AugmentedFnGBase[Z, A, B, C, D, E, F, G]:
   def f: (A, B, C, D, E, F, G) => Z
   def apply(a: A, b: B, c: C, d: D, e: E, f0: F, g: G) =
     f(a, b, c, d, e, f0, g)
+
+trait AugmentedFnHBase[Z, A, B, C, D, E, F, G, H]:
+  def f: (A, B, C, D, E, F, G, H) => Z
+  def apply(a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H) =
+    f(a, b, c, d, e, f0, g0, h)
+
+trait AugmentedFnIBase[Z, A, B, C, D, E, F, G, H, I]:
+  def f: (A, B, C, D, E, F, G, H, I) => Z
+  def apply(a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I) =
+    f(a, b, c, d, e, f0, g0, h, i0)
+
+trait AugmentedFnJBase[Z, A, B, C, D, E, F, G, H, I, J]:
+  def f: (A, B, C, D, E, F, G, H, I, J) => Z
+  def apply(a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I, j: J) =
+    f(a, b, c, d, e, f0, g0, h, i0, j)
+
+trait AugmentedFnKBase[Z, A, B, C, D, E, F, G, H, I, J, K]:
+  def f: (A, B, C, D, E, F, G, H, I, J, K) => Z
+  def apply(a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I, j: J, k: K) =
+    f(a, b, c, d, e, f0, g0, h, i0, j, k)

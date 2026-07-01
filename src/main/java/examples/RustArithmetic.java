@@ -1,7 +1,7 @@
 package examples;
 
 import static util.ZioUtil.sequence;
-import augmented.augmentJ.ZIO3;
+import augmented.augmentedJ.ZIO3;
 
 public class RustArithmetic {
   /**

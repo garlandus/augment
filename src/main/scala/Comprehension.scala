@@ -140,6 +140,140 @@ trait ComprehensionG[FF[_, _, _, _, _, _, _, _]]:
   ): IrregComprehensionDerivedG[FF, T, X, Z, A, B, C, D, E, F, G] =
     (as, bs, cs, ds, es, fs, gs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs).map(f.tupled andThen g)
 
+trait ComprehensionH[FF[_, _, _, _, _, _, _, _, _]]:
+
+  def rectangular[X, Z, A, B, C, D, E, F, G, H](using
+      ClassTag[Z]
+  ): RectComprehensionH[FF, X, Z, A, B, C, D, E, F, G, H] =
+    (as, bs, cs, ds, es, fs, gs, hs, f, g) =>
+      irregular(
+        as,
+        _ => bs,
+        (_, _) => cs,
+        (_, _, _) => ds,
+        (_, _, _, _) => es,
+        (_, _, _, _, _) => fs,
+        (_, _, _, _, _, _) => gs,
+        (_, _, _, _, _, _, _) => hs,
+        f,
+        g
+      )
+
+  def irregular[X, Z, A, B, C, D, E, F, G, H]: IrregComprehensionH[FF, X, Z, A, B, C, D, E, F, G, H]
+
+  def rectDerived[T[_], X, Z, A, B, C, D, E, F, G, H](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedH[FF, T, X, Z, A, B, C, D, E, F, G, H] =
+    (as, bs, cs, ds, es, fs, gs, hs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B, C, D, E, F, G, H](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedH[FF, T, X, Z, A, B, C, D, E, F, G, H] =
+    (as, bs, cs, ds, es, fs, gs, hs, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs).map(f.tupled andThen g)
+
+trait ComprehensionI[FF[_, _, _, _, _, _, _, _, _, _]]:
+
+  def rectangular[X, Z, A, B, C, D, E, F, G, H, I](using
+      ClassTag[Z]
+  ): RectComprehensionI[FF, X, Z, A, B, C, D, E, F, G, H, I] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, f, g) =>
+      irregular(
+        as,
+        _ => bs,
+        (_, _) => cs,
+        (_, _, _) => ds,
+        (_, _, _, _) => es,
+        (_, _, _, _, _) => fs,
+        (_, _, _, _, _, _) => gs,
+        (_, _, _, _, _, _, _) => hs,
+        (_, _, _, _, _, _, _, _) => is,
+        f,
+        g
+      )
+
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I]: IrregComprehensionI[FF, X, Z, A, B, C, D, E, F, G, H, I]
+
+  def rectDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedI[FF, T, X, Z, A, B, C, D, E, F, G, H, I] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedI[FF, T, X, Z, A, B, C, D, E, F, G, H, I] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, f, g) => (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is).map(f.tupled andThen g)
+
+trait ComprehensionJ[FF[_, _, _, _, _, _, _, _, _, _, _]]:
+
+  def rectangular[X, Z, A, B, C, D, E, F, G, H, I, J](using
+      ClassTag[Z]
+  ): RectComprehensionJ[FF, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, f, g) =>
+      irregular(
+        as,
+        _ => bs,
+        (_, _) => cs,
+        (_, _, _) => ds,
+        (_, _, _, _) => es,
+        (_, _, _, _, _) => fs,
+        (_, _, _, _, _, _) => gs,
+        (_, _, _, _, _, _, _) => hs,
+        (_, _, _, _, _, _, _, _) => is,
+        (_, _, _, _, _, _, _, _, _) => js,
+        f,
+        g
+      )
+
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J]: IrregComprehensionJ[FF, X, Z, A, B, C, D, E, F, G, H, I, J]
+
+  def rectDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I, J](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedJ[FF, T, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, f, g) =>
+      (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I, J](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedJ[FF, T, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, f, g) =>
+      (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js).map(f.tupled andThen g)
+
+trait ComprehensionK[FF[_, _, _, _, _, _, _, _, _, _, _, _]]:
+
+  def rectangular[X, Z, A, B, C, D, E, F, G, H, I, J, K](using
+      ClassTag[Z]
+  ): RectComprehensionK[FF, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f, g) =>
+      irregular(
+        as,
+        _ => bs,
+        (_, _) => cs,
+        (_, _, _) => ds,
+        (_, _, _, _) => es,
+        (_, _, _, _, _) => fs,
+        (_, _, _, _, _, _) => gs,
+        (_, _, _, _, _, _, _) => hs,
+        (_, _, _, _, _, _, _, _) => is,
+        (_, _, _, _, _, _, _, _, _) => js,
+        (_, _, _, _, _, _, _, _, _, _) => ks,
+        f,
+        g
+      )
+
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J, K]: IrregComprehensionK[FF, X, Z, A, B, C, D, E, F, G, H, I, J, K]
+
+  def rectDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I, J, K](using
+      t: Mappable[T]
+  ): RectComprehensionDerivedK[FF, T, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f, g) =>
+      (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js ⨉ ks).map(f.tupled andThen g)
+
+  def irregularDerived[T[_], X, Z, A, B, C, D, E, F, G, H, I, J, K](using
+      t: Mappable[T]
+  ): IrregComprehensionDerivedK[FF, T, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f, g) =>
+      (as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js ⨉ ks).map(f.tupled andThen g)
+
 type RectComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => X, X => Z) => F[Z, A]
 type IrregComprehensionA[F[_, _], X, Z, A] = (Seq[A], A => Boolean, A => X, X => Z) => F[Z, A]
 
@@ -268,6 +402,246 @@ type IrregComprehensionDerivedG[FF[_, _, _, _, _, _, _, _], T[_], X, Z, A, B, C,
       X => Z
   ) => T[Z]
 
+type RectComprehensionH[FF[_, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H] =
+  (
+      Seq[A],
+      Seq[B],
+      Seq[C],
+      Seq[D],
+      Seq[E],
+      Seq[F],
+      Seq[G],
+      Seq[H],
+      (A, B, C, D, E, F, G, H) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H]
+type IrregComprehensionH[FF[_, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H] =
+  (
+      Seq[A],
+      DepSeqB[A, B],
+      DepSeqC[A, B, C],
+      DepSeqD[A, B, C, D],
+      DepSeqE[A, B, C, D, E],
+      DepSeqF[A, B, C, D, E, F],
+      DepSeqG[A, B, C, D, E, F, G],
+      DepSeqH[A, B, C, D, E, F, G, H],
+      (A, B, C, D, E, F, G, H) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H]
+
+type RectComprehensionDerivedH[FF[_, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H] =
+  (
+      => T[A],
+      => T[B],
+      => T[C],
+      => T[D],
+      => T[E],
+      => T[F],
+      => T[G],
+      => T[H],
+      (A, B, C, D, E, F, G, H) => X,
+      X => Z
+  ) => T[Z]
+type IrregComprehensionDerivedH[FF[_, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H] =
+  (
+      T[A],
+      DepTB[T, A, B],
+      DepTC[T, A, B, C],
+      DepTD[T, A, B, C, D],
+      DepTE[T, A, B, C, D, E],
+      DepTF[T, A, B, C, D, E, F],
+      DepTG[T, A, B, C, D, E, F, G],
+      DepTH[T, A, B, C, D, E, F, G, H],
+      (A, B, C, D, E, F, G, H) => X,
+      X => Z
+  ) => T[Z]
+
+type RectComprehensionI[FF[_, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I] =
+  (
+      Seq[A],
+      Seq[B],
+      Seq[C],
+      Seq[D],
+      Seq[E],
+      Seq[F],
+      Seq[G],
+      Seq[H],
+      Seq[I],
+      (A, B, C, D, E, F, G, H, I) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I]
+type IrregComprehensionI[FF[_, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I] =
+  (
+      Seq[A],
+      DepSeqB[A, B],
+      DepSeqC[A, B, C],
+      DepSeqD[A, B, C, D],
+      DepSeqE[A, B, C, D, E],
+      DepSeqF[A, B, C, D, E, F],
+      DepSeqG[A, B, C, D, E, F, G],
+      DepSeqH[A, B, C, D, E, F, G, H],
+      DepSeqI[A, B, C, D, E, F, G, H, I],
+      (A, B, C, D, E, F, G, H, I) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I]
+
+type RectComprehensionDerivedI[FF[_, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I] =
+  (
+      => T[A],
+      => T[B],
+      => T[C],
+      => T[D],
+      => T[E],
+      => T[F],
+      => T[G],
+      => T[H],
+      => T[I],
+      (A, B, C, D, E, F, G, H, I) => X,
+      X => Z
+  ) => T[Z]
+type IrregComprehensionDerivedI[FF[_, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I] =
+  (
+      T[A],
+      DepTB[T, A, B],
+      DepTC[T, A, B, C],
+      DepTD[T, A, B, C, D],
+      DepTE[T, A, B, C, D, E],
+      DepTF[T, A, B, C, D, E, F],
+      DepTG[T, A, B, C, D, E, F, G],
+      DepTH[T, A, B, C, D, E, F, G, H],
+      DepTI[T, A, B, C, D, E, F, G, H, I],
+      (A, B, C, D, E, F, G, H, I) => X,
+      X => Z
+  ) => T[Z]
+
+type RectComprehensionJ[FF[_, _, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I, J] =
+  (
+      Seq[A],
+      Seq[B],
+      Seq[C],
+      Seq[D],
+      Seq[E],
+      Seq[F],
+      Seq[G],
+      Seq[H],
+      Seq[I],
+      Seq[J],
+      (A, B, C, D, E, F, G, H, I, J) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I, J]
+type IrregComprehensionJ[FF[_, _, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I, J] =
+  (
+      Seq[A],
+      DepSeqB[A, B],
+      DepSeqC[A, B, C],
+      DepSeqD[A, B, C, D],
+      DepSeqE[A, B, C, D, E],
+      DepSeqF[A, B, C, D, E, F],
+      DepSeqG[A, B, C, D, E, F, G],
+      DepSeqH[A, B, C, D, E, F, G, H],
+      DepSeqI[A, B, C, D, E, F, G, H, I],
+      DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+      (A, B, C, D, E, F, G, H, I, J) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I, J]
+
+type RectComprehensionDerivedJ[FF[_, _, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I, J] =
+  (
+      => T[A],
+      => T[B],
+      => T[C],
+      => T[D],
+      => T[E],
+      => T[F],
+      => T[G],
+      => T[H],
+      => T[I],
+      => T[J],
+      (A, B, C, D, E, F, G, H, I, J) => X,
+      X => Z
+  ) => T[Z]
+type IrregComprehensionDerivedJ[FF[_, _, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I, J] =
+  (
+      T[A],
+      DepTB[T, A, B],
+      DepTC[T, A, B, C],
+      DepTD[T, A, B, C, D],
+      DepTE[T, A, B, C, D, E],
+      DepTF[T, A, B, C, D, E, F],
+      DepTG[T, A, B, C, D, E, F, G],
+      DepTH[T, A, B, C, D, E, F, G, H],
+      DepTI[T, A, B, C, D, E, F, G, H, I],
+      DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+      (A, B, C, D, E, F, G, H, I, J) => X,
+      X => Z
+  ) => T[Z]
+
+type RectComprehensionK[FF[_, _, _, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+  (
+      Seq[A],
+      Seq[B],
+      Seq[C],
+      Seq[D],
+      Seq[E],
+      Seq[F],
+      Seq[G],
+      Seq[H],
+      Seq[I],
+      Seq[J],
+      Seq[K],
+      (A, B, C, D, E, F, G, H, I, J, K) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I, J, K]
+type IrregComprehensionK[FF[_, _, _, _, _, _, _, _, _, _, _, _], X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+  (
+      Seq[A],
+      DepSeqB[A, B],
+      DepSeqC[A, B, C],
+      DepSeqD[A, B, C, D],
+      DepSeqE[A, B, C, D, E],
+      DepSeqF[A, B, C, D, E, F],
+      DepSeqG[A, B, C, D, E, F, G],
+      DepSeqH[A, B, C, D, E, F, G, H],
+      DepSeqI[A, B, C, D, E, F, G, H, I],
+      DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+      DepSeqK[A, B, C, D, E, F, G, H, I, J, K],
+      (A, B, C, D, E, F, G, H, I, J, K) => X,
+      X => Z
+  ) => FF[Z, A, B, C, D, E, F, G, H, I, J, K]
+
+type RectComprehensionDerivedK[FF[_, _, _, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+  (
+      => T[A],
+      => T[B],
+      => T[C],
+      => T[D],
+      => T[E],
+      => T[F],
+      => T[G],
+      => T[H],
+      => T[I],
+      => T[J],
+      => T[K],
+      (A, B, C, D, E, F, G, H, I, J, K) => X,
+      X => Z
+  ) => T[Z]
+type IrregComprehensionDerivedK[FF[_, _, _, _, _, _, _, _, _, _, _, _], T[_], X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+  (
+      T[A],
+      DepTB[T, A, B],
+      DepTC[T, A, B, C],
+      DepTD[T, A, B, C, D],
+      DepTE[T, A, B, C, D, E],
+      DepTF[T, A, B, C, D, E, F],
+      DepTG[T, A, B, C, D, E, F, G],
+      DepTH[T, A, B, C, D, E, F, G, H],
+      DepTI[T, A, B, C, D, E, F, G, H, I],
+      DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+      DepTK[T, A, B, C, D, E, F, G, H, I, J, K],
+      (A, B, C, D, E, F, G, H, I, J, K) => X,
+      X => Z
+  ) => T[Z]
+
 case class ComprehensionsA[R[_, _], S[_, _]](rectangular: ComprehensionA[R], irregular: ComprehensionA[S])
 case class ComprehensionsB[R[_, _, _], S[_, _, _]](rectangular: ComprehensionB[R], irregular: ComprehensionB[S])
 case class ComprehensionsC[R[_, _, _, _], S[_, _, _, _]](rectangular: ComprehensionC[R], irregular: ComprehensionC[S])
@@ -321,5 +695,29 @@ def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, Z](context: T[(A, B, C, D, 
 def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, Z](
     context: T[(A, B, C, D, E, F, G)],
     f: (A, B, C, D, E, F, G) => Z
+) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, H, Z](
+    context: T[(A, B, C, D, E, F, G, H)],
+    f: (A, B, C, D, E, F, G, H) => Z
+) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, H, I, Z](
+    context: T[(A, B, C, D, E, F, G, H, I)],
+    f: (A, B, C, D, E, F, G, H, I) => Z
+) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, H, I, J, Z](
+    context: T[(A, B, C, D, E, F, G, H, I, J)],
+    f: (A, B, C, D, E, F, G, H, I, J) => Z
+) =
+  context.map(f.tupled)
+
+def mapOverContext[T[_]: Mappable, A, B, C, D, E, F, G, H, I, J, K, Z](
+    context: T[(A, B, C, D, E, F, G, H, I, J, K)],
+    f: (A, B, C, D, E, F, G, H, I, J, K) => Z
 ) =
   context.map(f.tupled)

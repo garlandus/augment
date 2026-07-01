@@ -13,7 +13,7 @@ given ComprehensionA[SeqA] with
           f andThen g
 
 given ComprehensionA[ArrayNA] with
-  def irregular[X, Z, A]: IrregComprehensionA[ArrayNA, X, Z, A] = ???
+  def irregular[X, Z, A] = ???
   override def rectangular[X, Z, A](using ClassTag[Z]): RectComprehensionA[ArrayNA, X, Z, A] =
     (as: Seq[A], f: A => X, g: X => Z) =>
       as.map:
@@ -37,7 +37,7 @@ given ComprehensionA[SetA] with
         .toSet
 
 given ComprehensionA[MultiArrayA] with
-  def irregular[X, Z, A]: IrregComprehensionA[MultiArrayA, X, Z, A] = ???
+  def irregular[X, Z, A] = ???
   override def rectangular[X, Z, A](using ClassTag[Z]): RectComprehensionA[MultiArrayA, X, Z, A] =
     (as: Seq[A], f: A => X, g: X => Z) =>
       val m =
@@ -60,7 +60,7 @@ given ComprehensionB[SeqNB] with
           g(f(a, b))
 
 given ComprehensionB[ArrayNB] with
-  def irregular[X, Z, A, B]: IrregComprehensionB[ArrayNB, X, Z, A, B] = ???
+  def irregular[X, Z, A, B] = ???
   override def rectangular[X, Z, A, B](using ClassTag[Z]): RectComprehensionB[ArrayNB, X, Z, A, B] =
     (as: Seq[A], bs: Seq[B], f: (A, B) => X, g: X => Z) =>
       as.map: a =>
@@ -91,7 +91,7 @@ given ComprehensionB[SetB] with
       .toSet
 
 given ComprehensionB[MultiArrayB] with
-  def irregular[X, Z, A, B]: IrregComprehensionB[MultiArrayB, X, Z, A, B] = ???
+  def irregular[X, Z, A, B] = ???
   override def rectangular[X, Z, A, B](using ClassTag[Z]): RectComprehensionB[MultiArrayB, X, Z, A, B] =
     (as: Seq[A], bs: Seq[B], f: (A, B) => X, g: X => Z) =>
       val m =
@@ -117,7 +117,7 @@ given ComprehensionC[SeqNC] with
             g(f(a, b, c))
 
 given ComprehensionC[ArrayNC] with
-  def irregular[X, Z, A, B, C]: IrregComprehensionC[ArrayNC, X, Z, A, B, C] = ???
+  def irregular[X, Z, A, B, C] = ???
   override def rectangular[X, Z, A, B, C](using ClassTag[Z]): RectComprehensionC[ArrayNC, X, Z, A, B, C] =
     (as: Seq[A], bs: Seq[B], cs: Seq[C], f: (A, B, C) => X, g: X => Z) =>
       as.map: a =>
@@ -136,7 +136,7 @@ given ComprehensionC[MapC] with
       .toMap
 
 given ComprehensionC[MultiArrayC] with
-  def irregular[X, Z, A, B, C]: IrregComprehensionC[MultiArrayC, X, Z, A, B, C] = ???
+  def irregular[X, Z, A, B, C] = ???
   override def rectangular[X, Z, A, B, C](using ClassTag[Z]): RectComprehensionC[MultiArrayC, X, Z, A, B, C] =
     (as: Seq[A], bs: Seq[B], cs: Seq[C], f: (A, B, C) => X, g: X => Z) =>
       val m = as.map: a =>
@@ -187,7 +187,7 @@ given ComprehensionD[SeqND] with
               g(f(a, b, c, d))
 
 given ComprehensionD[ArrayND] with
-  def irregular[X, Z, A, B, C, D]: IrregComprehensionD[ArrayND, X, Z, A, B, C, D] = ???
+  def irregular[X, Z, A, B, C, D] = ???
   override def rectangular[X, Z, A, B, C, D](using ClassTag[Z]): RectComprehensionD[ArrayND, X, Z, A, B, C, D] =
     (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], f: (A, B, C, D) => X, g: X => Z) =>
       as.map: a =>
@@ -220,7 +220,7 @@ given ComprehensionD[MapD] with
       .toMap
 
 given ComprehensionD[MultiArrayD] with
-  def irregular[X, Z, A, B, C, D]: IrregComprehensionD[MultiArrayD, X, Z, A, B, C, D] = ???
+  def irregular[X, Z, A, B, C, D] = ???
   override def rectangular[X, Z, A, B, C, D](using ClassTag[Z]): RectComprehensionD[MultiArrayD, X, Z, A, B, C, D] =
     (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], f: (A, B, C, D) => X, g: X => Z) =>
       val m =
@@ -285,7 +285,7 @@ given ComprehensionE[SeqNE] with
                 g(f(a, b, c, d, e))
 
 given ComprehensionE[ArrayNE] with
-  def irregular[X, Z, A, B, C, D, E]: IrregComprehensionE[ArrayNE, X, Z, A, B, C, D, E] = ???
+  def irregular[X, Z, A, B, C, D, E] = ???
   override def rectangular[X, Z, A, B, C, D, E](using ClassTag[Z]): RectComprehensionE[ArrayNE, X, Z, A, B, C, D, E] =
     (as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], f: (A, B, C, D, E) => X, g: X => Z) =>
       as.map: a =>
@@ -330,7 +330,7 @@ given ComprehensionE[MapE] with
       .toMap
 
 given ComprehensionE[MultiArrayE] with
-  def irregular[X, Z, A, B, C, D, E]: IrregComprehensionE[MultiArrayE, X, Z, A, B, C, D, E] = ???
+  def irregular[X, Z, A, B, C, D, E] = ???
   override def rectangular[X, Z, A, B, C, D, E](using
       ClassTag[Z]
   ): RectComprehensionE[MultiArrayE, X, Z, A, B, C, D, E] =
@@ -404,7 +404,7 @@ given ComprehensionF[SeqNF] with
                   g(f(a, b, c, d, e, f0))
 
 given ComprehensionF[MultiArrayF] with
-  def irregular[X, Z, A, B, C, D, E, F]: IrregComprehensionF[MultiArrayF, X, Z, A, B, C, D, E, F] = ???
+  def irregular[X, Z, A, B, C, D, E, F] = ???
   override def rectangular[X, Z, A, B, C, D, E, F](using
       ClassTag[Z]
   ): RectComprehensionF[MultiArrayF, X, Z, A, B, C, D, E, F] =
@@ -465,7 +465,7 @@ given ComprehensionG[SeqNG] with
                     g(f(a, b, c, d, e, f0, g0))
 
 given ComprehensionG[MultiArrayG] with
-  def irregular[X, Z, A, B, C, D, E, F, G]: IrregComprehensionG[MultiArrayG, X, Z, A, B, C, D, E, F, G] = ???
+  def irregular[X, Z, A, B, C, D, E, F, G] = ???
   override def rectangular[X, Z, A, B, C, D, E, F, G](using
       ClassTag[Z]
   ): RectComprehensionG[MultiArrayG, X, Z, A, B, C, D, E, F, G] =
@@ -490,3 +490,362 @@ given ComprehensionG[MultiArrayG] with
                     gs.map: g0 =>
                       g(f(a, b, c, d, e, f0, g0))
       MultiArrayG(as, bs, cs, ds, es, fs, gs, m.flatten.flatten.flatten.flatten.flatten.flatten.toArray)
+
+given ComprehensionH[SeqH] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H]: IrregComprehensionH[SeqH, X, Z, A, B, C, D, E, F, G, H] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        f: (A, B, C, D, E, F, G, H) => X,
+        g: X => Z
+    ) =>
+      as.flatMap: a =>
+        bsDep(a).flatMap: b =>
+          csDep(a, b).flatMap: c =>
+            dsDep(a, b, c).flatMap: d =>
+              esDep(a, b, c, d).flatMap: e =>
+                fsDep(a, b, c, d, e).flatMap: f0 =>
+                  gsDep(a, b, c, d, e, f0).flatMap: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).map: h =>
+                      g(f(a, b, c, d, e, f0, g0, h))
+
+given ComprehensionH[SeqNH] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H]: IrregComprehensionH[SeqNH, X, Z, A, B, C, D, E, F, G, H] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        f: (A, B, C, D, E, F, G, H) => X,
+        g: X => Z
+    ) =>
+      as.map: a =>
+        bsDep(a).map: b =>
+          csDep(a, b).map: c =>
+            dsDep(a, b, c).map: d =>
+              esDep(a, b, c, d).map: e =>
+                fsDep(a, b, c, d, e).map: f0 =>
+                  gsDep(a, b, c, d, e, f0).map: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).map: h =>
+                      g(f(a, b, c, d, e, f0, g0, h))
+
+given ComprehensionH[MultiArrayH] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H] = ???
+  override def rectangular[X, Z, A, B, C, D, E, F, G, H](using
+      ClassTag[Z]
+  ): RectComprehensionH[MultiArrayH, X, Z, A, B, C, D, E, F, G, H] =
+    (
+        as: Seq[A],
+        bs: Seq[B],
+        cs: Seq[C],
+        ds: Seq[D],
+        es: Seq[E],
+        fs: Seq[F],
+        gs: Seq[G],
+        hs: Seq[H],
+        f: (A, B, C, D, E, F, G, H) => X,
+        g: X => Z
+    ) =>
+      val m =
+        as.map: a =>
+          bs.map: b =>
+            cs.map: c =>
+              ds.map: d =>
+                es.map: e =>
+                  fs.map: f0 =>
+                    gs.map: g0 =>
+                      hs.map: h =>
+                        g(f(a, b, c, d, e, f0, g0, h))
+      MultiArrayH(as, bs, cs, ds, es, fs, gs, hs, m.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray)
+
+given ComprehensionI[SeqI] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I]: IrregComprehensionI[SeqI, X, Z, A, B, C, D, E, F, G, H, I] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        f: (A, B, C, D, E, F, G, H, I) => X,
+        g: X => Z
+    ) =>
+      as.flatMap: a =>
+        bsDep(a).flatMap: b =>
+          csDep(a, b).flatMap: c =>
+            dsDep(a, b, c).flatMap: d =>
+              esDep(a, b, c, d).flatMap: e =>
+                fsDep(a, b, c, d, e).flatMap: f0 =>
+                  gsDep(a, b, c, d, e, f0).flatMap: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).flatMap: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).map: i =>
+                        g(f(a, b, c, d, e, f0, g0, h, i))
+
+given ComprehensionI[SeqNI] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I]: IrregComprehensionI[SeqNI, X, Z, A, B, C, D, E, F, G, H, I] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        f: (A, B, C, D, E, F, G, H, I) => X,
+        g: X => Z
+    ) =>
+      as.map: a =>
+        bsDep(a).map: b =>
+          csDep(a, b).map: c =>
+            dsDep(a, b, c).map: d =>
+              esDep(a, b, c, d).map: e =>
+                fsDep(a, b, c, d, e).map: f0 =>
+                  gsDep(a, b, c, d, e, f0).map: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).map: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).map: i =>
+                        g(f(a, b, c, d, e, f0, g0, h, i))
+
+given ComprehensionI[MultiArrayI] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I] = ???
+  override def rectangular[X, Z, A, B, C, D, E, F, G, H, I](using
+      ClassTag[Z]
+  ): RectComprehensionI[MultiArrayI, X, Z, A, B, C, D, E, F, G, H, I] =
+    (
+        as: Seq[A],
+        bs: Seq[B],
+        cs: Seq[C],
+        ds: Seq[D],
+        es: Seq[E],
+        fs: Seq[F],
+        gs: Seq[G],
+        hs: Seq[H],
+        is: Seq[I],
+        f: (A, B, C, D, E, F, G, H, I) => X,
+        g: X => Z
+    ) =>
+      val m =
+        as.map: a =>
+          bs.map: b =>
+            cs.map: c =>
+              ds.map: d =>
+                es.map: e =>
+                  fs.map: f0 =>
+                    gs.map: g0 =>
+                      hs.map: h =>
+                        is.map: i =>
+                          g(f(a, b, c, d, e, f0, g0, h, i))
+      MultiArrayI(
+        as,
+        bs,
+        cs,
+        ds,
+        es,
+        fs,
+        gs,
+        hs,
+        is,
+        m.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray
+      )
+
+given ComprehensionJ[SeqJ] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J]: IrregComprehensionJ[SeqJ, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+        f: (A, B, C, D, E, F, G, H, I, J) => X,
+        g: X => Z
+    ) =>
+      as.flatMap: a =>
+        bsDep(a).flatMap: b =>
+          csDep(a, b).flatMap: c =>
+            dsDep(a, b, c).flatMap: d =>
+              esDep(a, b, c, d).flatMap: e =>
+                fsDep(a, b, c, d, e).flatMap: f0 =>
+                  gsDep(a, b, c, d, e, f0).flatMap: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).flatMap: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).flatMap: i =>
+                        jsDep(a, b, c, d, e, f0, g0, h, i).map: j =>
+                          g(f(a, b, c, d, e, f0, g0, h, i, j))
+
+given ComprehensionJ[SeqNJ] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J]: IrregComprehensionJ[SeqNJ, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+        f: (A, B, C, D, E, F, G, H, I, J) => X,
+        g: X => Z
+    ) =>
+      as.map: a =>
+        bsDep(a).map: b =>
+          csDep(a, b).map: c =>
+            dsDep(a, b, c).map: d =>
+              esDep(a, b, c, d).map: e =>
+                fsDep(a, b, c, d, e).map: f0 =>
+                  gsDep(a, b, c, d, e, f0).map: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).map: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).map: i =>
+                        jsDep(a, b, c, d, e, f0, g0, h, i).map: j =>
+                          g(f(a, b, c, d, e, f0, g0, h, i, j))
+
+given ComprehensionJ[MultiArrayJ] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J] = ???
+  override def rectangular[X, Z, A, B, C, D, E, F, G, H, I, J](using
+      ClassTag[Z]
+  ): RectComprehensionJ[MultiArrayJ, X, Z, A, B, C, D, E, F, G, H, I, J] =
+    (
+        as: Seq[A],
+        bs: Seq[B],
+        cs: Seq[C],
+        ds: Seq[D],
+        es: Seq[E],
+        fs: Seq[F],
+        gs: Seq[G],
+        hs: Seq[H],
+        is: Seq[I],
+        js: Seq[J],
+        f: (A, B, C, D, E, F, G, H, I, J) => X,
+        g: X => Z
+    ) =>
+      val m =
+        as.map: a =>
+          bs.map: b =>
+            cs.map: c =>
+              ds.map: d =>
+                es.map: e =>
+                  fs.map: f0 =>
+                    gs.map: g0 =>
+                      hs.map: h =>
+                        is.map: i =>
+                          js.map: j =>
+                            g(f(a, b, c, d, e, f0, g0, h, i, j))
+      val arr = m.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray
+      multiArray(as, bs, cs, ds, es, fs, gs, hs, is, js, arr)
+
+given ComprehensionK[SeqK] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J, K]
+      : IrregComprehensionK[SeqK, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+        ksDep: DepSeqK[A, B, C, D, E, F, G, H, I, J, K],
+        f: (A, B, C, D, E, F, G, H, I, J, K) => X,
+        g: X => Z
+    ) =>
+      as.flatMap: a =>
+        bsDep(a).flatMap: b =>
+          csDep(a, b).flatMap: c =>
+            dsDep(a, b, c).flatMap: d =>
+              esDep(a, b, c, d).flatMap: e =>
+                fsDep(a, b, c, d, e).flatMap: f0 =>
+                  gsDep(a, b, c, d, e, f0).flatMap: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).flatMap: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).flatMap: i =>
+                        jsDep(a, b, c, d, e, f0, g0, h, i).flatMap: j =>
+                          ksDep(a, b, c, d, e, f0, g0, h, i, j).map: k =>
+                            g(f(a, b, c, d, e, f0, g0, h, i, j, k))
+
+given ComprehensionK[SeqNK] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J, K]
+      : IrregComprehensionK[SeqNK, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (
+        as: Seq[A],
+        bsDep: DepSeqB[A, B],
+        csDep: DepSeqC[A, B, C],
+        dsDep: DepSeqD[A, B, C, D],
+        esDep: DepSeqE[A, B, C, D, E],
+        fsDep: DepSeqF[A, B, C, D, E, F],
+        gsDep: DepSeqG[A, B, C, D, E, F, G],
+        hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+        isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+        jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+        ksDep: DepSeqK[A, B, C, D, E, F, G, H, I, J, K],
+        f: (A, B, C, D, E, F, G, H, I, J, K) => X,
+        g: X => Z
+    ) =>
+      as.map: a =>
+        bsDep(a).map: b =>
+          csDep(a, b).map: c =>
+            dsDep(a, b, c).map: d =>
+              esDep(a, b, c, d).map: e =>
+                fsDep(a, b, c, d, e).map: f0 =>
+                  gsDep(a, b, c, d, e, f0).map: g0 =>
+                    hsDep(a, b, c, d, e, f0, g0).map: h =>
+                      isDep(a, b, c, d, e, f0, g0, h).map: i =>
+                        jsDep(a, b, c, d, e, f0, g0, h, i).map: j =>
+                          ksDep(a, b, c, d, e, f0, g0, h, i, j).map: k =>
+                            g(f(a, b, c, d, e, f0, g0, h, i, j, k))
+
+given ComprehensionK[MultiArrayK] with
+  def irregular[X, Z, A, B, C, D, E, F, G, H, I, J, K] = ???
+  override def rectangular[X, Z, A, B, C, D, E, F, G, H, I, J, K](using
+      ClassTag[Z]
+  ): RectComprehensionK[MultiArrayK, X, Z, A, B, C, D, E, F, G, H, I, J, K] =
+    (
+        as: Seq[A],
+        bs: Seq[B],
+        cs: Seq[C],
+        ds: Seq[D],
+        es: Seq[E],
+        fs: Seq[F],
+        gs: Seq[G],
+        hs: Seq[H],
+        is: Seq[I],
+        js: Seq[J],
+        ks: Seq[K],
+        f: (A, B, C, D, E, F, G, H, I, J, K) => X,
+        g: X => Z
+    ) =>
+      val m =
+        as.map: a =>
+          bs.map: b =>
+            cs.map: c =>
+              ds.map: d =>
+                es.map: e =>
+                  fs.map: f0 =>
+                    gs.map: g0 =>
+                      hs.map: h =>
+                        is.map: i =>
+                          js.map: j =>
+                            ks.map: k =>
+                              g(f(a, b, c, d, e, f0, g0, h, i, j, k))
+      val arr = m.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray
+      multiArray(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, arr)

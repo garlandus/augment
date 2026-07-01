@@ -16,15 +16,14 @@ case class MultiArrayA[X, A](as: Seq[A], arr: Array[X])(using ClassTag[X]) exten
 
   def flat() = arr.toList
   def axes = List(as)
-  val length = as.length
-  val axisLengths = List(1)
+  val length = axes.map(_.length).product
+  val axisLengths = getAxisLengths(axes)
   def head = apply(as.head)
-  def isEmpty = as.isEmpty
+  def isEmpty = axes.exists(_.isEmpty)
 
   def apply(a: A) =
-    val ia = as.indexOf(a)
-    val i = getIndex(List(ia), axisLengths, length, List(a))
-    arr(i)
+    val vs = List(a)
+    arr(getIndex(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs))
 
   def transform[Z](f: X => Z)(using ClassTag[Z]) =
     MultiArrayA(as, arr.map(f))
@@ -97,6 +96,152 @@ object multiArray:
       ClassTag[X]
   ) =
     checkedMultiArray(as, bs, cs, ds, es, arr)
+
+  def apply[X, A, B, C, D, E, F](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      na: Seq[Seq[Seq[Seq[Seq[Seq[X]]]]]]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, na.flatten.flatten.flatten.flatten.flatten.toArray)
+
+  def apply[X, A, B, C, D, E, F](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], fs: Seq[F], arr: Array[X])(
+      using ClassTag[X]
+  ) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, arr)
+
+  def apply[X, A, B, C, D, E, F, G](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      na: Seq[Seq[Seq[Seq[Seq[Seq[Seq[X]]]]]]]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, na.flatten.flatten.flatten.flatten.flatten.flatten.toArray)
+
+  def apply[X, A, B, C, D, E, F, G](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      arr: Array[X]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, arr)
+
+  def apply[X, A, B, C, D, E, F, G, H](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      na: Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[X]]]]]]]]
+  )(using ClassTag[X]) =
+    checkedMultiArray(
+      as,
+      bs,
+      cs,
+      ds,
+      es,
+      fs,
+      gs,
+      hs,
+      na.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray
+    )
+
+  def apply[X, A, B, C, D, E, F, G, H](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      arr: Array[X]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, hs, arr)
+
+  def apply[X, A, B, C, D, E, F, G, H, I](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      na: Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[X]]]]]]]]]
+  )(using ClassTag[X]) =
+    checkedMultiArray(
+      as,
+      bs,
+      cs,
+      ds,
+      es,
+      fs,
+      gs,
+      hs,
+      is,
+      na.flatten.flatten.flatten.flatten.flatten.flatten.flatten.flatten.toArray
+    )
+
+  def apply[X, A, B, C, D, E, F, G, H, I](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      arr: Array[X]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, hs, is, arr)
+
+  def apply[X, A, B, C, D, E, F, G, H, I, J](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J],
+      arr: Array[X]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, hs, is, js, arr)
+
+  def apply[X, A, B, C, D, E, F, G, H, I, J, K](
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J],
+      ks: Seq[K],
+      arr: Array[X]
+  )(using ClassTag[X]) =
+    checkedMultiArray(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, arr)
 
   def apply[X, A, B, C, D](as: Seq[A], bs: Seq[B], blocks: MultiArrayB[MultiArrayB[X, C, D], A, B])(using ClassTag[X]) =
     val arr = image(as, bs, blocks(_, _).arr).arr.flatten
@@ -181,6 +326,11 @@ def getIndexOpt(subIndexes: Seq[Int], axisLengths: Seq[Int], l: Int, coords: Seq
   if (subIndexes.contains(-1)) then None
   else Some((subIndexes zip axisLengths).map(_ * _).sum)
 
+def indexOfStrict[A](seq: Seq[A], v: A, ctx: => Any): Int =
+  val i = seq.indexOf(v)
+  if i == -1 then throw new Exception(s"Index $v not found in $seq\n$ctx")
+  i
+
 val entryDividingLine = "_" * 30
 
 def checkInputDim[X, A](as: Seq[A], xs: Seq[X]) =
@@ -201,6 +351,102 @@ def checkInputDim[X, A, B, C, D, E](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[
     throw new Exception(
       s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${xs.length}"
     )
+def checkInputDim[X, A, B, C, D, E, F](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length != xs.length then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${xs.length}"
+    )
+def checkInputDim[X, A, B, C, D, E, F, G](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length * gs.length != xs.length then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${gs.length} ${xs.length}"
+    )
+def checkInputDim[X, A, B, C, D, E, F, G, H](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length * gs.length * hs.length != xs.length then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${gs.length} ${hs.length} ${xs.length}"
+    )
+def checkInputDim[X, A, B, C, D, E, F, G, H, I](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length * gs.length * hs.length * is.length != xs.length
+  then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${gs.length} ${hs.length} ${is.length} ${xs.length}"
+    )
+def checkInputDim[X, A, B, C, D, E, F, G, H, I, J](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length * gs.length * hs.length * is.length * js.length != xs.length
+  then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${gs.length} ${hs.length} ${is.length} ${js.length} ${xs.length}"
+    )
+def checkInputDim[X, A, B, C, D, E, F, G, H, I, J, K](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    ks: Seq[K],
+    xs: Seq[X]
+) =
+  if as.length * bs.length * cs.length * ds.length * es.length * fs.length * gs.length * hs.length * is.length * js.length * ks.length != xs.length
+  then
+    throw new Exception(
+      s"Non-rectangular input lengths: ${as.length} ${bs.length} ${cs.length} ${ds.length} ${es.length} ${fs.length} ${gs.length} ${hs.length} ${is.length} ${js.length} ${ks.length} ${xs.length}"
+    )
 
 def checkedMultiArray[X, A](as: Seq[A], xs: Array[X])(using ClassTag[X]) =
   checkInputDim(as, xs)
@@ -219,6 +465,87 @@ def checkedMultiArray[X, A, B, C, D, E](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: 
 ) =
   checkInputDim(as, bs, cs, ds, es, xs)
   MultiArrayE(as, bs, cs, ds, es, xs)
+def checkedMultiArray[X, A, B, C, D, E, F](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, xs)
+  MultiArrayF(as, bs, cs, ds, es, fs, xs)
+def checkedMultiArray[X, A, B, C, D, E, F, G](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, gs, xs)
+  MultiArrayG(as, bs, cs, ds, es, fs, gs, xs)
+def checkedMultiArray[X, A, B, C, D, E, F, G, H](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, gs, hs, xs)
+  MultiArrayH(as, bs, cs, ds, es, fs, gs, hs, xs)
+def checkedMultiArray[X, A, B, C, D, E, F, G, H, I](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, gs, hs, is, xs)
+  MultiArrayI(as, bs, cs, ds, es, fs, gs, hs, is, xs)
+def checkedMultiArray[X, A, B, C, D, E, F, G, H, I, J](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, gs, hs, is, js, xs)
+  MultiArrayJ(as, bs, cs, ds, es, fs, gs, hs, is, js, xs)
+def checkedMultiArray[X, A, B, C, D, E, F, G, H, I, J, K](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    ks: Seq[K],
+    xs: Array[X]
+)(using ClassTag[X]) =
+  checkInputDim(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, xs)
+  MultiArrayK(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, xs)
 
 case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], arr: Array[X])(using ClassTag[X])
     extends ArrayB[X]
@@ -233,15 +560,13 @@ case class MultiArrayB[X, A, B](as: Seq[A], bs: Seq[B], arr: Array[X])(using Cla
 
   def axes = List(as, bs)
   override val length = axes.map(_.length).product
-  val axisLengths = List(bs.length, 1)
+  val axisLengths = getAxisLengths(axes)
   def head = apply(as.head, bs.head)
-  def isEmpty = as.isEmpty || bs.isEmpty
+  def isEmpty = axes.exists(_.isEmpty)
 
   def apply(a: A, b: B) =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val i = getIndex(List(ia, ib), axisLengths, length, List(a, b))
-    arr(i)
+    val vs = List(a, b)
+    arr(getIndex(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs))
 
   def apply(coords: (A, B)): X = apply(coords._1, coords._2)
 
@@ -410,23 +735,17 @@ case class MultiArrayC[X, A, B, C](as: Seq[A], bs: Seq[B], cs: Seq[C], arr: Arra
 
   def axes = List(as, bs, cs)
   val length = axes.map(_.length).product
-  val axisLengths = List(bs.length * cs.length, cs.length, 1)
+  val axisLengths = getAxisLengths(axes)
   def head = apply(as.head, bs.head, cs.head)
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty
+  def isEmpty = axes.exists(_.isEmpty)
 
   def apply(a: A, b: B, c: C): X =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val ic = cs.indexOf(c)
-    val i = getIndex(List(ia, ib, ic), axisLengths, length, List(a, b, c))
-    arr(i)
+    val vs = List(a, b, c)
+    arr(getIndex(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs))
 
   def get(a: A, b: B, c: C): Option[X] =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val ic = cs.indexOf(c)
-    val iOpt = getIndexOpt(List(ia, ib, ic), axisLengths, length, List(a, b, c))
-    iOpt.map(arr(_))
+    val vs = List(a, b, c)
+    getIndexOpt(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs).map(arr(_))
 
   def subArray(a: A): MultiArrayB[X, B, C] =
     val ia = as.indexOf(a)
@@ -534,15 +853,11 @@ case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Se
   val length = axes.map(_.length).product
   val axisLengths = getAxisLengths(axes)
   def head = apply(as.head, bs.head, cs.head, ds.head)
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty
+  def isEmpty = axes.exists(_.isEmpty)
 
   def apply(a: A, b: B, c: C, d: D) =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val ic = cs.indexOf(c)
-    val id = ds.indexOf(d)
-    val i = getIndex(List(ia, ib, ic, id), axisLengths, length, List(a, b, c, d))
-    arr(i)
+    val vs = List(a, b, c, d)
+    arr(getIndex(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs))
 
   def map[Z](f: Seq[X] => Z)(using ClassTag[Z]) =
     val sq =
@@ -579,13 +894,10 @@ case class MultiArrayD[X, A, B, C, D](as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Se
     multiArray(bs, cs, ds, arr1.map(f))
 
   def subArray[Z](a: A, b: B, f: X => Z)(using ClassTag[Z]): MultiArrayB[Z, C, D] =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    if ia == -1 then throw new Exception(s"Index $a not found in ${as}\n${this}")
-    if ib == -1 then throw new Exception(s"Index $b not found in ${bs}\n${this}")
-    val subIndexes = Array(ia, ib, 0, 0, 0)
-    val ind = getIndex(subIndexes, axisLengths, length, List(a, b))
-    val arr1 = arr.slice(ind, ind + axisLengths(1))
+    val vs = List(a, b)
+    val subIndexes = axes.lazyZip(vs).map(indexOfStrict(_, _, this))
+    val ind = getIndex(subIndexes, axisLengths, length, vs)
+    val arr1 = arr.slice(ind, ind + axisLengths(vs.size - 1))
     multiArray(cs, ds, arr1.map(f))
 
   def blockArrayA(): MultiArrayA[MultiArrayC[X, B, C, D], A] =
@@ -676,45 +988,31 @@ case class MultiArrayE[X, A, B, C, D, E](
   val length = axes.map(_.length).product
   val axisLengths = getAxisLengths(axes)
   def head = apply(as.head, bs.head, cs.head, ds.head, es.head)
-  def isEmpty = as.isEmpty || bs.isEmpty || cs.isEmpty || ds.isEmpty || es.isEmpty
+  def isEmpty = axes.exists(_.isEmpty)
 
   def apply(a: A, b: B, c: C, d: D, e: E) =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val ic = cs.indexOf(c)
-    val id = ds.indexOf(d)
-    val ie = es.indexOf(e)
-    val i = getIndex(Array(ia, ib, ic, id, ie), axisLengths, length, List(a, b, c, d, e))
-    arr(i)
+    val vs = List(a, b, c, d, e)
+    arr(getIndex(axes.lazyZip(vs).map(_ indexOf _), axisLengths, length, vs))
 
   def subArray[Z](a: A, f: X => Z)(using ClassTag[Z]): MultiArrayD[Z, B, C, D, E] =
-    val ia = as.indexOf(a)
-    if ia == -1 then throw new Exception(s"Index $a not found in ${as}\n${this}")
-    val subIndexes = Array(ia, 0, 0, 0, 0)
-    val ind = getIndex(subIndexes, axisLengths, length, List(a))
-    val arr1 = arr.slice(ind, ind + axisLengths(2))
+    val vs = List(a)
+    val subIndexes = axes.lazyZip(vs).map(indexOfStrict(_, _, this))
+    val ind = getIndex(subIndexes, axisLengths, length, vs)
+    val arr1 = arr.slice(ind, ind + axisLengths(vs.size - 1))
     multiArray(bs, cs, ds, es, arr1.map(f))
 
   def subArray[Z](a: A, b: B, f: X => Z)(using ClassTag[Z]): MultiArrayC[Z, C, D, E] =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    if ia == -1 then throw new Exception(s"Index $a not found in ${as}\n${this}")
-    if ib == -1 then throw new Exception(s"Index $b not found in ${bs}\n${this}")
-    val subIndexes = Array(ia, ib, 0, 0, 0)
-    val ind = getIndex(subIndexes, axisLengths, length, List(a, b))
-    val arr1 = arr.slice(ind, ind + axisLengths(2))
+    val vs = List(a, b)
+    val subIndexes = axes.lazyZip(vs).map(indexOfStrict(_, _, this))
+    val ind = getIndex(subIndexes, axisLengths, length, vs)
+    val arr1 = arr.slice(ind, ind + axisLengths(vs.size - 1))
     multiArray(cs, ds, es, arr1.map(f))
 
   def subArray[Z](a: A, b: B, c: C, f: X => Z)(using ClassTag[Z]): MultiArrayB[Z, D, E] =
-    val ia = as.indexOf(a)
-    val ib = bs.indexOf(b)
-    val ic = cs.indexOf(c)
-    if ia == -1 then throw new Exception(s"Index $a not found in ${as}\n${this}")
-    if ib == -1 then throw new Exception(s"Index $b not found in ${bs}\n${this}")
-    if ic == -1 then throw new Exception(s"Index $c not found in ${cs}\n${this}")
-    val subIndexes = Array(ia, ib, ic, 0, 0)
-    val ind = getIndex(subIndexes, axisLengths, length, List(a, b, c))
-    val arr1 = arr.slice(ind, ind + axisLengths(2))
+    val vs = List(a, b, c)
+    val subIndexes = axes.lazyZip(vs).map(indexOfStrict(_, _, this))
+    val ind = getIndex(subIndexes, axisLengths, length, vs)
+    val arr1 = arr.slice(ind, ind + axisLengths(vs.size - 1))
     MultiArrayB(ds, es, arr1.map(f))
 
   def plot(title: String, addTimeStamp: Boolean, name: String, visibleAxes: Boolean) = ???

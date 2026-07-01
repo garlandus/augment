@@ -25,6 +25,7 @@ lazy val root = project
       "org.typelevel" %% "cats-effect" % "3.7.0",
       "dev.zio" %% "zio" % "2.1.26",
       "dev.zio" %% "zio-direct" % "1.0.0-RC7" % "it,test",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
     ),
 
     Global / onChangedBuildSource := ReloadOnSourceChanges,

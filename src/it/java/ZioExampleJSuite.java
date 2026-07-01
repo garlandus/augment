@@ -1,4 +1,4 @@
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;

@@ -1,5 +1,5 @@
 import static augmented.augment.*;
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import basicdef.Color;
 import multiarray.ArrayB;
 import static multiarray.multiArray.*;

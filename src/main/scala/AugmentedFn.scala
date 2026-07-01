@@ -1028,3 +1028,649 @@ trait AugmentedFnG[Z, A, B, C, D, E, F, G, R[_, _, _, _, _, _, _, _], S[_, _, _,
   def apply[U, V](us: Seq[U], vs: Seq[V], g: (U, V) => (A, B, C, D, E, F, G))(using ClassTag[Z]) =
     val v = AugmentB[MultiArrayB, SeqB]()(us, vs, g)
     v.rectComprehension(f(_, _, _, _, _, _, _))
+
+trait AugmentedFnH[Z, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]](using
+    cr: ComprehensionH[R],
+    cs: ComprehensionH[S]
+) extends AugmentedFnHBase[Z, A, B, C, D, E, F, G, H]:
+
+  val baseShape = AugmentH[R, S]()
+
+  def apply[X <: Product](x: X)(using mp: ProdH[X, A, B, C, D, E, F, G, H]) =
+    val (a, b, c, d, e, f0, g0, h) = Tuple.fromProductTyped(x)
+    f(a, b, c, d, e, f0, g0, h)
+
+  def apply(as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], fs: Seq[F], gs: Seq[G], hs: Seq[H])(using
+      ClassTag[Z]
+  ): R[Z, A, B, C, D, E, F, G, H] =
+    val v = baseShape(as, bs, cs, ds, es, fs, gs, hs, f)
+    v.rectComprehension(id)
+
+  def apply(
+      as: Seq[A],
+      bs: GenSeqB[A, B],
+      cs: GenSeqC[A, B, C],
+      ds: GenSeqD[A, B, C, D],
+      es: GenSeqE[A, B, C, D, E],
+      fs: GenSeqF[A, B, C, D, E, F],
+      gs: GenSeqG[A, B, C, D, E, F, G],
+      hs: GenSeqH[A, B, C, D, E, F, G, H]
+  ) =
+    val v = baseShape(as, seq(bs), seq(cs), seq(ds), seq(es), seq(fs), seq(gs), seq(hs), f)
+    v.irregComprehension[Z](id)
+
+  infix def applyPlainForm[T[_]: Mappable](
+      a: => A,
+      bs: DepB[A, B],
+      cs: DepC[A, B, C],
+      ds: DepD[A, B, C, D],
+      es: DepE[A, B, C, D, E],
+      fs: DepF[A, B, C, D, E, F],
+      gs: DepG[A, B, C, D, E, F, G],
+      hs: DepH[A, B, C, D, E, F, G, H]
+  ) =
+    applyStandardForm(
+      a.unit(),
+      bs(_).unit(),
+      cs(_, _).unit(),
+      ds(_, _, _).unit(),
+      es(_, _, _, _).unit(),
+      fs(_, _, _, _, _).unit(),
+      gs(_, _, _, _, _, _).unit(),
+      hs(_, _, _, _, _, _, _).unit()
+    )
+
+  infix def applyRectangular[T[_]: Mappable](
+      as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E], fs: T[F], gs: T[G], hs: T[H]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs, f)
+
+  infix def applyStandardForm[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTC[T, A, B, C],
+      ds: DepTD[T, A, B, C, D],
+      es: DepTE[T, A, B, C, D, E],
+      fs: DepTF[T, A, B, C, D, E, F],
+      gs: DepTG[T, A, B, C, D, E, F, G],
+      hs: DepTH[T, A, B, C, D, E, F, G, H]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs, f)
+
+  def applyThreaded[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTB[T, B, C],
+      ds: DepTB[T, C, D],
+      es: DepTB[T, D, E],
+      fs: DepTB[T, E, F],
+      gs: DepTB[T, F, G],
+      hs: DepTB[T, G, H]
+  ) =
+    applyStandardForm(
+      as,
+      bs,
+      (_, b) => cs(b),
+      (_, _, c) => ds(c),
+      (_, _, _, d) => es(d),
+      (_, _, _, _, e) => fs(e),
+      (_, _, _, _, _, f0) => gs(f0),
+      (_, _, _, _, _, _, g0) => hs(g0)
+    )
+
+  infix def applyMixed[T[_]](
+      as: => Mixed[A, T],
+      bs: A => Mixed[B, T],
+      cs: (A, B) => Mixed[C, T],
+      ds: (A, B, C) => Mixed[D, T],
+      es: (A, B, C, D) => Mixed[E, T],
+      fs: (A, B, C, D, E) => Mixed[F, T],
+      gs: (A, B, C, D, E, F) => Mixed[G, T],
+      hs: (A, B, C, D, E, F, G) => Mixed[H, T]
+  )(using
+      m: Mappable[T],
+      ta: ClassTag[A],
+      tb: ClassTag[B],
+      tc: ClassTag[C],
+      td: ClassTag[D],
+      te: ClassTag[E],
+      tf: ClassTag[F],
+      tg: ClassTag[G],
+      th: ClassTag[H],
+      pa: Plain[A],
+      pb: Plain[B],
+      pc: Plain[C],
+      pd: Plain[D],
+      pe: Plain[E],
+      pf: Plain[F],
+      pg: Plain[G],
+      ph: Plain[H],
+      pz: Plain[Z]
+  ): T[Z] =
+    applyStandardForm(
+      toDerived(as),
+      a => toDerived(bs(a)),
+      (a, b) => toDerived(cs(a, b)),
+      (a, b, c) => toDerived(ds(a, b, c)),
+      (a, b, c, d) => toDerived(es(a, b, c, d)),
+      (a, b, c, d, e) => toDerived(fs(a, b, c, d, e)),
+      (a, b, c, d, e, f) => toDerived(gs(a, b, c, d, e, f)),
+      (a, b, c, d, e, f, g) => toDerived(hs(a, b, c, d, e, f, g))
+    )
+
+  def apply[U, V](us: Seq[U], vs: Seq[V], g: (U, V) => (A, B, C, D, E, F, G, H))(using tagZ: ClassTag[Z]) =
+    val v = AugmentB[MultiArrayB, SeqB]()(us, vs, g)
+    v.rectComprehension(f(_, _, _, _, _, _, _, _))
+
+trait AugmentedFnI[Z, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _]](using
+    cr: ComprehensionI[R],
+    cs: ComprehensionI[S]
+) extends AugmentedFnIBase[Z, A, B, C, D, E, F, G, H, I]:
+
+  val baseShape = AugmentI[R, S]()
+
+  def apply[X <: Product](x: X)(using mp: ProdI[X, A, B, C, D, E, F, G, H, I]) =
+    val (a, b, c, d, e, f0, g0, h, i) = Tuple.fromProductTyped(x)
+    f(a, b, c, d, e, f0, g0, h, i)
+
+  def apply(as: Seq[A], bs: Seq[B], cs: Seq[C], ds: Seq[D], es: Seq[E], fs: Seq[F], gs: Seq[G], hs: Seq[H], is: Seq[I])(
+      using ClassTag[Z]
+  ): R[Z, A, B, C, D, E, F, G, H, I] =
+    val v = baseShape(as, bs, cs, ds, es, fs, gs, hs, is, f)
+    v.rectComprehension(id)
+
+  def apply(
+      as: Seq[A],
+      bs: GenSeqB[A, B],
+      cs: GenSeqC[A, B, C],
+      ds: GenSeqD[A, B, C, D],
+      es: GenSeqE[A, B, C, D, E],
+      fs: GenSeqF[A, B, C, D, E, F],
+      gs: GenSeqG[A, B, C, D, E, F, G],
+      hs: GenSeqH[A, B, C, D, E, F, G, H],
+      is: GenSeqI[A, B, C, D, E, F, G, H, I]
+  ) =
+    val v = baseShape(as, seq(bs), seq(cs), seq(ds), seq(es), seq(fs), seq(gs), seq(hs), seq(is), f)
+    v.irregComprehension[Z](id)
+
+  infix def applyPlainForm[T[_]: Mappable](
+      a: => A,
+      bs: DepB[A, B],
+      cs: DepC[A, B, C],
+      ds: DepD[A, B, C, D],
+      es: DepE[A, B, C, D, E],
+      fs: DepF[A, B, C, D, E, F],
+      gs: DepG[A, B, C, D, E, F, G],
+      hs: DepH[A, B, C, D, E, F, G, H],
+      is: DepI[A, B, C, D, E, F, G, H, I]
+  ) =
+    applyStandardForm(
+      a.unit(),
+      bs(_).unit(),
+      cs(_, _).unit(),
+      ds(_, _, _).unit(),
+      es(_, _, _, _).unit(),
+      fs(_, _, _, _, _).unit(),
+      gs(_, _, _, _, _, _).unit(),
+      hs(_, _, _, _, _, _, _).unit(),
+      is(_, _, _, _, _, _, _, _).unit()
+    )
+
+  infix def applyRectangular[T[_]: Mappable](
+      as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E], fs: T[F], gs: T[G], hs: T[H], is: T[I]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is, f)
+
+  infix def applyStandardForm[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTC[T, A, B, C],
+      ds: DepTD[T, A, B, C, D],
+      es: DepTE[T, A, B, C, D, E],
+      fs: DepTF[T, A, B, C, D, E, F],
+      gs: DepTG[T, A, B, C, D, E, F, G],
+      hs: DepTH[T, A, B, C, D, E, F, G, H],
+      is: DepTI[T, A, B, C, D, E, F, G, H, I]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is, f)
+
+  def applyThreaded[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTB[T, B, C],
+      ds: DepTB[T, C, D],
+      es: DepTB[T, D, E],
+      fs: DepTB[T, E, F],
+      gs: DepTB[T, F, G],
+      hs: DepTB[T, G, H],
+      is: DepTB[T, H, I]
+  ) =
+    applyStandardForm(
+      as,
+      bs,
+      (_, b) => cs(b),
+      (_, _, c) => ds(c),
+      (_, _, _, d) => es(d),
+      (_, _, _, _, e) => fs(e),
+      (_, _, _, _, _, f0) => gs(f0),
+      (_, _, _, _, _, _, g0) => hs(g0),
+      (_, _, _, _, _, _, _, h) => is(h)
+    )
+
+  infix def applyMixed[T[_]](
+      as: => Mixed[A, T],
+      bs: A => Mixed[B, T],
+      cs: (A, B) => Mixed[C, T],
+      ds: (A, B, C) => Mixed[D, T],
+      es: (A, B, C, D) => Mixed[E, T],
+      fs: (A, B, C, D, E) => Mixed[F, T],
+      gs: (A, B, C, D, E, F) => Mixed[G, T],
+      hs: (A, B, C, D, E, F, G) => Mixed[H, T],
+      is: (A, B, C, D, E, F, G, H) => Mixed[I, T]
+  )(using
+      m: Mappable[T],
+      ta: ClassTag[A],
+      tb: ClassTag[B],
+      tc: ClassTag[C],
+      td: ClassTag[D],
+      te: ClassTag[E],
+      tf: ClassTag[F],
+      tg: ClassTag[G],
+      th: ClassTag[H],
+      ti: ClassTag[I],
+      pa: Plain[A],
+      pb: Plain[B],
+      pc: Plain[C],
+      pd: Plain[D],
+      pe: Plain[E],
+      pf: Plain[F],
+      pg: Plain[G],
+      ph: Plain[H],
+      pi: Plain[I],
+      pz: Plain[Z]
+  ): T[Z] =
+    applyStandardForm(
+      toDerived(as),
+      a => toDerived(bs(a)),
+      (a, b) => toDerived(cs(a, b)),
+      (a, b, c) => toDerived(ds(a, b, c)),
+      (a, b, c, d) => toDerived(es(a, b, c, d)),
+      (a, b, c, d, e) => toDerived(fs(a, b, c, d, e)),
+      (a, b, c, d, e, f) => toDerived(gs(a, b, c, d, e, f)),
+      (a, b, c, d, e, f, g) => toDerived(hs(a, b, c, d, e, f, g)),
+      (a, b, c, d, e, f, g, h) => toDerived(is(a, b, c, d, e, f, g, h))
+    )
+
+  def apply[U, V](us: Seq[U], vs: Seq[V], g: (U, V) => (A, B, C, D, E, F, G, H, I))(using tagZ: ClassTag[Z]) =
+    val v = AugmentB[MultiArrayB, SeqB]()(us, vs, g)
+    v.rectComprehension(f(_, _, _, _, _, _, _, _, _))
+
+trait AugmentedFnJ[Z, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](using
+    cr: ComprehensionJ[R],
+    cs: ComprehensionJ[S]
+) extends AugmentedFnJBase[Z, A, B, C, D, E, F, G, H, I, J]:
+
+  val baseShape = AugmentJ[R, S]()
+
+  def apply[X <: Product](x: X)(using mp: ProdJ[X, A, B, C, D, E, F, G, H, I, J]) =
+    val (a, b, c, d, e, f0, g0, h, i0, j) = Tuple.fromProductTyped(x)
+    f(a, b, c, d, e, f0, g0, h, i0, j)
+
+  def apply(
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J]
+  )(using ClassTag[Z]): R[Z, A, B, C, D, E, F, G, H, I, J] =
+    val v = baseShape(as, bs, cs, ds, es, fs, gs, hs, is, js, f)
+    v.rectComprehension(id)
+
+  def apply(
+      as: Seq[A],
+      bs: GenSeqB[A, B],
+      cs: GenSeqC[A, B, C],
+      ds: GenSeqD[A, B, C, D],
+      es: GenSeqE[A, B, C, D, E],
+      fs: GenSeqF[A, B, C, D, E, F],
+      gs: GenSeqG[A, B, C, D, E, F, G],
+      hs: GenSeqH[A, B, C, D, E, F, G, H],
+      is: GenSeqI[A, B, C, D, E, F, G, H, I],
+      js: GenSeqJ[A, B, C, D, E, F, G, H, I, J]
+  ) =
+    val v = baseShape(as, seq(bs), seq(cs), seq(ds), seq(es), seq(fs), seq(gs), seq(hs), seq(is), seq(js), f)
+    v.irregComprehension[Z](id)
+
+  infix def applyPlainForm[T[_]: Mappable](
+      a: => A,
+      bs: DepB[A, B],
+      cs: DepC[A, B, C],
+      ds: DepD[A, B, C, D],
+      es: DepE[A, B, C, D, E],
+      fs: DepF[A, B, C, D, E, F],
+      gs: DepG[A, B, C, D, E, F, G],
+      hs: DepH[A, B, C, D, E, F, G, H],
+      is: DepI[A, B, C, D, E, F, G, H, I],
+      js: DepJ[A, B, C, D, E, F, G, H, I, J]
+  ) =
+    applyStandardForm(
+      a.unit(),
+      bs(_).unit(),
+      cs(_, _).unit(),
+      ds(_, _, _).unit(),
+      es(_, _, _, _).unit(),
+      fs(_, _, _, _, _).unit(),
+      gs(_, _, _, _, _, _).unit(),
+      hs(_, _, _, _, _, _, _).unit(),
+      is(_, _, _, _, _, _, _, _).unit(),
+      js(_, _, _, _, _, _, _, _, _).unit()
+    )
+
+  infix def applyRectangular[T[_]: Mappable](
+      as: T[A], bs: T[B], cs: T[C], ds: T[D], es: T[E], fs: T[F], gs: T[G], hs: T[H], is: T[I], js: T[J]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js, f)
+
+  infix def applyStandardForm[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTC[T, A, B, C],
+      ds: DepTD[T, A, B, C, D],
+      es: DepTE[T, A, B, C, D, E],
+      fs: DepTF[T, A, B, C, D, E, F],
+      gs: DepTG[T, A, B, C, D, E, F, G],
+      hs: DepTH[T, A, B, C, D, E, F, G, H],
+      is: DepTI[T, A, B, C, D, E, F, G, H, I],
+      js: DepTJ[T, A, B, C, D, E, F, G, H, I, J]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js, f)
+
+  def applyThreaded[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTB[T, B, C],
+      ds: DepTB[T, C, D],
+      es: DepTB[T, D, E],
+      fs: DepTB[T, E, F],
+      gs: DepTB[T, F, G],
+      hs: DepTB[T, G, H],
+      is: DepTB[T, H, I],
+      js: DepTB[T, I, J]
+  ) =
+    applyStandardForm(
+      as,
+      bs,
+      (_, b) => cs(b),
+      (_, _, c) => ds(c),
+      (_, _, _, d) => es(d),
+      (_, _, _, _, e) => fs(e),
+      (_, _, _, _, _, f0) => gs(f0),
+      (_, _, _, _, _, _, g0) => hs(g0),
+      (_, _, _, _, _, _, _, h) => is(h),
+      (_, _, _, _, _, _, _, _, i0) => js(i0)
+    )
+
+  infix def applyMixed[T[_]](
+      as: => Mixed[A, T],
+      bs: A => Mixed[B, T],
+      cs: (A, B) => Mixed[C, T],
+      ds: (A, B, C) => Mixed[D, T],
+      es: (A, B, C, D) => Mixed[E, T],
+      fs: (A, B, C, D, E) => Mixed[F, T],
+      gs: (A, B, C, D, E, F) => Mixed[G, T],
+      hs: (A, B, C, D, E, F, G) => Mixed[H, T],
+      is: (A, B, C, D, E, F, G, H) => Mixed[I, T],
+      js: (A, B, C, D, E, F, G, H, I) => Mixed[J, T]
+  )(using
+      m: Mappable[T],
+      ta: ClassTag[A],
+      tb: ClassTag[B],
+      tc: ClassTag[C],
+      td: ClassTag[D],
+      te: ClassTag[E],
+      tf: ClassTag[F],
+      tg: ClassTag[G],
+      th: ClassTag[H],
+      ti: ClassTag[I],
+      tj: ClassTag[J],
+      pa: Plain[A],
+      pb: Plain[B],
+      pc: Plain[C],
+      pd: Plain[D],
+      pe: Plain[E],
+      pf: Plain[F],
+      pg: Plain[G],
+      ph: Plain[H],
+      pi: Plain[I],
+      pj: Plain[J],
+      pz: Plain[Z]
+  ): T[Z] =
+    applyStandardForm(
+      toDerived(as),
+      a => toDerived(bs(a)),
+      (a, b) => toDerived(cs(a, b)),
+      (a, b, c) => toDerived(ds(a, b, c)),
+      (a, b, c, d) => toDerived(es(a, b, c, d)),
+      (a, b, c, d, e) => toDerived(fs(a, b, c, d, e)),
+      (a, b, c, d, e, f) => toDerived(gs(a, b, c, d, e, f)),
+      (a, b, c, d, e, f, g) => toDerived(hs(a, b, c, d, e, f, g)),
+      (a, b, c, d, e, f, g, h) => toDerived(is(a, b, c, d, e, f, g, h)),
+      (a, b, c, d, e, f, g, h, i) => toDerived(js(a, b, c, d, e, f, g, h, i))
+    )
+
+  def apply[U, V](us: Seq[U], vs: Seq[V], g: (U, V) => (A, B, C, D, E, F, G, H, I, J))(using tagZ: ClassTag[Z]) =
+    val v = AugmentB[MultiArrayB, SeqB]()(us, vs, g)
+    v.rectComprehension(f(_, _, _, _, _, _, _, _, _, _))
+
+trait AugmentedFnK[Z, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](using
+    cr: ComprehensionK[R],
+    cs: ComprehensionK[S]
+) extends AugmentedFnKBase[Z, A, B, C, D, E, F, G, H, I, J, K]:
+
+  val baseShape = AugmentK[R, S]()
+
+  def apply[X <: Product](x: X)(using mp: ProdK[X, A, B, C, D, E, F, G, H, I, J, K]) =
+    val (a, b, c, d, e, f0, g0, h, i0, j, k) = Tuple.fromProductTyped(x)
+    f(a, b, c, d, e, f0, g0, h, i0, j, k)
+
+  def apply(
+      as: Seq[A],
+      bs: Seq[B],
+      cs: Seq[C],
+      ds: Seq[D],
+      es: Seq[E],
+      fs: Seq[F],
+      gs: Seq[G],
+      hs: Seq[H],
+      is: Seq[I],
+      js: Seq[J],
+      ks: Seq[K]
+  )(using ClassTag[Z]): R[Z, A, B, C, D, E, F, G, H, I, J, K] =
+    val v = baseShape(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f)
+    v.rectComprehension(id)
+
+  def apply(
+      as: Seq[A],
+      bs: GenSeqB[A, B],
+      cs: GenSeqC[A, B, C],
+      ds: GenSeqD[A, B, C, D],
+      es: GenSeqE[A, B, C, D, E],
+      fs: GenSeqF[A, B, C, D, E, F],
+      gs: GenSeqG[A, B, C, D, E, F, G],
+      hs: GenSeqH[A, B, C, D, E, F, G, H],
+      is: GenSeqI[A, B, C, D, E, F, G, H, I],
+      js: GenSeqJ[A, B, C, D, E, F, G, H, I, J],
+      ks: GenSeqK[A, B, C, D, E, F, G, H, I, J, K]
+  ) =
+    val v = baseShape(as, seq(bs), seq(cs), seq(ds), seq(es), seq(fs), seq(gs), seq(hs), seq(is), seq(js), seq(ks), f)
+    v.irregComprehension[Z](id)
+
+  infix def applyPlainForm[T[_]: Mappable](
+      a: => A,
+      bs: DepB[A, B],
+      cs: DepC[A, B, C],
+      ds: DepD[A, B, C, D],
+      es: DepE[A, B, C, D, E],
+      fs: DepF[A, B, C, D, E, F],
+      gs: DepG[A, B, C, D, E, F, G],
+      hs: DepH[A, B, C, D, E, F, G, H],
+      is: DepI[A, B, C, D, E, F, G, H, I],
+      js: DepJ[A, B, C, D, E, F, G, H, I, J],
+      ks: DepK[A, B, C, D, E, F, G, H, I, J, K]
+  ) =
+    applyStandardForm(
+      a.unit(),
+      bs(_).unit(),
+      cs(_, _).unit(),
+      ds(_, _, _).unit(),
+      es(_, _, _, _).unit(),
+      fs(_, _, _, _, _).unit(),
+      gs(_, _, _, _, _, _).unit(),
+      hs(_, _, _, _, _, _, _).unit(),
+      is(_, _, _, _, _, _, _, _).unit(),
+      js(_, _, _, _, _, _, _, _, _).unit(),
+      ks(_, _, _, _, _, _, _, _, _, _).unit()
+    )
+
+  infix def applyRectangular[T[_]: Mappable](
+      as: T[A],
+      bs: T[B],
+      cs: T[C],
+      ds: T[D],
+      es: T[E],
+      fs: T[F],
+      gs: T[G],
+      hs: T[H],
+      is: T[I],
+      js: T[J],
+      ks: T[K]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js ⨉ ks, f)
+
+  infix def applyStandardForm[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTC[T, A, B, C],
+      ds: DepTD[T, A, B, C, D],
+      es: DepTE[T, A, B, C, D, E],
+      fs: DepTF[T, A, B, C, D, E, F],
+      gs: DepTG[T, A, B, C, D, E, F, G],
+      hs: DepTH[T, A, B, C, D, E, F, G, H],
+      is: DepTI[T, A, B, C, D, E, F, G, H, I],
+      js: DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+      ks: DepTK[T, A, B, C, D, E, F, G, H, I, J, K]
+  ) =
+    mapOverContext(as ⨉ bs ⨉ cs ⨉ ds ⨉ es ⨉ fs ⨉ gs ⨉ hs ⨉ is ⨉ js ⨉ ks, f)
+
+  def applyThreaded[T[_]: Mappable](
+      as: T[A],
+      bs: DepTB[T, A, B],
+      cs: DepTB[T, B, C],
+      ds: DepTB[T, C, D],
+      es: DepTB[T, D, E],
+      fs: DepTB[T, E, F],
+      gs: DepTB[T, F, G],
+      hs: DepTB[T, G, H],
+      is: DepTB[T, H, I],
+      js: DepTB[T, I, J],
+      ks: DepTB[T, J, K]
+  ) =
+    applyStandardForm(
+      as,
+      bs,
+      (_, b) => cs(b),
+      (_, _, c) => ds(c),
+      (_, _, _, d) => es(d),
+      (_, _, _, _, e) => fs(e),
+      (_, _, _, _, _, f0) => gs(f0),
+      (_, _, _, _, _, _, g0) => hs(g0),
+      (_, _, _, _, _, _, _, h) => is(h),
+      (_, _, _, _, _, _, _, _, i0) => js(i0),
+      (_, _, _, _, _, _, _, _, _, j) => ks(j)
+    )
+
+  infix def applyMixed[T[_]](
+      as: => Mixed[A, T],
+      bs: A => Mixed[B, T],
+      cs: (A, B) => Mixed[C, T],
+      ds: (A, B, C) => Mixed[D, T],
+      es: (A, B, C, D) => Mixed[E, T],
+      fs: (A, B, C, D, E) => Mixed[F, T],
+      gs: (A, B, C, D, E, F) => Mixed[G, T],
+      hs: (A, B, C, D, E, F, G) => Mixed[H, T],
+      is: (A, B, C, D, E, F, G, H) => Mixed[I, T],
+      js: (A, B, C, D, E, F, G, H, I) => Mixed[J, T],
+      ks: (A, B, C, D, E, F, G, H, I, J) => Mixed[K, T]
+  )(using
+      m: Mappable[T],
+      ta: ClassTag[A],
+      tb: ClassTag[B],
+      tc: ClassTag[C],
+      td: ClassTag[D],
+      te: ClassTag[E],
+      tf: ClassTag[F],
+      tg: ClassTag[G],
+      th: ClassTag[H],
+      ti: ClassTag[I],
+      tj: ClassTag[J],
+      tk: ClassTag[K],
+      pa: Plain[A],
+      pb: Plain[B],
+      pc: Plain[C],
+      pd: Plain[D],
+      pe: Plain[E],
+      pf: Plain[F],
+      pg: Plain[G],
+      ph: Plain[H],
+      pi: Plain[I],
+      pj: Plain[J],
+      pk: Plain[K],
+      pz: Plain[Z]
+  ): T[Z] =
+    applyStandardForm(
+      toDerived(as),
+      a => toDerived(bs(a)),
+      (a, b) => toDerived(cs(a, b)),
+      (a, b, c) => toDerived(ds(a, b, c)),
+      (a, b, c, d) => toDerived(es(a, b, c, d)),
+      (a, b, c, d, e) => toDerived(fs(a, b, c, d, e)),
+      (a, b, c, d, e, f) => toDerived(gs(a, b, c, d, e, f)),
+      (a, b, c, d, e, f, g) => toDerived(hs(a, b, c, d, e, f, g)),
+      (a, b, c, d, e, f, g, h) => toDerived(is(a, b, c, d, e, f, g, h)),
+      (a, b, c, d, e, f, g, h, i) => toDerived(js(a, b, c, d, e, f, g, h, i)),
+      (a, b, c, d, e, f, g, h, i, j) => toDerived(ks(a, b, c, d, e, f, g, h, i, j))
+    )
+
+  def apply[U, V](us: Seq[U], vs: Seq[V], g: (U, V) => (A, B, C, D, E, F, G, H, I, J, K))(using tagZ: ClassTag[Z]) =
+    val v = AugmentB[MultiArrayB, SeqB]()(us, vs, g)
+    v.rectComprehension(f(_, _, _, _, _, _, _, _, _, _, _))

@@ -128,7 +128,7 @@ You can add the following to the dependencies in a *pom.xml* file:
 
 Imports to get you started:
 ```java
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import static java.util.stream.IntStream.range;
 ```
 

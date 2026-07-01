@@ -1,6 +1,6 @@
 package examples;
 
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import util.JavaUtil.Pair;
 import scala.runtime.*;
 

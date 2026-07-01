@@ -2,8 +2,7 @@ package mappable
 
 import augmented.augment
 import augmented.given
-import shape.Mixed
-import shape.{DepTB, DepTC, DepTD, DepTE, DepTF, DepTG}
+import shape._
 
 import scala.reflect.ClassTag
 import scala.util._
@@ -29,6 +28,22 @@ given [T[_]: Mappable as t, A, B, C, D, E, Z]: Productive[T, (A, B, C, D, E), Z,
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
 given [T[_]: Mappable as t, A, B, C, D, E, F, Z]: Productive[T, (A, B, C, D, E, F), Z, DepTG[T, A, B, C, D, E, F, Z]] =
+  (xs, ys) => t.mproduct(xs, ys.tupled)
+
+given [T[_]: Mappable as t, A, B, C, D, E, F, G, Z]
+    : Productive[T, (A, B, C, D, E, F, G), Z, DepTH[T, A, B, C, D, E, F, G, Z]] =
+  (xs, ys) => t.mproduct(xs, ys.tupled)
+
+given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, Z]
+    : Productive[T, (A, B, C, D, E, F, G, H), Z, DepTI[T, A, B, C, D, E, F, G, H, Z]] =
+  (xs, ys) => t.mproduct(xs, ys.tupled)
+
+given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, I, Z]
+    : Productive[T, (A, B, C, D, E, F, G, H, I), Z, DepTJ[T, A, B, C, D, E, F, G, H, I, Z]] =
+  (xs, ys) => t.mproduct(xs, ys.tupled)
+
+given [T[_]: Mappable as t, A, B, C, D, E, F, G, H, I, J, Z]
+    : Productive[T, (A, B, C, D, E, F, G, H, I, J), Z, DepTK[T, A, B, C, D, E, F, G, H, I, J, Z]] =
   (xs, ys) => t.mproduct(xs, ys.tupled)
 
 given [A, B]: Productive[Seq, A, B, Seq[B]] = (as, bs) => as.flatMap(a => bs.map(b => (a, b)))

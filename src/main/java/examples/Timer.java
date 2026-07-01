@@ -1,7 +1,7 @@
 package examples;
 
-import static augmented.augmentJ.*;
-import static augmented.augmentJ.sequence;
+import static augmented.augmentedJ.*;
+import static augmented.augmentedJ.sequence;
 import static util.AugmentUtil.*;
 import static util.ZioUtil.sequence;
 import util.AugmentUtil.Unit;
@@ -55,7 +55,7 @@ public class Timer
   public static ZIO<Object, FailureReason, Integer> getGainControl(List<String> args) {
     var DEFAULT_GAIN = -39;
     return args.size() == 2 ? zioAttempt(() -> Integer.parseInt(args.get(1)), FailureReason.InvalidIntForGain)
-        : augmented.augmentJ.<FailureReason, Integer>zioSucceed(DEFAULT_GAIN);
+        : augmented.augmentedJ.<FailureReason, Integer>zioSucceed(DEFAULT_GAIN);
   }
 
   public static ZIO<Object, Object, Unit> printTimerStartingMsg(Integer minutesToWait) {

@@ -1,6 +1,6 @@
 package util;
 
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import util.AugmentUtil.*;
 
 import static scala.jdk.javaapi.FunctionConverters.*;
@@ -13,9 +13,9 @@ public class ZioUtil {
     return () -> {
       try {
         f.apply();
-        return augmented.augmentJ.<E1, Unit>zioSucceed(new Unit());
+        return augmented.augmentedJ.<E1, Unit>zioSucceed(new Unit());
       } catch (Throwable e) {
-        return augmented.augmentJ.<E1, Unit>zioFail((E1) e);
+        return augmented.augmentedJ.<E1, Unit>zioFail((E1) e);
       }
     };
   };
@@ -27,9 +27,9 @@ public class ZioUtil {
   public static <R, E1 extends Throwable> Fn0<ZIO<Object, E1, R>> attemptFn(ThrowingFn0<R, E1> f) {
     return () -> {
       try {
-        return augmented.augmentJ.<E1, R>zioSucceed(f.apply());
+        return augmented.augmentedJ.<E1, R>zioSucceed(f.apply());
       } catch (Throwable e) {
-        return augmented.augmentJ.<E1, R>zioFail((E1) e);
+        return augmented.augmentedJ.<E1, R>zioFail((E1) e);
       }
     };
   };
@@ -38,9 +38,9 @@ public class ZioUtil {
       E2 e) {
     return () -> {
       try {
-        return augmented.augmentJ.<E2, R>zioSucceed(f.apply());
+        return augmented.augmentedJ.<E2, R>zioSucceed(f.apply());
       } catch (Throwable exc) {
-        return augmented.augmentJ.<E2, R>zioFail(e);
+        return augmented.augmentedJ.<E2, R>zioFail(e);
       }
     };
   };
@@ -52,9 +52,9 @@ public class ZioUtil {
   public static <T, R, E1 extends Throwable> Fn1<T, ZIO<Object, E1, R>> attemptFn(ThrowingFn1<T, R, E1> f) {
     return t -> {
       try {
-        return augmented.augmentJ.<E1, R>zioSucceed(f.apply(t));
+        return augmented.augmentedJ.<E1, R>zioSucceed(f.apply(t));
       } catch (Throwable e) {
-        return augmented.augmentJ.<E1, R>zioFail((E1) e);
+        return augmented.augmentedJ.<E1, R>zioFail((E1) e);
       }
     };
   };
@@ -66,9 +66,9 @@ public class ZioUtil {
   static <T, U, R, E1 extends Throwable> Fn2<T, U, ZIO<Object, E1, R>> attemptFn(ThrowingFn2<T, U, R, E1> f) {
     return (t, u) -> {
       try {
-        return augmented.augmentJ.<E1, R>zioSucceed(f.apply(t, u));
+        return augmented.augmentedJ.<E1, R>zioSucceed(f.apply(t, u));
       } catch (Throwable e) {
-        return augmented.augmentJ.<E1, R>zioFail((E1) e);
+        return augmented.augmentedJ.<E1, R>zioFail((E1) e);
       }
     };
   };

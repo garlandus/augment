@@ -1,4 +1,4 @@
-import static augmented.augmentJ.*;
+import static augmented.augmentedJ.*;
 import static mappable.Mapper.*;
 
 import java.util.concurrent.*;

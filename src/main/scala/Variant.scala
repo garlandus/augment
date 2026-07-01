@@ -426,3 +426,548 @@ case class VariantIrregDerivedG[T[_], X, A, B, C, D, E, F, G, R[_, _, _, _, _, _
 )(using Mappable[T]):
   def irregComprehensionDerived[Z](using c: ComprehensionG[S]): (X => Z) => T[Z] =
     c.irregularDerived(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, f, _)
+
+trait VariantHT[X, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]]:
+  def as: Seq[A]
+  def bsDep: DepSeqB[A, B]
+  def csDep: DepSeqC[A, B, C]
+  def dsDep: DepSeqD[A, B, C, D]
+  def esDep: DepSeqE[A, B, C, D, E]
+  def fsDep: DepSeqF[A, B, C, D, E, F]
+  def gsDep: DepSeqG[A, B, C, D, E, F, G]
+  def hsDep: DepSeqH[A, B, C, D, E, F, G, H]
+
+  def f: (A, B, C, D, E, F, G, H) => X
+
+  def rectComprehension[Z](using c: ComprehensionH[R], t: ClassTag[Z]): (X => Z) => R[Z, A, B, C, D, E, F, G, H]
+  def irregComprehension[Z](using c: ComprehensionH[S]): (X => Z) => S[Z, A, B, C, D, E, F, G, H]
+
+case class VariantRectH[X, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    f: (A, B, C, D, E, F, G, H) => X
+) extends VariantHT[X, A, B, C, D, E, F, G, H, R, S]:
+  def bsDep = (a: A) => bs
+  def csDep = (a: A, b: B) => cs
+  def dsDep = (a: A, b: B, c: C) => ds
+  def esDep = (a: A, b: B, c: C, d: D) => es
+  def fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
+  def gsDep = (a: A, b: B, c: C, d: D, e: E, f0: F) => gs
+  def hsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G) => hs
+  def rectComprehension[Z](using c: ComprehensionH[R], t: ClassTag[Z]) =
+    c.rectangular(as, bs, cs, ds, es, fs, gs, hs, f, _)
+  def irregComprehension[Z](using c: ComprehensionH[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, f, _)
+
+case class VariantIrregH[X, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _]](
+    as: Seq[A],
+    bsDep: DepSeqB[A, B],
+    csDep: DepSeqC[A, B, C],
+    dsDep: DepSeqD[A, B, C, D],
+    esDep: DepSeqE[A, B, C, D, E],
+    fsDep: DepSeqF[A, B, C, D, E, F],
+    gsDep: DepSeqG[A, B, C, D, E, F, G],
+    hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+    f: (A, B, C, D, E, F, G, H) => X
+) extends VariantHT[X, A, B, C, D, E, F, G, H, R, S]:
+  def rectComprehension[Z](using c: ComprehensionH[R], t: ClassTag[Z]) = ???
+  def irregComprehension[Z](using c: ComprehensionH[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, f, _)
+
+case class VariantRectDerivedH[T[_], X, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bs: T[B],
+    cs: T[C],
+    ds: T[D],
+    es: T[E],
+    fs: T[F],
+    gs: T[G],
+    hs: T[H],
+    f: (A, B, C, D, E, F, G, H) => X
+)(using Mappable[T]):
+  def rectComprehensionDerived[Z](using c: ComprehensionH[R]): (X => Z) => T[Z] =
+    c.rectDerived(as, bs, cs, ds, es, fs, gs, hs, f, _)
+
+case class VariantIrregDerivedH[T[_], X, A, B, C, D, E, F, G, H, R[_, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bsDep: DepTB[T, A, B],
+    csDep: DepTC[T, A, B, C],
+    dsDep: DepTD[T, A, B, C, D],
+    esDep: DepTE[T, A, B, C, D, E],
+    fsDep: DepTF[T, A, B, C, D, E, F],
+    gsDep: DepTG[T, A, B, C, D, E, F, G],
+    hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+    f: (A, B, C, D, E, F, G, H) => X
+)(using Mappable[T]):
+  def irregComprehensionDerived[Z](using c: ComprehensionH[R]): (X => Z) => T[Z] =
+    c.irregularDerived(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, f, _)
+
+trait VariantIT[X, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _]]:
+  def as: Seq[A]
+  def bsDep: DepSeqB[A, B]
+  def csDep: DepSeqC[A, B, C]
+  def dsDep: DepSeqD[A, B, C, D]
+  def esDep: DepSeqE[A, B, C, D, E]
+  def fsDep: DepSeqF[A, B, C, D, E, F]
+  def gsDep: DepSeqG[A, B, C, D, E, F, G]
+  def hsDep: DepSeqH[A, B, C, D, E, F, G, H]
+  def isDep: DepSeqI[A, B, C, D, E, F, G, H, I]
+
+  def f: (A, B, C, D, E, F, G, H, I) => X
+
+  def rectComprehension[Z](using c: ComprehensionI[R], t: ClassTag[Z]): (X => Z) => R[Z, A, B, C, D, E, F, G, H, I]
+  def irregComprehension[Z](using c: ComprehensionI[S]): (X => Z) => S[Z, A, B, C, D, E, F, G, H, I]
+
+case class VariantRectI[X, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[_, _, _, _, _, _, _, _, _, _]](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    f: (A, B, C, D, E, F, G, H, I) => X
+) extends VariantIT[X, A, B, C, D, E, F, G, H, I, R, S]:
+  def bsDep = (a: A) => bs
+  def csDep = (a: A, b: B) => cs
+  def dsDep = (a: A, b: B, c: C) => ds
+  def esDep = (a: A, b: B, c: C, d: D) => es
+  def fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
+  def gsDep = (a: A, b: B, c: C, d: D, e: E, f0: F) => gs
+  def hsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G) => hs
+  def isDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H) => is
+  def rectComprehension[Z](using c: ComprehensionI[R], t: ClassTag[Z]) =
+    c.rectangular(as, bs, cs, ds, es, fs, gs, hs, is, f, _)
+  def irregComprehension[Z](using c: ComprehensionI[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, f, _)
+
+case class VariantIrregI[
+    X,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    R[_, _, _, _, _, _, _, _, _, _],
+    S[_, _, _, _, _, _, _, _, _, _]
+](
+    as: Seq[A],
+    bsDep: DepSeqB[A, B],
+    csDep: DepSeqC[A, B, C],
+    dsDep: DepSeqD[A, B, C, D],
+    esDep: DepSeqE[A, B, C, D, E],
+    fsDep: DepSeqF[A, B, C, D, E, F],
+    gsDep: DepSeqG[A, B, C, D, E, F, G],
+    hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+    isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+    f: (A, B, C, D, E, F, G, H, I) => X
+) extends VariantIT[X, A, B, C, D, E, F, G, H, I, R, S]:
+  def rectComprehension[Z](using c: ComprehensionI[R], t: ClassTag[Z]) = ???
+  def irregComprehension[Z](using c: ComprehensionI[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, f, _)
+
+case class VariantRectDerivedI[T[_], X, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bs: T[B],
+    cs: T[C],
+    ds: T[D],
+    es: T[E],
+    fs: T[F],
+    gs: T[G],
+    hs: T[H],
+    is: T[I],
+    f: (A, B, C, D, E, F, G, H, I) => X
+)(using Mappable[T]):
+  def rectComprehensionDerived[Z](using c: ComprehensionI[R]): (X => Z) => T[Z] =
+    c.rectDerived(as, bs, cs, ds, es, fs, gs, hs, is, f, _)
+
+case class VariantIrregDerivedI[T[_], X, A, B, C, D, E, F, G, H, I, R[_, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bsDep: DepTB[T, A, B],
+    csDep: DepTC[T, A, B, C],
+    dsDep: DepTD[T, A, B, C, D],
+    esDep: DepTE[T, A, B, C, D, E],
+    fsDep: DepTF[T, A, B, C, D, E, F],
+    gsDep: DepTG[T, A, B, C, D, E, F, G],
+    hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+    isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+    f: (A, B, C, D, E, F, G, H, I) => X
+)(using Mappable[T]):
+  def irregComprehensionDerived[Z](using c: ComprehensionI[R]): (X => Z) => T[Z] =
+    c.irregularDerived(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, f, _)
+
+trait VariantJT[
+    X,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    R[_, _, _, _, _, _, _, _, _, _, _],
+    S[_, _, _, _, _, _, _, _, _, _, _]
+]:
+  def as: Seq[A]
+  def bsDep: DepSeqB[A, B]
+  def csDep: DepSeqC[A, B, C]
+  def dsDep: DepSeqD[A, B, C, D]
+  def esDep: DepSeqE[A, B, C, D, E]
+  def fsDep: DepSeqF[A, B, C, D, E, F]
+  def gsDep: DepSeqG[A, B, C, D, E, F, G]
+  def hsDep: DepSeqH[A, B, C, D, E, F, G, H]
+  def isDep: DepSeqI[A, B, C, D, E, F, G, H, I]
+  def jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J]
+
+  def f: (A, B, C, D, E, F, G, H, I, J) => X
+
+  def rectComprehension[Z](using c: ComprehensionJ[R], t: ClassTag[Z]): (X => Z) => R[Z, A, B, C, D, E, F, G, H, I, J]
+  def irregComprehension[Z](using c: ComprehensionJ[S]): (X => Z) => S[Z, A, B, C, D, E, F, G, H, I, J]
+
+case class VariantRectJ[X, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    f: (A, B, C, D, E, F, G, H, I, J) => X
+) extends VariantJT[X, A, B, C, D, E, F, G, H, I, J, R, S]:
+  def bsDep = (a: A) => bs
+  def csDep = (a: A, b: B) => cs
+  def dsDep = (a: A, b: B, c: C) => ds
+  def esDep = (a: A, b: B, c: C, d: D) => es
+  def fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
+  def gsDep = (a: A, b: B, c: C, d: D, e: E, f0: F) => gs
+  def hsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G) => hs
+  def isDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H) => is
+  def jsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I) => js
+  def rectComprehension[Z](using c: ComprehensionJ[R], t: ClassTag[Z]) =
+    c.rectangular(as, bs, cs, ds, es, fs, gs, hs, is, js, f, _)
+  def irregComprehension[Z](using c: ComprehensionJ[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, f, _)
+
+case class VariantIrregJ[X, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: Seq[A],
+    bsDep: DepSeqB[A, B],
+    csDep: DepSeqC[A, B, C],
+    dsDep: DepSeqD[A, B, C, D],
+    esDep: DepSeqE[A, B, C, D, E],
+    fsDep: DepSeqF[A, B, C, D, E, F],
+    gsDep: DepSeqG[A, B, C, D, E, F, G],
+    hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+    isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+    jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+    f: (A, B, C, D, E, F, G, H, I, J) => X
+) extends VariantJT[X, A, B, C, D, E, F, G, H, I, J, R, S]:
+  def rectComprehension[Z](using c: ComprehensionJ[R], t: ClassTag[Z]) = ???
+  def irregComprehension[Z](using c: ComprehensionJ[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, f, _)
+
+case class VariantRectDerivedJ[T[_], X, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bs: T[B],
+    cs: T[C],
+    ds: T[D],
+    es: T[E],
+    fs: T[F],
+    gs: T[G],
+    hs: T[H],
+    is: T[I],
+    js: T[J],
+    f: (A, B, C, D, E, F, G, H, I, J) => X
+)(using Mappable[T]):
+  def rectComprehensionDerived[Z](using c: ComprehensionJ[R]): (X => Z) => T[Z] =
+    c.rectDerived(as, bs, cs, ds, es, fs, gs, hs, is, js, f, _)
+
+case class VariantIrregDerivedJ[T[_], X, A, B, C, D, E, F, G, H, I, J, R[_, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bsDep: DepTB[T, A, B],
+    csDep: DepTC[T, A, B, C],
+    dsDep: DepTD[T, A, B, C, D],
+    esDep: DepTE[T, A, B, C, D, E],
+    fsDep: DepTF[T, A, B, C, D, E, F],
+    gsDep: DepTG[T, A, B, C, D, E, F, G],
+    hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+    isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+    jsDep: DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+    f: (A, B, C, D, E, F, G, H, I, J) => X
+)(using Mappable[T]):
+  def irregComprehensionDerived[Z](using c: ComprehensionJ[R]): (X => Z) => T[Z] =
+    c.irregularDerived(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, f, _)
+
+trait VariantKT[X, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]]:
+  def as: Seq[A]
+  def bsDep: DepSeqB[A, B]
+  def csDep: DepSeqC[A, B, C]
+  def dsDep: DepSeqD[A, B, C, D]
+  def esDep: DepSeqE[A, B, C, D, E]
+  def fsDep: DepSeqF[A, B, C, D, E, F]
+  def gsDep: DepSeqG[A, B, C, D, E, F, G]
+  def hsDep: DepSeqH[A, B, C, D, E, F, G, H]
+  def isDep: DepSeqI[A, B, C, D, E, F, G, H, I]
+  def jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J]
+  def ksDep: DepSeqK[A, B, C, D, E, F, G, H, I, J, K]
+
+  def f: (A, B, C, D, E, F, G, H, I, J, K) => X
+
+  def rectComprehension[Z](using
+      c: ComprehensionK[R],
+      t: ClassTag[Z]
+  ): (X => Z) => R[Z, A, B, C, D, E, F, G, H, I, J, K]
+  def irregComprehension[Z](using c: ComprehensionK[S]): (X => Z) => S[Z, A, B, C, D, E, F, G, H, I, J, K]
+
+case class VariantRectK[X, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: Seq[A],
+    bs: Seq[B],
+    cs: Seq[C],
+    ds: Seq[D],
+    es: Seq[E],
+    fs: Seq[F],
+    gs: Seq[G],
+    hs: Seq[H],
+    is: Seq[I],
+    js: Seq[J],
+    ks: Seq[K],
+    f: (A, B, C, D, E, F, G, H, I, J, K) => X
+) extends VariantKT[X, A, B, C, D, E, F, G, H, I, J, K, R, S]:
+  def bsDep = (a: A) => bs
+  def csDep = (a: A, b: B) => cs
+  def dsDep = (a: A, b: B, c: C) => ds
+  def esDep = (a: A, b: B, c: C, d: D) => es
+  def fsDep = (a: A, b: B, c: C, d: D, e: E) => fs
+  def gsDep = (a: A, b: B, c: C, d: D, e: E, f0: F) => gs
+  def hsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G) => hs
+  def isDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H) => is
+  def jsDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I) => js
+  def ksDep = (a: A, b: B, c: C, d: D, e: E, f0: F, g0: G, h: H, i0: I, j: J) => ks
+  def rectComprehension[Z](using c: ComprehensionK[R], t: ClassTag[Z]) =
+    c.rectangular(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f, _)
+  def irregComprehension[Z](using c: ComprehensionK[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, ksDep, f, _)
+
+case class VariantIrregK[X, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: Seq[A],
+    bsDep: DepSeqB[A, B],
+    csDep: DepSeqC[A, B, C],
+    dsDep: DepSeqD[A, B, C, D],
+    esDep: DepSeqE[A, B, C, D, E],
+    fsDep: DepSeqF[A, B, C, D, E, F],
+    gsDep: DepSeqG[A, B, C, D, E, F, G],
+    hsDep: DepSeqH[A, B, C, D, E, F, G, H],
+    isDep: DepSeqI[A, B, C, D, E, F, G, H, I],
+    jsDep: DepSeqJ[A, B, C, D, E, F, G, H, I, J],
+    ksDep: DepSeqK[A, B, C, D, E, F, G, H, I, J, K],
+    f: (A, B, C, D, E, F, G, H, I, J, K) => X
+) extends VariantKT[X, A, B, C, D, E, F, G, H, I, J, K, R, S]:
+  def rectComprehension[Z](using c: ComprehensionK[R], t: ClassTag[Z]) = ???
+  def irregComprehension[Z](using c: ComprehensionK[S]) =
+    c.irregular(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, ksDep, f, _)
+
+case class VariantRectDerivedK[T[_], X, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bs: T[B],
+    cs: T[C],
+    ds: T[D],
+    es: T[E],
+    fs: T[F],
+    gs: T[G],
+    hs: T[H],
+    is: T[I],
+    js: T[J],
+    ks: T[K],
+    f: (A, B, C, D, E, F, G, H, I, J, K) => X
+)(using Mappable[T]):
+  def rectComprehensionDerived[Z](using c: ComprehensionK[R]): (X => Z) => T[Z] =
+    c.rectDerived(as, bs, cs, ds, es, fs, gs, hs, is, js, ks, f, _)
+
+case class VariantIrregDerivedK[T[_], X, A, B, C, D, E, F, G, H, I, J, K, R[_, _, _, _, _, _, _, _, _, _, _, _], S[
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _,
+    _
+]](
+    as: T[A],
+    bsDep: DepTB[T, A, B],
+    csDep: DepTC[T, A, B, C],
+    dsDep: DepTD[T, A, B, C, D],
+    esDep: DepTE[T, A, B, C, D, E],
+    fsDep: DepTF[T, A, B, C, D, E, F],
+    gsDep: DepTG[T, A, B, C, D, E, F, G],
+    hsDep: DepTH[T, A, B, C, D, E, F, G, H],
+    isDep: DepTI[T, A, B, C, D, E, F, G, H, I],
+    jsDep: DepTJ[T, A, B, C, D, E, F, G, H, I, J],
+    ksDep: DepTK[T, A, B, C, D, E, F, G, H, I, J, K],
+    f: (A, B, C, D, E, F, G, H, I, J, K) => X
+)(using Mappable[T]):
+  def irregComprehensionDerived[Z](using c: ComprehensionK[R]): (X => Z) => T[Z] =
+    c.irregularDerived(as, bsDep, csDep, dsDep, esDep, fsDep, gsDep, hsDep, isDep, jsDep, ksDep, f, _)

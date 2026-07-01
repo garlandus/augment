@@ -11,43 +11,59 @@ import scala.deriving.Mirror
 
 /** Dependent sets */
 
-type DepSetA[A]                   = () => Set[A]
-type DepSetB[A, B]                = A => Set[B]
-type DepSetC[A, B, C]             = (A, B) => Set[C]
-type DepSetD[A, B, C, D]          = (A, B, C) => Set[D]
-type DepSetE[A, B, C, D, E]       = (A, B, C, D) => Set[E]
-type DepSetF[A, B, C, D, E, F]    = (A, B, C, D, E) => Set[F]
-type DepSetG[A, B, C, D, E, F, G] = (A, B, C, D, E, F) => Set[G]
+type DepSetA[A]                               = () => Set[A]
+type DepSetB[A, B]                            = A => Set[B]
+type DepSetC[A, B, C]                         = (A, B) => Set[C]
+type DepSetD[A, B, C, D]                      = (A, B, C) => Set[D]
+type DepSetE[A, B, C, D, E]                   = (A, B, C, D) => Set[E]
+type DepSetF[A, B, C, D, E, F]                = (A, B, C, D, E) => Set[F]
+type DepSetG[A, B, C, D, E, F, G]             = (A, B, C, D, E, F) => Set[G]
+type DepSetH[A, B, C, D, E, F, G, H]          = (A, B, C, D, E, F, G) => Set[H]
+type DepSetI[A, B, C, D, E, F, G, H, I]       = (A, B, C, D, E, F, G, H) => Set[I]
+type DepSetJ[A, B, C, D, E, F, G, H, I, J]    = (A, B, C, D, E, F, G, H, I) => Set[J]
+type DepSetK[A, B, C, D, E, F, G, H, I, J, K] = (A, B, C, D, E, F, G, H, I, J) => Set[K]
 
 /** Generalized sets */
 
-type GenSetA[A]                   = Set[A] | DepSetA[A]
-type GenSetB[A, B]                = Set[B] | DepSetB[A, B]
-type GenSetC[A, B, C]             = Set[C] | DepSetC[A, B, C]
-type GenSetD[A, B, C, D]          = Set[D] | DepSetD[A, B, C, D]
-type GenSetE[A, B, C, D, E]       = Set[E] | DepSetE[A, B, C, D, E]
-type GenSetF[A, B, C, D, E, F]    = Set[F] | DepSetF[A, B, C, D, E, F]
-type GenSetG[A, B, C, D, E, F, G] = Set[G] | DepSetG[A, B, C, D, E, F, G]
+type GenSetA[A]                               = Set[A] | DepSetA[A]
+type GenSetB[A, B]                            = Set[B] | DepSetB[A, B]
+type GenSetC[A, B, C]                         = Set[C] | DepSetC[A, B, C]
+type GenSetD[A, B, C, D]                      = Set[D] | DepSetD[A, B, C, D]
+type GenSetE[A, B, C, D, E]                   = Set[E] | DepSetE[A, B, C, D, E]
+type GenSetF[A, B, C, D, E, F]                = Set[F] | DepSetF[A, B, C, D, E, F]
+type GenSetG[A, B, C, D, E, F, G]             = Set[G] | DepSetG[A, B, C, D, E, F, G]
+type GenSetH[A, B, C, D, E, F, G, H]          = Set[H] | DepSetH[A, B, C, D, E, F, G, H]
+type GenSetI[A, B, C, D, E, F, G, H, I]       = Set[I] | DepSetI[A, B, C, D, E, F, G, H, I]
+type GenSetJ[A, B, C, D, E, F, G, H, I, J]    = Set[J] | DepSetJ[A, B, C, D, E, F, G, H, I, J]
+type GenSetK[A, B, C, D, E, F, G, H, I, J, K] = Set[K] | DepSetK[A, B, C, D, E, F, G, H, I, J, K]
 
 /** Dependent sequences */
 
-type DepSeqA[A]                   = () => Seq[A]
-type DepSeqB[A, B]                = A => Seq[B]
-type DepSeqC[A, B, C]             = (A, B) => Seq[C]
-type DepSeqD[A, B, C, D]          = (A, B, C) => Seq[D]
-type DepSeqE[A, B, C, D, E]       = (A, B, C, D) => Seq[E]
-type DepSeqF[A, B, C, D, E, F]    = (A, B, C, D, E) => Seq[F]
-type DepSeqG[A, B, C, D, E, F, G] = (A, B, C, D, E, F) => Seq[G]
+type DepSeqA[A]                               = () => Seq[A]
+type DepSeqB[A, B]                            = A => Seq[B]
+type DepSeqC[A, B, C]                         = (A, B) => Seq[C]
+type DepSeqD[A, B, C, D]                      = (A, B, C) => Seq[D]
+type DepSeqE[A, B, C, D, E]                   = (A, B, C, D) => Seq[E]
+type DepSeqF[A, B, C, D, E, F]                = (A, B, C, D, E) => Seq[F]
+type DepSeqG[A, B, C, D, E, F, G]             = (A, B, C, D, E, F) => Seq[G]
+type DepSeqH[A, B, C, D, E, F, G, H]          = (A, B, C, D, E, F, G) => Seq[H]
+type DepSeqI[A, B, C, D, E, F, G, H, I]       = (A, B, C, D, E, F, G, H) => Seq[I]
+type DepSeqJ[A, B, C, D, E, F, G, H, I, J]    = (A, B, C, D, E, F, G, H, I) => Seq[J]
+type DepSeqK[A, B, C, D, E, F, G, H, I, J, K] = (A, B, C, D, E, F, G, H, I, J) => Seq[K]
 
 /** Generalized sequences */
 
-type GenSeqA[A]                   = Seq[A] | DepSeqA[A]
-type GenSeqB[A, B]                = Seq[B] | DepSeqB[A, B]
-type GenSeqC[A, B, C]             = Seq[C] | DepSeqC[A, B, C]
-type GenSeqD[A, B, C, D]          = Seq[D] | DepSeqD[A, B, C, D]
-type GenSeqE[A, B, C, D, E]       = Seq[E] | DepSeqE[A, B, C, D, E]
-type GenSeqF[A, B, C, D, E, F]    = Seq[F] | DepSeqF[A, B, C, D, E, F]
-type GenSeqG[A, B, C, D, E, F, G] = Seq[G] | DepSeqG[A, B, C, D, E, F, G]
+type GenSeqA[A]                               = Seq[A] | DepSeqA[A]
+type GenSeqB[A, B]                            = Seq[B] | DepSeqB[A, B]
+type GenSeqC[A, B, C]                         = Seq[C] | DepSeqC[A, B, C]
+type GenSeqD[A, B, C, D]                      = Seq[D] | DepSeqD[A, B, C, D]
+type GenSeqE[A, B, C, D, E]                   = Seq[E] | DepSeqE[A, B, C, D, E]
+type GenSeqF[A, B, C, D, E, F]                = Seq[F] | DepSeqF[A, B, C, D, E, F]
+type GenSeqG[A, B, C, D, E, F, G]             = Seq[G] | DepSeqG[A, B, C, D, E, F, G]
+type GenSeqH[A, B, C, D, E, F, G, H]          = Seq[H] | DepSeqH[A, B, C, D, E, F, G, H]
+type GenSeqI[A, B, C, D, E, F, G, H, I]       = Seq[I] | DepSeqI[A, B, C, D, E, F, G, H, I]
+type GenSeqJ[A, B, C, D, E, F, G, H, I, J]    = Seq[J] | DepSeqJ[A, B, C, D, E, F, G, H, I, J]
+type GenSeqK[A, B, C, D, E, F, G, H, I, J, K] = Seq[K] | DepSeqK[A, B, C, D, E, F, G, H, I, J, K]
 
 /** Dependent values */
 
@@ -58,34 +74,42 @@ type DepD[A, B, C, D]             = (A, B, C) => D
 type DepE[A, B, C, D, E]          = (A, B, C, D) => E
 type DepF[A, B, C, D, E, F]       = (A, B, C, D, E) => F
 type DepG[A, B, C, D, E, F, G]    = (A, B, C, D, E, F) => G
+type DepH[A, B, C, D, E, F, G, H]          = (A, B, C, D, E, F, G) => H
+type DepI[A, B, C, D, E, F, G, H, I]       = (A, B, C, D, E, F, G, H) => I
+type DepJ[A, B, C, D, E, F, G, H, I, J]    = (A, B, C, D, E, F, G, H, I) => J
+type DepK[A, B, C, D, E, F, G, H, I, J, K] = (A, B, C, D, E, F, G, H, I, J) => K
 
 /** Derived types */
 
 type Mixed[A, T[_]]               = T[A] | A
-type MixedB[T[_], A, B]           = A => T[B] | B
-type MixedC[T[_], A, B, C]        = (A, B) => T[C] | C
-type MixedD[T[_], A, B, C, D]     = (A, B, C) => T[D] | D
-type MixedE[T[_], A, B, C, D, E]  = (A, B, C, D) => T[E] | E
 
 /** Dependent derived types */
 
-type DepTA[T[_], A]                   = () => T[A]
-type DepTB[T[_], A, B]                = A => T[B]
-type DepTC[T[_], A, B, C]             = (A, B) => T[C]
-type DepTD[T[_], A, B, C, D]          = (A, B, C) => T[D]
-type DepTE[T[_], A, B, C, D, E]       = (A, B, C, D) => T[E]
-type DepTF[T[_], A, B, C, D, E, F]    = (A, B, C, D, E) => T[F]
-type DepTG[T[_], A, B, C, D, E, F, G] = (A, B, C, D, E, F) => T[G]
+type DepTA[T[_], A]                               = () => T[A]
+type DepTB[T[_], A, B]                            = A => T[B]
+type DepTC[T[_], A, B, C]                         = (A, B) => T[C]
+type DepTD[T[_], A, B, C, D]                      = (A, B, C) => T[D]
+type DepTE[T[_], A, B, C, D, E]                   = (A, B, C, D) => T[E]
+type DepTF[T[_], A, B, C, D, E, F]                = (A, B, C, D, E) => T[F]
+type DepTG[T[_], A, B, C, D, E, F, G]             = (A, B, C, D, E, F) => T[G]
+type DepTH[T[_], A, B, C, D, E, F, G, H]          = (A, B, C, D, E, F, G) => T[H]
+type DepTI[T[_], A, B, C, D, E, F, G, H, I]       = (A, B, C, D, E, F, G, H) => T[I]
+type DepTJ[T[_], A, B, C, D, E, F, G, H, I, J]    = (A, B, C, D, E, F, G, H, I) => T[J]
+type DepTK[T[_], A, B, C, D, E, F, G, H, I, J, K] = (A, B, C, D, E, F, G, H, I, J) => T[K]
 
 /** Generalized derived types */
 
-type GenTA[T[_], A]                   = T[A] | DepTA[T, A]
-type GenTB[T[_], A, B]                = T[B] | DepTB[T, A, B]
-type GenTC[T[_], A, B, C]             = T[C] | DepTC[T, A, B, C]
-type GenTD[T[_], A, B, C, D]          = T[D] | DepTD[T, A, B, C, D]
-type GenTE[T[_], A, B, C, D, E]       = T[E] | DepTE[T, A, B, C, D, E]
-type GenTF[T[_], A, B, C, D, E, F]    = T[F] | DepTF[T, A, B, C, D, E, F]
-type GenTG[T[_], A, B, C, D, E, F, G] = T[G] | DepTG[T, A, B, C, D, E, F, G]
+type GenTA[T[_], A]                               = T[A] | DepTA[T, A]
+type GenTB[T[_], A, B]                            = T[B] | DepTB[T, A, B]
+type GenTC[T[_], A, B, C]                         = T[C] | DepTC[T, A, B, C]
+type GenTD[T[_], A, B, C, D]                      = T[D] | DepTD[T, A, B, C, D]
+type GenTE[T[_], A, B, C, D, E]                   = T[E] | DepTE[T, A, B, C, D, E]
+type GenTF[T[_], A, B, C, D, E, F]                = T[F] | DepTF[T, A, B, C, D, E, F]
+type GenTG[T[_], A, B, C, D, E, F, G]             = T[G] | DepTG[T, A, B, C, D, E, F, G]
+type GenTH[T[_], A, B, C, D, E, F, G, H]          = T[H] | DepTH[T, A, B, C, D, E, F, G, H]
+type GenTI[T[_], A, B, C, D, E, F, G, H, I]       = T[I] | DepTI[T, A, B, C, D, E, F, G, H, I]
+type GenTJ[T[_], A, B, C, D, E, F, G, H, I, J]    = T[J] | DepTJ[T, A, B, C, D, E, F, G, H, I, J]
+type GenTK[T[_], A, B, C, D, E, F, G, H, I, J, K] = T[K] | DepTK[T, A, B, C, D, E, F, G, H, I, J, K]
 
 /** Some containers that can be returned by comprehensions */
 
@@ -155,6 +179,34 @@ type ArrayNG[Z, A, B, C, D, E, F, G]  = Array[Array[Array[Array[Array[Array[Arra
 type MapG[Z, A, B, C, D, E, F, G]     = Map[A, Map[B, Map[C, Map[D, Map[E, Map[F, Map[G, Z]]]]]]]
 type SetG[Z, A, B, C, D, E, F, G]     = Set[Z]
 
+type IdH[Z, A, B, C, D, E, F, G, H]         = Z
+type SeqH[Z, A, B, C, D, E, F, G, H]        = Seq[Z]
+type SeqNH[Z, A, B, C, D, E, F, G, H]       = Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Z]]]]]]]]
+type ArrayNH[Z, A, B, C, D, E, F, G, H]     = Array[Array[Array[Array[Array[Array[Array[Array[Z]]]]]]]]
+type MapH[Z, A, B, C, D, E, F, G, H]        = Map[A, Map[B, Map[C, Map[D, Map[E, Map[F, Map[G, Map[H, Z]]]]]]]]
+type SetH[Z, A, B, C, D, E, F, G, H]        = Set[Z]
+
+type IdI[Z, A, B, C, D, E, F, G, H, I]      = Z
+type SeqI[Z, A, B, C, D, E, F, G, H, I]     = Seq[Z]
+type SeqNI[Z, A, B, C, D, E, F, G, H, I]    = Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Z]]]]]]]]]
+type ArrayNI[Z, A, B, C, D, E, F, G, H, I]  = Array[Array[Array[Array[Array[Array[Array[Array[Array[Z]]]]]]]]]
+type MapI[Z, A, B, C, D, E, F, G, H, I]     = Map[A, Map[B, Map[C, Map[D, Map[E, Map[F, Map[G, Map[H, Map[I, Z]]]]]]]]]
+type SetI[Z, A, B, C, D, E, F, G, H, I]     = Set[Z]
+
+type IdJ[Z, A, B, C, D, E, F, G, H, I, J]         = Z
+type SeqJ[Z, A, B, C, D, E, F, G, H, I, J]        = Seq[Z]
+type SeqNJ[Z, A, B, C, D, E, F, G, H, I, J]       = Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Z]]]]]]]]]]
+type ArrayNJ[Z, A, B, C, D, E, F, G, H, I, J]     = Array[Array[Array[Array[Array[Array[Array[Array[Array[Array[Z]]]]]]]]]]
+type MapJ[Z, A, B, C, D, E, F, G, H, I, J]        = Map[A, Map[B, Map[C, Map[D, Map[E, Map[F, Map[G, Map[H, Map[I, Map[J, Z]]]]]]]]]]
+type SetJ[Z, A, B, C, D, E, F, G, H, I, J]        = Set[Z]
+
+type IdK[Z, A, B, C, D, E, F, G, H, I, J, K]      = Z
+type SeqK[Z, A, B, C, D, E, F, G, H, I, J, K]     = Seq[Z]
+type SeqNK[Z, A, B, C, D, E, F, G, H, I, J, K]    = Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Seq[Z]]]]]]]]]]]
+type ArrayNK[Z, A, B, C, D, E, F, G, H, I, J, K]  = Array[Array[Array[Array[Array[Array[Array[Array[Array[Array[Array[Z]]]]]]]]]]]
+type MapK[Z, A, B, C, D, E, F, G, H, I, J, K]     = Map[A, Map[B, Map[C, Map[D, Map[E, Map[F, Map[G, Map[H, Map[I, Map[J, Map[K, Z]]]]]]]]]]]
+type SetK[Z, A, B, C, D, E, F, G, H, I, J, K]     = Set[Z]
+
 type ProdB[X, A, B] =
   Mirror.Product:
     type MirroredType = X
@@ -185,6 +237,32 @@ type ProdG[X, A, B, C, D, E, F, G] =
     type MirroredType = X
     type MirroredMonoType = X
     type MirroredElemTypes = (A, B, C, D, E, F, G)
+type ProdH[X, A, B, C, D, E, F, G, H] =
+  Mirror.Product:
+    type MirroredType = X
+    type MirroredMonoType = X
+    type MirroredElemTypes = (A, B, C, D, E, F, G, H)
+type ProdI[X, A, B, C, D, E, F, G, H, I] =
+  Mirror.Product:
+    type MirroredType = X
+    type MirroredMonoType = X
+    type MirroredElemTypes = (A, B, C, D, E, F, G, H, I)
+type ProdJ[X, A, B, C, D, E, F, G, H, I, J] =
+  Mirror.Product:
+    type MirroredType = X
+    type MirroredMonoType = X
+    type MirroredElemTypes = (A, B, C, D, E, F, G, H, I, J)
+type ProdK[X, A, B, C, D, E, F, G, H, I, J, K] =
+  Mirror.Product:
+    type MirroredType = X
+    type MirroredMonoType = X
+    type MirroredElemTypes = (A, B, C, D, E, F, G, H, I, J, K)
+
+case class ColVector[A](vec: Vector[A])
+
+object ColVector:
+  def apply[A](a: A*): ColVector[A] =
+    ColVector(a.toVector)
 
 def seq[A, B](genSeq: GenSeqB[A, B]): DepSeqB[A, B] =
   genSeq match
@@ -215,6 +293,30 @@ def seq[A, B, C, D, E, F, G](genSeq: GenSeqG[A, B, C, D, E, F, G]): DepSeqG[A, B
   genSeq match
     case l: Seq[_] => ((a, b, c, d, e, f) => l.asInstanceOf[Seq[G]])
     case _         => genSeq.asInstanceOf[DepSeqG[A, B, C, D, E, F, G]]
+
+def seq[A, B, C, D, E, F, G, H](genSeq: GenSeqH[A, B, C, D, E, F, G, H]): DepSeqH[A, B, C, D, E, F, G, H] =
+  genSeq match
+    case l: Seq[_] => ((a, b, c, d, e, f, g) => l.asInstanceOf[Seq[H]])
+    case _         => genSeq.asInstanceOf[DepSeqH[A, B, C, D, E, F, G, H]]
+
+def seq[A, B, C, D, E, F, G, H, I](genSeq: GenSeqI[A, B, C, D, E, F, G, H, I]): DepSeqI[A, B, C, D, E, F, G, H, I] =
+  genSeq match
+    case l: Seq[_] => ((a, b, c, d, e, f, g, h) => l.asInstanceOf[Seq[I]])
+    case _         => genSeq.asInstanceOf[DepSeqI[A, B, C, D, E, F, G, H, I]]
+
+def seq[A, B, C, D, E, F, G, H, I, J](
+    genSeq: GenSeqJ[A, B, C, D, E, F, G, H, I, J]
+): DepSeqJ[A, B, C, D, E, F, G, H, I, J] =
+  genSeq match
+    case l: Seq[_] => ((a, b, c, d, e, f, g, h, i) => l.asInstanceOf[Seq[J]])
+    case _         => genSeq.asInstanceOf[DepSeqJ[A, B, C, D, E, F, G, H, I, J]]
+
+def seq[A, B, C, D, E, F, G, H, I, J, K](
+    genSeq: GenSeqK[A, B, C, D, E, F, G, H, I, J, K]
+): DepSeqK[A, B, C, D, E, F, G, H, I, J, K] =
+  genSeq match
+    case l: Seq[_] => ((a, b, c, d, e, f, g, h, i, j) => l.asInstanceOf[Seq[K]])
+    case _         => genSeq.asInstanceOf[DepSeqK[A, B, C, D, E, F, G, H, I, J, K]]
 
 type F0[A]                            = () => A
 type F1[A, B]                         = A => B

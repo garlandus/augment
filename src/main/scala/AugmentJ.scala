@@ -19,7 +19,7 @@ def tupleJPair[A, B] = augment((a: A, b: B) => Pair(a, b))
 def tupleJTriple[A, B, C] = augment((a: A, b: B, c: C) => Triple(a, b, c))
 
 /** used from Java */
-object augmentJ:
+object augmentedJ:
 
   def augment[Z, A](f: java.util.function.Function[A, Z]) =
     AugmentA[MultiArrayA, SeqA]()((a: A) => f(a))
